@@ -7,7 +7,7 @@ let port = null;
 let sessions = new Map();
 let currentSessionId = null;
 let tabs = [];
-let logs = [];
+let allLogs = new Map(); // Store logs per session: sessionId -> logs array
 let logRetention = 100;
 let countdownInterval = null;
 
@@ -356,8 +356,7 @@ function selectSession(sessionId) {
   currentSessionId = sessionId;
   sessionSelectorWrapper.classList.remove('open');
   
-  // Clear logs when switching sessions
-  logs = [];
+  // Render logs for the selected session
   renderLogs();
   
   updateSessionsUI();
@@ -431,23 +430,35 @@ function renderTabs() {
  * Add log entry
  */
 function addLog(log) {
-  logs.push({
+  // Get or create logs array for this session
+  if (!allLogs.has(log.sessionId)) {
+    allLogs.set(log.sessionId, []);
+  }
+  
+  const sessionLogs = allLogs.get(log.sessionId);
+  sessionLogs.push({
     ...log,
     timestamp: Date.now()
   });
   
-  // Enforce retention limit (FIFO)
-  if (logs.length > logRetention) {
-    logs = logs.slice(logs.length - logRetention);
+  // Enforce retention limit (FIFO) per session
+  if (sessionLogs.length > logRetention) {
+    allLogs.set(log.sessionId, sessionLogs.slice(sessionLogs.length - logRetention));
   }
   
-  renderLogs();
+  // Only render if this log is for the current session
+  if (log.sessionId === currentSessionId) {
+    renderLogs();
+  }
 }
 
 /**
  * Render logs
  */
 function renderLogs() {
+  // Get logs for current session
+  const logs = currentSessionId && allLogs.has(currentSessionId) ? allLogs.get(currentSessionId) : [];
+  
   if (logs.length === 0) {
     logsContainer.innerHTML = '<div class="empty-state">No logs yet</div>';
     return;
@@ -513,10 +524,13 @@ function onLogRetentionChange(e) {
   // Save to storage
   chrome.storage.local.set({ logRetention });
   
-  // Apply to current logs
-  if (logs.length > logRetention) {
-    logs = logs.slice(logs.length - logRetention);
-    renderLogs();
+  // Apply to current session logs
+  if (currentSessionId && allLogs.has(currentSessionId)) {
+    const logs = allLogs.get(currentSessionId);
+    if (logs.length > logRetention) {
+      allLogs.set(currentSessionId, logs.slice(logs.length - logRetention));
+      renderLogs();
+    }
   }
 }
 
@@ -524,7 +538,9 @@ function onLogRetentionChange(e) {
  * Clear logs
  */
 function clearLogs() {
-  logs = [];
+  if (currentSessionId) {
+    allLogs.set(currentSessionId, []);
+  }
   renderLogs();
 }
 
