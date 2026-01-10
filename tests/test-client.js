@@ -37,7 +37,7 @@ async function main() {
           ws.off('message', handler);
           
           if (msg.error) {
-            reject(new Error(msg.error));
+            reject(new Error(JSON.stringify(msg.error, null, 2)));
           } else {
             resolve(msg.result);
           }
@@ -122,7 +122,9 @@ async function main() {
     console.log('🎉 All tests passed!\n');
     
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error('❌ Test failed:', error);
+    if (error.message) console.error('Message:', error.message);
+    if (error.stack) console.error('Stack:', error.stack);
     process.exit(1);
   } finally {
     ws.close();
@@ -130,7 +132,8 @@ async function main() {
 }
 
 main().catch(error => {
-  console.error('❌ Fatal error:', error.message);
+  console.error('❌ Fatal error:', error);
+  if (error.message) console.error('Message:', error.message);
   console.error('\nMake sure:');
   console.error('1. Chrome extension is loaded');
   console.error('2. Extension side panel is open (click extension icon)');

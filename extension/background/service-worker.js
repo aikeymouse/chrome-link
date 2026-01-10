@@ -11,6 +11,7 @@ let nativePort = null;
 let reconnectTimer = null;
 let currentWindowId = null;
 let tabCache = new Map();
+const activeSessions = new Set(); // Track active session IDs
 
 /**
  * Connect to native messaging host
@@ -71,6 +72,14 @@ async function handleNativeMessage(message) {
   
   if (message.type === 'ready') {
     console.log('Native host ready on port', message.port);
+    
+    // Send acknowledgment back to native host
+    if (nativePort) {
+      nativePort.postMessage({
+        type: 'extensionReady',
+        extensionId: chrome.runtime.id
+      });
+    }
     return;
   }
   
@@ -86,6 +95,12 @@ async function handleCommand(sessionId, command) {
   const { action, params, requestId } = command;
   
   console.log(`Executing command: ${action}`, params);
+  
+  // Track this session
+  if (!activeSessions.has(sessionId)) {
+    activeSessions.add(sessionId);
+    broadcastSessionUpdate();
+  }
   
   // Log to native host
   sendLog(sessionId, 'in', command);
@@ -294,8 +309,9 @@ async function executeScriptWithTimeout(tabId, code, timeout) {
         target: { tabId },
         func: (code) => {
           try {
-            // Execute code and return result
-            const result = eval(code);
+            // Use Function constructor instead of eval to avoid CSP issues
+            const fn = new Function('return (' + code + ')');
+            const result = fn();
             return {
               value: result,
               type: typeof result
@@ -307,7 +323,8 @@ async function executeScriptWithTimeout(tabId, code, timeout) {
             };
           }
         },
-        args: [code]
+        args: [code],
+        world: 'MAIN' // Execute in page context, not isolated world
       });
       
       clearTimeout(timer);
@@ -377,12 +394,27 @@ function sendNativeMessage(message) {
  * Send log event to native host
  */
 function sendLog(sessionId, direction, data) {
-  sendNativeMessage({
+  const logEntry = {
     type: 'log',
     sessionId,
     timestamp: Date.now(),
     direction,
     data
+  };
+  
+  // Send to native host
+  sendNativeMessage(logEntry);
+  
+  // Also broadcast to side panel
+  broadcastToSidePanel({
+    type: 'logEntry',
+    log: {
+      timestamp: new Date().toISOString(),
+      direction: direction === 'in' ? 'REQUEST' : 'RESPONSE',
+      action: data.action || data.type,
+      requestId: data.requestId,
+      sessionId
+    }
   });
 }
 
@@ -399,6 +431,20 @@ function broadcastToSidePanel(message) {
       console.error('Error broadcasting to side panel:', err);
       sidePanelPorts.delete(port);
     }
+  });
+}
+
+function broadcastSessionUpdate() {
+  broadcastToSidePanel({
+    type: 'sessionsUpdate',
+    sessions: Array.from(activeSessions)
+  });
+}
+
+function broadcastSessionUpdate() {
+  broadcastToSidePanel({
+    type: 'sessionsUpdate',
+    sessions: Array.from(activeSessions)
   });
 }
 
@@ -527,6 +573,12 @@ chrome.runtime.onConnect.addListener((port) => {
     // Send current connection status
     port.postMessage({
       type: nativePort ? 'nativeHostConnected' : 'nativeHostDisconnected'
+    });
+    
+    // Send current sessions
+    port.postMessage({
+      type: 'sessionsUpdate',
+      sessions: Array.from(activeSessions)
     });
     
     port.onDisconnect.addListener(() => {

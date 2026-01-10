@@ -194,12 +194,37 @@ register_native_host() {
     # Create Chrome native messaging directory
     mkdir -p "$CHROME_DIR"
     
+    # Get node path
+    NODE_PATH=$(which node)
+    
+    # Create launch script
+    cat > "$INSTALL_DIR/native-host/launch.sh" <<'LAUNCH_EOF'
+#!/bin/bash
+# ChromePilot Native Host Launcher
+# This wrapper ensures the correct node version is used
+
+# Set PATH to include common node locations
+export PATH="$HOME/.nvm/versions/node/v22.16.0/bin:$PATH"
+export PATH="$HOME/.nvm/versions/node/v20.11.0/bin:$PATH"
+export PATH="$HOME/.nvm/versions/node/v18.19.0/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
+
+# Change to the native host directory
+cd "$(dirname "$0")"
+
+# Launch the server with error logging
+exec node server.js 2>> /tmp/chromepilot-error.log
+LAUNCH_EOF
+    
+    chmod +x "$INSTALL_DIR/native-host/launch.sh"
+    
     # Create native messaging manifest
     cat > "$CHROME_DIR/${NATIVE_HOST_NAME}.json" <<EOF
 {
   "name": "${NATIVE_HOST_NAME}",
   "description": "ChromePilot Native Messaging Host",
-  "path": "$INSTALL_DIR/native-host/server.js",
+  "path": "$INSTALL_DIR/native-host/launch.sh",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://EXTENSION_ID_PLACEHOLDER/"

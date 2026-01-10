@@ -25,8 +25,8 @@ if (!fs.existsSync(LOGS_DIR)) {
 // Sessions storage
 const sessions = new Map();
 
-// Native messaging communication
-let nativePort = null;
+// Native messaging communication - tracks if extension is connected
+let extensionConnected = false;
 
 /**
  * Session class
@@ -138,7 +138,7 @@ class Session {
     this.log('REQUEST', command);
     
     // Send to extension via native messaging
-    if (nativePort) {
+    if (extensionConnected) {
       const message = {
         type: 'command',
         sessionId: this.sessionId,
@@ -404,6 +404,12 @@ function handleNativeMessages() {
 }
 
 function processNativeMessage(message) {
+  // Mark extension as connected when we receive any message
+  if (!extensionConnected) {
+    extensionConnected = true;
+    console.error('Chrome extension connected');
+  }
+  
   if (message.type === 'response') {
     // Response from extension
     const session = sessions.get(message.sessionId);
