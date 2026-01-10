@@ -242,7 +242,7 @@ function updateSessionsUI() {
     sessionSelectorTrigger.querySelector('.session-name').textContent = 'No active sessions';
     sessionSelectorTrigger.querySelector('.session-status').textContent = '';
     sessionSelectorTrigger.classList.add('disabled');
-    sessionDetails.style.display = 'none';
+    updateSessionDetails();
   } else {
     sessionSelectorTrigger.classList.remove('disabled');
     
@@ -304,13 +304,13 @@ function updateSessionsUI() {
  */
 function updateSessionDetails() {
   if (!currentSessionId || !sessions.has(currentSessionId)) {
-    sessionDetails.style.display = 'none';
+    sessionId.textContent = '';
+    sessionTimeout.textContent = '';
     return;
   }
   
   const session = sessions.get(currentSessionId);
   
-  sessionDetails.style.display = 'block';
   sessionId.textContent = currentSessionId;
   sessionTimeout.textContent = formatDuration(session.timeout);
 }
