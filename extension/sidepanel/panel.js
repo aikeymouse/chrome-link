@@ -213,11 +213,8 @@ function handleSessionDetails(message) {
   // Update or create session with full details
   sessions.set(session.id, session);
   
-  // If this is the first or current session, select it
-  if (!currentSessionId || currentSessionId === session.id) {
-    currentSessionId = session.id;
-    sessionSelector.value = session.id;
-  }
+  // Auto-select this session when it receives messages
+  currentSessionId = session.id;
   
   updateSessionsUI();
 }
