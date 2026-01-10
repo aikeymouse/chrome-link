@@ -353,72 +353,84 @@ function sendNativeMessage(message) {
   process.stdout.write(messageStr);
 }
 
-function readNativeMessage() {
-  return new Promise((resolve, reject) => {
-    const lengthBuffer = Buffer.alloc(4);
+function handleNativeMessages() {
+  let messageLength = null;
+  let messageBuffer = Buffer.alloc(0);
+  
+  process.stdin.on('readable', () => {
+    let chunk;
     
-    process.stdin.read(4, (err, buffer) => {
-      if (err || !buffer) {
-        reject(err || new Error('No data'));
-        return;
-      }
+    while (null !== (chunk = process.stdin.read())) {
+      messageBuffer = Buffer.concat([messageBuffer, chunk]);
       
-      const messageLen = buffer.readUInt32LE(0);
-      
-      process.stdin.read(messageLen, (err, messageBuffer) => {
-        if (err || !messageBuffer) {
-          reject(err || new Error('No message data'));
-          return;
+      while (messageBuffer.length > 0) {
+        // Read message length if we don't have it yet
+        if (messageLength === null) {
+          if (messageBuffer.length < 4) {
+            // Not enough data for length header
+            break;
+          }
+          
+          messageLength = messageBuffer.readUInt32LE(0);
+          messageBuffer = messageBuffer.slice(4);
         }
         
-        try {
-          const message = JSON.parse(messageBuffer.toString());
-          resolve(message);
-        } catch (e) {
-          reject(e);
+        // Read message if we have enough data
+        if (messageLength !== null) {
+          if (messageBuffer.length < messageLength) {
+            // Not enough data for message
+            break;
+          }
+          
+          const messageData = messageBuffer.slice(0, messageLength);
+          messageBuffer = messageBuffer.slice(messageLength);
+          messageLength = null;
+          
+          try {
+            const message = JSON.parse(messageData.toString());
+            processNativeMessage(message);
+          } catch (err) {
+            console.error('Error parsing message:', err);
+          }
         }
-      });
-    });
+      }
+    }
+  });
+  
+  process.stdin.on('end', () => {
+    console.error('Native messaging stdin closed');
+    process.exit(0);
   });
 }
 
-async function handleNativeMessages() {
-  try {
-    while (true) {
-      const message = await readNativeMessage();
-      
-      if (message.type === 'response') {
-        // Response from extension
-        const session = sessions.get(message.sessionId);
-        if (session) {
-          session.sendResponse({
-            requestId: message.requestId,
-            result: message.result,
-            error: message.error
-          });
-        }
-      } else if (message.type === 'log') {
-        // Log event from extension
-        const session = sessions.get(message.sessionId);
-        if (session) {
-          session.log(message.direction === 'in' ? 'REQUEST_EXTENSION' : 'RESPONSE_EXTENSION', message.data);
-        }
-      } else if (message.type === 'tabUpdate') {
-        // Broadcast tab update to all sessions
-        sessions.forEach(session => {
-          if (session.ws && session.ws.readyState === WebSocket.OPEN) {
-            session.ws.send(JSON.stringify({
-              type: 'tabUpdate',
-              event: message.event,
-              tab: message.tab
-            }));
-          }
-        });
-      }
+function processNativeMessage(message) {
+  if (message.type === 'response') {
+    // Response from extension
+    const session = sessions.get(message.sessionId);
+    if (session) {
+      session.sendResponse({
+        requestId: message.requestId,
+        result: message.result,
+        error: message.error
+      });
     }
-  } catch (err) {
-    console.error('Native messaging error:', err);
-    process.exit(1);
+  } else if (message.type === 'log') {
+    // Log event from extension
+    const session = sessions.get(message.sessionId);
+    if (session) {
+      session.log(message.direction === 'in' ? 'REQUEST_EXTENSION' : 'RESPONSE_EXTENSION', message.data);
+    }
+  } else if (message.type === 'tabUpdate') {
+    // Broadcast tab update to all sessions
+    sessions.forEach(session => {
+      if (session.ws && session.ws.readyState === WebSocket.OPEN) {
+        session.ws.send(JSON.stringify({
+          type: 'tabUpdate',
+          event: message.event,
+          tab: message.tab
+        }));
+      }
+    });
   }
 }
 
