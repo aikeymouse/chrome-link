@@ -253,7 +253,7 @@ function updateSessionsUI() {
       
       const sessionName = document.createElement('span');
       sessionName.className = 'session-name';
-      sessionName.textContent = `Session ${id.substring(0, 8)}...`;
+      sessionName.textContent = `Session ${id}`;
       
       const sessionStatus = document.createElement('span');
       sessionStatus.className = 'session-status';
@@ -305,6 +305,8 @@ function updateSessionsUI() {
 function updateSessionDetails() {
   if (!currentSessionId || !sessions.has(currentSessionId)) {
     sessionId.textContent = '';
+    sessionId.style.background = 'transparent';
+    sessionId.style.padding = '0';
     sessionTimeout.textContent = '';
     return;
   }
@@ -312,6 +314,8 @@ function updateSessionDetails() {
   const session = sessions.get(currentSessionId);
   
   sessionId.textContent = currentSessionId;
+  sessionId.style.background = '';
+  sessionId.style.padding = '';
   sessionTimeout.textContent = formatDuration(session.timeout);
 }
 
