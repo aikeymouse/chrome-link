@@ -105,12 +105,12 @@ function handleBackgroundMessage(message) {
       handleTabUpdate(message);
       break;
       
-    case 'sessionUpdate':
-      handleSessionUpdate(message);
+    case 'sessionsUpdate':
+      handleSessionsUpdate(message);
       break;
       
-    case 'logUpdate':
-      handleLogUpdate(message);
+    case 'logEntry':
+      handleLogEntry(message);
       break;
   }
 }
@@ -167,41 +167,33 @@ function handleTabUpdate(message) {
 /**
  * Handle session updates
  */
-function handleSessionUpdate(message) {
-  const { sessionId, action, data } = message;
+/**
+ * Handle sessions update from background
+ */
+function handleSessionsUpdate(message) {
+  console.log('Received sessionsUpdate:', message);
+  const { sessions: sessionIds } = message;
   
-  switch (action) {
-    case 'created':
-      sessions.set(sessionId, data);
-      break;
-      
-    case 'removed':
-      sessions.delete(sessionId);
-      if (currentSessionId === sessionId) {
-        currentSessionId = null;
-      }
-      break;
-      
-    case 'updated':
-      if (sessions.has(sessionId)) {
-        sessions.set(sessionId, { ...sessions.get(sessionId), ...data });
-      }
-      break;
-  }
+  // Update connected clients count
+  clientCount.textContent = sessionIds.length;
+  
+  // Update sessions display
+  sessions.clear();
+  sessionIds.forEach(id => {
+    sessions.set(id, { id, active: true });
+  });
   
   updateSessionsUI();
 }
 
 /**
- * Handle log updates
+ * Handle log entry from background
  */
-function handleLogUpdate(message) {
-  const { sessionId, log } = message;
+function handleLogEntry(message) {
+  const { log } = message;
   
-  // Only add logs for current session
-  if (sessionId === currentSessionId) {
-    addLog(log);
-  }
+  // Add log entry
+  addLog(log);
 }
 
 /**

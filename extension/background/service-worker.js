@@ -409,10 +409,9 @@ function sendLog(sessionId, direction, data) {
   broadcastToSidePanel({
     type: 'logEntry',
     log: {
-      timestamp: new Date().toISOString(),
-      direction: direction === 'in' ? 'REQUEST' : 'RESPONSE',
-      action: data.action || data.type,
-      requestId: data.requestId,
+      timestamp: Date.now(),
+      direction: direction, // 'in' or 'out'
+      data: data,
       sessionId
     }
   });
