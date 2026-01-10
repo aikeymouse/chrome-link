@@ -113,8 +113,8 @@ install_local() {
     cd "$INSTALL_DIR/native-host"
     npm install --production --silent
     
-    # Make server.js executable
-    chmod +x "$INSTALL_DIR/native-host/server.js"
+    # Make browser-pilot-browser-pilot-server.js executable
+    chmod +x "$INSTALL_DIR/native-host/browser-pilot-browser-pilot-server.js"
     
     print_info "Native host installed to: $INSTALL_DIR/native-host"
 }
@@ -179,8 +179,8 @@ download_and_install() {
     cd "$INSTALL_DIR/native-host"
     npm install --production --silent
     
-    # Make server.js executable
-    chmod +x "$INSTALL_DIR/native-host/server.js"
+    # Make browser-pilot-server.js executable
+    chmod +x "$INSTALL_DIR/native-host/browser-pilot-server.js"
     
     # Cleanup
     rm -rf "$TEMP_DIR"
@@ -217,7 +217,7 @@ export PATH="/opt/homebrew/bin:$PATH"
 cd "$(dirname "$0")"
 
 # Launch the server with error logging
-exec node server.js 2>> /tmp/chromepilot-error.log
+exec node browser-pilot-browser-pilot-server.js 2>> /tmp/chromepilot-error.log
 LAUNCH_EOF
     
     chmod +x "$INSTALL_DIR/native-host/launch.sh"
@@ -244,8 +244,8 @@ verify_installation() {
     print_info "Verifying installation..."
     
     # Check files exist
-    if [ ! -f "$INSTALL_DIR/native-host/server.js" ]; then
-        print_error "Installation verification failed: server.js not found"
+    if [ ! -f "$INSTALL_DIR/native-host/browser-pilot-browser-pilot-server.js" ]; then
+        print_error "Installation verification failed: browser-pilot-browser-pilot-server.js not found"
         return 1
     fi
     

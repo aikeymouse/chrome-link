@@ -371,6 +371,9 @@ function handleNativeMessages() {
   let messageLength = null;
   let messageBuffer = Buffer.alloc(0);
   
+  // Keep stdin open to prevent process from exiting
+  process.stdin.resume();
+  
   process.stdin.on('readable', () => {
     let chunk;
     
@@ -410,18 +413,20 @@ function handleNativeMessages() {
       }
     }
   });
-  
-  process.stdin.on('end', () => {
-    console.error('Native messaging stdin closed');
-    process.exit(0);
-  });
 }
 
 function processNativeMessage(message) {
+  console.error(`Received message from extension: ${message.type}`);
+  
   // Mark extension as connected when we receive any message
   if (!extensionConnected) {
     extensionConnected = true;
     console.error('Chrome extension connected');
+  }
+  
+  if (message.type === 'extensionReady') {
+    console.error(`Extension ready, ID: ${message.extensionId}`);
+    return;
   }
   
   if (message.type === 'response') {
@@ -458,32 +463,28 @@ function processNativeMessage(message) {
  * Startup
  */
 
+// Track if we successfully started the server
+let serverStarted = false;
+
 // Start native messaging first (always works)
 handleNativeMessages();
 
-// Attach error handler to HTTP server before listening
+// Handle server errors before starting
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${WS_PORT} is already in use. Running as native messaging bridge only.`);
-    
-    // Send ready signal indicating another instance is serving WebSocket
-    sendNativeMessage({
-      type: 'ready',
-      port: WS_PORT,
-      bridgeOnly: true
-    });
-    
-    // Keep process alive
-    process.stdin.resume();
+    console.error(`Port ${WS_PORT} already in use - another instance is running, exiting silently`);
+    process.exit(0); // Exit quietly, this is expected
   } else {
     console.error('Server error:', err);
     process.exit(1);
   }
 });
 
-// Try to start WebSocket server
+// Start WebSocket server
 server.listen(WS_PORT, () => {
   console.error(`WebSocket server listening on port ${WS_PORT}`);
+  serverStarted = true;
+  console.error('Server marked as started, will not exit on stdin close');
   
   // Send ready signal to extension
   sendNativeMessage({
@@ -492,11 +493,28 @@ server.listen(WS_PORT, () => {
   });
 });
 
+// Handle stdin end - don't exit, let the WebSocket server keep us alive
+process.stdin.on('end', () => {
+  console.error(`stdin closed, serverStarted=${serverStarted}, activeSessions=${sessions.size}`);
+  console.error('stdin closed but server will continue running');
+  // Don't exit - the WebSocket server keeps the process alive
+  // Chrome can reconnect by starting a new process via the launch script
+});
+
 /**
  * Cleanup on exit
  */
+process.on('exit', (code) => {
+  console.error(`>>> Process exiting with code ${code} <<<`);
+});
+
+process.on('SIGTERM', () => {
+  console.error('>>> Received SIGTERM <<<');
+  process.exit(0);
+});
+
 process.on('SIGINT', () => {
-  console.error('Shutting down...');
+  console.error('>>> Received SIGINT <<<');
   
   sessions.forEach(session => {
     session.cleanup();
@@ -504,6 +522,15 @@ process.on('SIGINT', () => {
   
   server.close();
   process.exit(0);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('>>> Uncaught exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('>>> Unhandled rejection:', reason);
 });
 
 process.on('SIGTERM', () => {
