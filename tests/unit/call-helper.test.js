@@ -27,11 +27,11 @@ describe('callHelper command', function() {
     initialTabIds = await client.getInitialTabIds();
     
     const result = await client.sendRequest('openTab', { 
-      url: TEST_URLS.EXAMPLE 
+      url: TEST_URLS.SELENIUM_FORM 
     });
     testTabId = result.tab.id;
     
-    await client.wait(1000);
+    await client.wait(2000); // Wait for form to load
   });
 
   afterEach(async function() {
@@ -41,7 +41,7 @@ describe('callHelper command', function() {
   it('should call clickElement helper', async function() {
     const result = await client.callHelper(
       'clickElement',
-      ['h1'],
+      ['button[type="submit"]'],
       testTabId
     );
     
@@ -58,7 +58,7 @@ describe('callHelper command', function() {
     
     client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('string');
-    expect(result.value.length).to.be.at.least(1);
+    expect(result.value).to.include('Web form');
   });
 
   it('should call getHTML helper', async function() {
@@ -92,6 +92,99 @@ describe('callHelper command', function() {
     
     client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('boolean');
+  });
+
+  it('should call typeText helper', async function() {
+    const result = await client.callHelper(
+      'typeText',
+      ['#my-text-id', 'Hello World'],
+      testTabId
+    );
+    
+    client.assertValidExecutionResponse(result);
+    expect(result.value).to.be.true;
+    
+    // Verify the text was typed
+    const valueResult = await client.executeJS(
+      'document.querySelector("#my-text-id").value',
+      testTabId
+    );
+    expect(valueResult.value).to.equal('Hello World');
+  });
+
+  it('should call getLastHTML helper', async function() {
+    // The Selenium form has multiple labels with class 'form-label'
+    // Get the HTML of the last label on the page
+    const result = await client.callHelper(
+      'getLastHTML',
+      ['label.form-label'],
+      testTabId
+    );
+    
+    expect(result).to.be.an('object');
+    expect(result.value).to.be.a('string');
+    // Should contain text like "Example range" or an input element
+    expect(result.value.length).to.be.greaterThan(0);
+  });
+
+  it('should call clearContentEditable helper', async function() {
+    // First, add some content to the textarea
+    await client.callHelper(
+      'typeText',
+      ['textarea[name="my-textarea"]', 'Test content', false],
+      testTabId
+    );
+    await client.wait(100);
+    
+    // Now clear it using clearContentEditable
+    const result = await client.callHelper(
+      'clearContentEditable',
+      ['textarea[name="my-textarea"]'],
+      testTabId
+    );
+    
+    expect(result).to.be.an('object');
+    expect(result.value).to.be.true;
+    
+    // Verify it was cleared - clearContentEditable sets innerHTML to '<p><br></p>'
+    // Note: getHTML returns escaped content for textareas
+    const htmlResult = await client.callHelper(
+      'getHTML',
+      ['textarea[name="my-textarea"]'],
+      testTabId
+    );
+    expect(htmlResult.value).to.equal('&lt;p&gt;&lt;br&gt;&lt;/p&gt;');
+  });
+
+  it('should call appendChar helper', async function() {
+    // Note: appendChar is designed for contenteditable elements
+    // Since Selenium form textarea is not contenteditable, we'll test the helper
+    // returns false/null when called on non-contenteditable element
+    // This validates the helper correctly handles incompatible elements
+    
+    const result = await client.callHelper(
+      'appendChar',
+      ['textarea[name="my-textarea"]', '!'],
+      testTabId
+    );
+    
+    expect(result).to.be.an('object');
+    // appendChar returns null for non-contenteditable elements
+    // This is expected behavior - the function is specific to contenteditable
+    expect(result.value).to.be.null;
+  });
+
+  it('should call waitForElement helper', async function() {
+    // Test waiting for an element that already exists
+    // The submit button is already on the page
+    const result = await client.callHelper(
+      'waitForElement',
+      ['button[type="submit"]', 3000],
+      testTabId
+    );
+    
+    expect(result).to.be.an('object');
+    expect(result.value).to.be.true;
   });
 
   describe('error handling', function() {
