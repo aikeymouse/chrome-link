@@ -223,10 +223,10 @@ function Install-Local {
         Write-Host ""
         Write-Host "Directory structure should be:"
         Write-Host "  chromepilot-native-host-v*/"
-        Write-Host "    ├── native-host/"
-        Write-Host "    ├── install-scripts/"
-        Write-Host "    │   └── install.ps1  (you are here)"
-        Write-Host "    └── README.md"
+        Write-Host "    +-- native-host/"
+        Write-Host "    +-- install-scripts/"
+        Write-Host "    |   +-- install.ps1  (you are here)"
+        Write-Host "    +-- README.md"
         throw "Native host directory not found"
     }
     
