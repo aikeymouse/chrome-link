@@ -127,6 +127,10 @@ function handleBackgroundMessage(message) {
       handleSessionDetails(message);
       break;
       
+    case 'sessionExpired':
+      handleSessionExpired(message);
+      break;
+      
     case 'logEntry':
       handleLogEntry(message);
       break;
@@ -225,6 +229,31 @@ function handleSessionDetails(message) {
   // Force immediate UI update
   updateSessionsUI();
   updateSessionDetails();
+}
+
+/**
+ * Handle session expired notification
+ */
+function handleSessionExpired(message) {
+  const { sessionId } = message;
+  
+  console.log('Session expired:', sessionId);
+  
+  // Mark session as expired
+  if (sessions.has(sessionId)) {
+    const session = sessions.get(sessionId);
+    session.active = false;
+    session.expiresAt = Date.now(); // Already expired
+    sessions.set(sessionId, session);
+    
+    // Update UI
+    updateSessionsUI();
+    
+    // If this was the current session, clear selection
+    if (currentSessionId === sessionId) {
+      updateSessionDetails();
+    }
+  }
 }
 
 /**
