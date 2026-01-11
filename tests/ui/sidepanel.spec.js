@@ -151,4 +151,70 @@ test.describe('ChromePilot Sidepanel UI', () => {
     await expect(tabsList).toHaveClass(/collapsed/);
     await expect(tabsList).not.toBeVisible();
   });
+
+  test('should track new tab opening and closing', async ({ page, extensionId, context }) => {
+    await page.goto(`chrome-extension://${extensionId}/sidepanel/panel.html`);
+    await page.waitForLoadState('networkidle');
+    
+    const tabsList = page.locator('#tabs-list');
+    const tabsCount = page.locator('#tabs-count');
+    
+    // Initial state: 1 tab (extension tab)
+    await expect(tabsCount).toHaveText('1');
+    
+    // Open new tab with example.com
+    const newTab = await context.newPage();
+    await newTab.goto('http://example.com');
+    await newTab.waitForLoadState('networkidle');
+    
+    // Wait for UI to update
+    await page.waitForTimeout(1000);
+    
+    // Verify counter changed to 2
+    await expect(tabsCount).toHaveText('2');
+    
+    // Expand tabs list
+    await page.locator('#tabs-header').click();
+    await expect(tabsList).not.toHaveClass(/collapsed/);
+    
+    // Verify 2 tab items exist
+    const tabItems = tabsList.locator('.tab-item');
+    await expect(tabItems).toHaveCount(2);
+    
+    // Find the example.com tab (should be second item)
+    const exampleTab = tabItems.nth(1);
+    await expect(exampleTab).toBeVisible();
+    
+    // Verify example.com tab details
+    const exampleTabHeader = exampleTab.locator('.tab-header');
+    const exampleTabId = await exampleTabHeader.locator('.tab-id').textContent();
+    const exampleTabTitle = await exampleTabHeader.locator('.tab-title').textContent();
+    const exampleTabUrl = await exampleTab.locator('.tab-url').textContent();
+    
+    // Verify tab ID format
+    expect(exampleTabId).toMatch(/^#\d+$/);
+    
+    // Verify tab title
+    expect(exampleTabTitle).toBe('Example Domain');
+    
+    // Verify tab URL (example.com redirects to https)
+    expect(exampleTabUrl).toBe('https://example.com/');
+    
+    // Close the example.com tab
+    await newTab.close();
+    
+    // Wait for UI to update
+    await page.waitForTimeout(1000);
+    
+    // Verify counter changed back to 1
+    await expect(tabsCount).toHaveText('1');
+    
+    // Verify only 1 tab item remains
+    await expect(tabItems).toHaveCount(1);
+    
+    // Verify remaining tab is the extension tab
+    const remainingTab = tabItems.first();
+    const remainingTabTitle = await remainingTab.locator('.tab-header .tab-title').textContent();
+    expect(remainingTabTitle).toBe('ChromePilot Panel');
+  });
 });
