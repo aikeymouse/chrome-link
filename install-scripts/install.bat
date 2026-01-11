@@ -16,20 +16,20 @@ REM Helper Functions
 REM ============================================================================
 
 :print_info
-echo [INFO] %~1
-exit /b 0
+echo [INFO] %*
+goto :eof
 
 :print_success
-echo [OK] %~1
-exit /b 0
+echo [OK] %*
+goto :eof
 
 :print_warning
-echo [WARN] %~1
-exit /b 0
+echo [WARN] %*
+goto :eof
 
 :print_error
-echo [ERROR] %~1
-exit /b 0
+echo [ERROR] %*
+goto :eof
 
 :show_usage
 echo.
