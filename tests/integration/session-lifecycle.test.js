@@ -163,4 +163,24 @@ describe('Session Lifecycle', function() {
     
     client3.close();
   });
+
+  it('should reject connection with non-existent session ID', async function() {
+    this.timeout(5000);
+    
+    // Try to connect with a fake session ID that never existed
+    const fakeSessionId = '00000000-0000-0000-0000-000000000000';
+    const client = new TestClient();
+    
+    let connectionError = null;
+    try {
+      await client.connect(`ws://localhost:9000?sessionId=${fakeSessionId}`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (err) {
+      connectionError = err;
+    }
+    
+    // Should get error because session doesn't exist
+    expect(connectionError).to.exist;
+    expect(connectionError.message).to.include('Session not found or expired');
+  });
 });
