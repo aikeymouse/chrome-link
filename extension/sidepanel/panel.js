@@ -241,7 +241,7 @@ function handleLogEntry(message) {
  * Update sessions UI
  */
 function updateSessionsUI() {
-  console.log('📊 Updating sessions UI, sessions:', Array.from(sessions.entries()));
+  // console.log('📊 Updating sessions UI, sessions:', Array.from(sessions.entries()));
   clientCount.textContent = sessions.size;
   
   // Clear options
@@ -270,8 +270,8 @@ function updateSessionsUI() {
       // Format status/remaining time
       if (data.expiresAt) {
         const remaining = data.expiresAt - Date.now();
-        console.log(`⏱️ Session ${id} remaining: ${remaining}ms (${formatDuration(remaining)})`);
         if (remaining > 0) {
+          console.log(`⏱️ Session ${id} remaining: ${remaining}ms (${formatDuration(remaining)})`);
           sessionStatus.textContent = formatDuration(remaining);
           if (remaining < 60000) {
             sessionStatus.classList.add('warning');
