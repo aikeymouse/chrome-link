@@ -40,3 +40,5 @@ exports.test = base.extend({
     await use(extensionId);
   },
 });
+
+exports.expect = require('@playwright/test').expect;
