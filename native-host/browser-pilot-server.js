@@ -158,13 +158,16 @@ class Session {
   }
   
   sendResponse(response) {
+    console.error('[DEBUG] sendResponse called with:', JSON.stringify(response, null, 2));
     this.log('RESPONSE', response);
     
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console.error('[DEBUG] WebSocket not open, cannot send response');
       return;
     }
     
     const responseStr = JSON.stringify(response);
+    console.error('[DEBUG] Sending to WebSocket:', responseStr);
     
     // Check if chunking is needed
     if (responseStr.length > CHUNK_SIZE) {
@@ -430,14 +433,10 @@ function processNativeMessage(message) {
   }
   
   if (message.type === 'response') {
-    // Response from extension
+    // Response from extension - forward as-is
     const session = sessions.get(message.sessionId);
     if (session) {
-      session.sendResponse({
-        requestId: message.requestId,
-        result: message.result,
-        error: message.error
-      });
+      session.sendResponse(message);
     }
   } else if (message.type === 'log') {
     // Log event from extension
