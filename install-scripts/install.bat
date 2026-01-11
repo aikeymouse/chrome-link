@@ -586,9 +586,14 @@ echo.
 call :print_info "ChromePilot - Installer"
 echo ==========================
 echo.
+echo [DEBUG] About to check dependencies...
 
 call :check_dependencies
-if errorlevel 1 exit /b 1
+if errorlevel 1 (
+    echo [DEBUG] Dependencies check failed
+    exit /b 1
+)
+echo [DEBUG] Dependencies check passed
 
 REM Create backup if upgrading
 if exist "%INSTALL_DIR%" (
