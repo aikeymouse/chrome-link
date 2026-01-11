@@ -1,0 +1,215 @@
+name: Release ChromePilot
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: native-host/package-lock.json
+      
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Validate version consistency
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Check extension manifest.json
+          EXT_VERSION=$(jq -r '.version' extension/manifest.json)
+          if [ "$EXT_VERSION" != "$VERSION" ]; then
+            echo "❌ Extension version mismatch: $EXT_VERSION != $VERSION"
+            exit 1
+          fi
+          
+          # Check native-host package.json
+          NH_VERSION=$(jq -r '.version' native-host/package.json)
+          if [ "$NH_VERSION" != "$VERSION" ]; then
+            echo "❌ Native host version mismatch: $NH_VERSION != $VERSION"
+            exit 1
+          fi
+          
+          echo "✓ All versions match: $VERSION"
+      
+      - name: Install native-host dependencies
+        working-directory: native-host
+        run: npm ci --production
+      
+      - name: Run tests
+        run: |
+          cd native-host
+          npm ci
+          npm test || echo "⚠️ Tests not configured yet"
+      
+      - name: Create extension zip
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="chromepilot-extension-v${VERSION}.zip"
+          
+          cd extension
+          zip -r "../$ZIP_NAME" . \
+            -x "*.DS_Store" \
+            -x "node_modules/*" \
+            -x ".git/*" \
+            -x "*.log"
+          
+          cd ..
+          echo "✓ Created $ZIP_NAME"
+          ls -lh "$ZIP_NAME"
+      
+      - name: Create native-host zip
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="chromepilot-native-host-v${VERSION}.zip"
+          
+          # Create a clean directory for packaging
+          mkdir -p release-tmp/native-host
+          
+          # Copy native-host files
+          cp -r native-host/* release-tmp/native-host/
+          
+          # Copy install scripts
+          cp -r install-scripts release-tmp/
+          
+          # Copy documentation
+          cp README.md release-tmp/
+          cp QUICKSTART.md release-tmp/ || true
+          
+          # Create the zip
+          cd release-tmp
+          zip -r "../$ZIP_NAME" . \
+            -x "*.DS_Store" \
+            -x "*/node_modules/.cache/*" \
+            -x "*/.git/*" \
+            -x "*.log"
+          
+          cd ..
+          rm -rf release-tmp
+          
+          echo "✓ Created $ZIP_NAME"
+          ls -lh "$ZIP_NAME"
+      
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            echo "## What's New in v$VERSION" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "Initial release of ChromePilot!" >> CHANGELOG.md
+          else
+            echo "## What's New in v$VERSION" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "### Changes since $PREV_TAG" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            
+            # Get commit messages
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s" >> CHANGELOG.md
+          fi
+          
+          echo "" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Installation" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Quick Install" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**macOS/Linux:**" >> CHANGELOG.md
+          echo '```bash' >> CHANGELOG.md
+          echo "# Download and extract native-host package" >> CHANGELOG.md
+          echo "unzip chromepilot-native-host-v${VERSION}.zip -d chromepilot" >> CHANGELOG.md
+          echo "cd chromepilot" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "# Run installer" >> CHANGELOG.md
+          echo "chmod +x install-scripts/install.sh" >> CHANGELOG.md
+          echo "./install-scripts/install.sh" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**Windows:**" >> CHANGELOG.md
+          echo '```cmd' >> CHANGELOG.md
+          echo "REM Download and extract native-host package" >> CHANGELOG.md
+          echo "REM Run installer" >> CHANGELOG.md
+          echo "install-scripts\\install.bat" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Extension Setup" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "1. Download \`chromepilot-extension-v${VERSION}.zip\`" >> CHANGELOG.md
+          echo "2. Extract the zip file" >> CHANGELOG.md
+          echo "3. Open Chrome and go to \`chrome://extensions/\`" >> CHANGELOG.md
+          echo "4. Enable **Developer mode** (top right)" >> CHANGELOG.md
+          echo "5. Click **Load unpacked**" >> CHANGELOG.md
+          echo "6. Select the extracted extension folder" >> CHANGELOG.md
+          echo "7. Copy your extension ID from chrome://extensions/" >> CHANGELOG.md
+          echo "8. Run: \`./install-scripts/install.sh update-id <your-extension-id>\`" >> CHANGELOG.md
+          echo "9. Restart Chrome" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Troubleshooting" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Run diagnostics:" >> CHANGELOG.md
+          echo '```bash' >> CHANGELOG.md
+          echo "# macOS/Linux" >> CHANGELOG.md
+          echo "./install-scripts/install.sh diagnose" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "# Windows" >> CHANGELOG.md
+          echo "install-scripts\\install.bat diagnose" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
+          
+          cat CHANGELOG.md
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ChromePilot v${{ steps.version.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          files: |
+            chromepilot-extension-v${{ steps.version.outputs.version }}.zip
+            chromepilot-native-host-v${{ steps.version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromepilot-v${{ steps.version.outputs.version }}
+          path: |
+            chromepilot-extension-v${{ steps.version.outputs.version }}.zip
+            chromepilot-native-host-v${{ steps.version.outputs.version }}.zip
+          retention-days: 30

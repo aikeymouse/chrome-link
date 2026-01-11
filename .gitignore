@@ -5,7 +5,7 @@ native-host/logs/*.log
 *.zip
 dist/
 PLAN.md
-IMPLEMENTATION_SUMMARY.md
+docs/dev/IMPLEMENTATION_SUMMARY.md
 tests/dev.notes.txt
 extension/sidepanel/panel.js
 tests/gemini-client.js
