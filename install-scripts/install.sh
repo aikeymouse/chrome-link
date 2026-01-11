@@ -461,9 +461,29 @@ diagnose() {
     # Server Status
     echo -e "${BLUE}Server Status:${NC}"
     
+    SERVER_RUNNING=false
+    SERVER_RESPONSIVE=false
+    
     if pgrep -f "browser-pilot-server.js" > /dev/null; then
         PID=$(pgrep -f "browser-pilot-server.js")
-        echo -e "  ${GREEN}✓${NC} Server is running (PID: $PID)"
+        SERVER_RUNNING=true
+        echo -e "  ${GREEN}✓${NC} Server process running (PID: $PID)"
+        
+        # Check if server is actually responsive (listening on port 9000)
+        if command -v lsof &> /dev/null && lsof -ti :9000 > /dev/null 2>&1; then
+            PORT_PID=$(lsof -ti :9000)
+            if [ "$PORT_PID" == "$PID" ]; then
+                SERVER_RESPONSIVE=true
+                echo -e "  ${GREEN}✓${NC} Server is listening on port 9000"
+            else
+                echo -e "  ${YELLOW}⚠${NC}  Server running but port 9000 used by different process"
+                issues=$((issues + 1))
+            fi
+        else
+            echo -e "  ${RED}✗${NC} Server running but NOT listening on port 9000 (stuck/crashed)"
+            echo -e "      ${YELLOW}→${NC} Run auto-fix to restart the server"
+            issues=$((issues + 1))
+        fi
     else
         echo -e "  ${YELLOW}⚠${NC}  Server is not running"
     fi
@@ -512,6 +532,12 @@ diagnose() {
             echo ""
             print_info "Running auto-fix..."
             
+            # Kill stuck server if detected
+            if [ "$SERVER_RUNNING" = true ] && [ "$SERVER_RESPONSIVE" = false ]; then
+                print_info "Stopping stuck server process..."
+                auto_fix_kill_server
+            fi
+            
             # Reinstall dependencies if missing
             if [ ! -d "$INSTALL_DIR/native-host/node_modules" ] && [ -d "$INSTALL_DIR/native-host" ]; then
                 print_info "Reinstalling dependencies..."
@@ -522,7 +548,8 @@ diagnose() {
             # Fix permissions
             auto_fix_permissions
             
-            print_info "✓ Auto-fix complete. Run '$0 diagnose' again to verify."
+            echo ""
+            print_info "✓ Auto-fix complete. Restart Chrome and run '$0 diagnose' again to verify."
         fi
     fi
 }
