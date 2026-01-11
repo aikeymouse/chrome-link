@@ -6,3 +6,6 @@ native-host/logs/*.log
 dist/
 PLAN.md
 IMPLEMENTATION_SUMMARY.md
+tests/dev.notes.txt
+extension/sidepanel/panel.js
+tests/gemini-client.js

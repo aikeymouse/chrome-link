@@ -473,6 +473,7 @@ function renderLogs() {
     let parsedData = null;
     let actionBadge = '';
     let requestIdBadge = '';
+    let hasError = false;
     
     try {
       parsedData = typeof log.data === 'string' ? JSON.parse(log.data) : log.data;
@@ -484,12 +485,17 @@ function renderLogs() {
       if (parsedData.requestId) {
         requestIdBadge = `<span class="log-badge log-badge-requestid">${escapeHtml(parsedData.requestId)}</span>`;
       }
+      
+      // Check if response has error
+      if (direction === 'response' && parsedData.error) {
+        hasError = true;
+      }
     } catch (e) {
       // If parsing fails, just show the raw data
     }
     
     return `
-      <div class="log-entry ${direction}">
+      <div class="log-entry ${direction} ${hasError ? 'error' : ''}">
         <div class="log-header">
           <span class="log-time">${time}</span>
           <span class="log-direction">${direction.toUpperCase()}</span>
