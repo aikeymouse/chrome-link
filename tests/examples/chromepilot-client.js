@@ -34,6 +34,14 @@ class ChromePilotClient {
           return;
         }
         
+        // Handle sessionResumed message
+        if (message.type === 'sessionResumed') {
+          this.sessionId = message.sessionId;
+          console.log(`✓ Session resumed: ${this.sessionId}`);
+          resolve();
+          return;
+        }
+        
         this.handleMessage(message);
       });
 

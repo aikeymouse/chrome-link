@@ -68,4 +68,42 @@ describe('Session Lifecycle', function() {
       expect(err).to.be.an('error');
     }
   });
+
+  it('should resume session when reconnecting with same session ID', async function() {
+    // Create initial connection and get session ID
+    const client1 = new TestClient();
+    await client1.connect();
+    await client1.waitForConnection();
+    const originalSessionId = client1.sessionId;
+    
+    // Create a tab in the first session
+    const tabResult = await client1.sendRequest('openTab', { 
+      url: 'http://example.com' 
+    });
+    const tabId = tabResult.tab.id;
+    
+    // Close the connection (but session remains active on server)
+    client1.close();
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Reconnect with the same session ID via query parameter
+    const client2 = new TestClient();
+    await client2.connect(`ws://localhost:9000?sessionId=${originalSessionId}`);
+    
+    // Wait for session resumed message
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Should have resumed the same session
+    expect(client2.sessionId).to.equal(originalSessionId);
+    
+    // Should still be able to access the tab from the previous session
+    const tabs = await client2.listTabs();
+    const foundTab = tabs.tabs.find(t => t.id === tabId);
+    expect(foundTab).to.exist;
+    
+    // Cleanup
+    await client2.closeTab(tabId);
+    client2.close();
+  });
 });
