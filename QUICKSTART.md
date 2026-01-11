@@ -185,7 +185,7 @@ cat ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chrome
 
 - Read full documentation: `README.md`
 - See API protocol: `docs/PROTOCOL.md`
-- Development guide: `DEVELOPMENT.md`
+- Development guide: `docs/dev/DEVELOPMENT.md`
 
 ## Example Client
 
