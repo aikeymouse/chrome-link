@@ -45,7 +45,7 @@ describe('callHelper command', function() {
       testTabId
     );
     
-    expect(result).to.have.property('value');
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.true;
   });
 
@@ -56,6 +56,7 @@ describe('callHelper command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('string');
     expect(result.value.length).to.be.at.least(1);
   });
@@ -67,6 +68,7 @@ describe('callHelper command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('string');
   });
 
@@ -77,6 +79,7 @@ describe('callHelper command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.true;
   });
 
@@ -87,6 +90,7 @@ describe('callHelper command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('boolean');
   });
 
@@ -116,6 +120,7 @@ describe('callHelper command', function() {
         testTabId
       );
       
+      client.assertValidExecutionResponse(result);
       expect(result.value).to.be.false;
     });
   });

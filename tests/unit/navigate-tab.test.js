@@ -43,8 +43,8 @@ describe('navigateTab command', function() {
       url: TEST_URLS.SELENIUM_FORM
     });
     
-    expect(result).to.have.property('success');
-    expect(result.success).to.be.true;
+    client.assertValidSuccessResponse(result);
+    expect(result.tabId).to.equal(testTabId);
   });
 
   it('should update tab URL after navigation', async function() {

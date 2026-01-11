@@ -43,8 +43,8 @@ describe('switchTab command', function() {
       tabId: testTabId
     });
     
-    expect(result).to.have.property('success');
-    expect(result.success).to.be.true;
+    client.assertValidSuccessResponse(result);
+    expect(result.tabId).to.equal(testTabId);
   });
 
   it('should make tab active after switch', async function() {

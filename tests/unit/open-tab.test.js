@@ -39,10 +39,11 @@ describe('openTab command', function() {
       url: TEST_URLS.EXAMPLE 
     });
     
-    expect(result).to.have.property('tab');
-    expect(result.tab).to.have.property('id');
-    // URL may be empty initially as page is loading
-    expect(result.tab).to.have.property('url');
+    client.assertValidResponse(result, {
+      requiredFields: ['tab'],
+      fieldTypes: { tab: 'object' }
+    });
+    client.assertValidTab(result.tab);
   });
 
   it('should open tab with focus option', async function() {
@@ -51,16 +52,22 @@ describe('openTab command', function() {
       focus: true
     });
     
-    expect(result.tab).to.have.property('active');
-    expect(result.tab.active).to.be.true;
-  });
-
+    client.assertValidResponse(result, {
+      requiredFields: ['tab'],
+      fieldTypes: { tab: 'object' }
+    });
   it('should open tab without focus', async function() {
     const result = await client.sendRequest('openTab', { 
       url: TEST_URLS.EXAMPLE,
       focus: false
     });
     
+    client.assertValidResponse(result, {
+      requiredFields: ['tab'],
+      fieldTypes: { tab: 'object' }
+    });
+    client.assertValidTab(result.tab);
+  });
     expect(result.tab).to.have.property('id');
     // Tab may or may not be active depending on browser state
   });

@@ -40,8 +40,8 @@ describe('closeTab command', function() {
     
     const closeResult = await client.closeTab(tabId);
     
-    expect(closeResult).to.have.property('success');
-    expect(closeResult.success).to.be.true;
+    client.assertValidSuccessResponse(closeResult);
+    expect(closeResult.tabId).to.equal(tabId);
   });
 
   it('should remove tab from tab list', async function() {

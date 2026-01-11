@@ -114,6 +114,64 @@ tests/
 - `fixtures.js` - Test URLs and selectors
 - Automatic tab cleanup
 - Connection verification
+- **Response validation helpers** - Standardized validation methods
+
+### Response Validation
+
+The `TestClient` provides validation helpers to ensure responses match protocol specifications:
+
+#### `assertValidResponse(response, options)`
+Comprehensive validation with configurable options:
+
+```javascript
+// Basic required field check
+client.assertValidResponse(result, {
+  requiredFields: ['tabs']
+});
+
+// Type validation
+client.assertValidResponse(result, {
+  requiredFields: ['tabs'],
+  fieldTypes: { tabs: 'array' }
+});
+
+// Custom validation
+client.assertValidResponse(result, {
+  requiredFields: ['value'],
+  customValidator: (response) => {
+    if (response.value < 0) throw new Error('Value must be positive');
+  }
+});
+```
+
+**Options:**
+- `requiredFields: Array<string>` - Fields that must exist in response
+- `fieldTypes: Object` - Map of field names to expected types ('string', 'number', 'boolean', 'array', 'object')
+- `customValidator: Function` - Custom validation function
+
+#### Specialized Validators
+
+**`assertValidTab(tab)`** - Validates tab object structure:
+```javascript
+const result = await client.sendRequest('openTab', { url: TEST_URLS.EXAMPLE });
+client.assertValidTab(result.tab);
+// Validates: id (number), url (string), title (string), active (boolean)
+```
+
+**`assertValidSuccessResponse(response)`** - Validates success responses:
+```javascript
+const result = await client.closeTab(tabId);
+client.assertValidSuccessResponse(result);
+// Validates: success field exists and equals true
+```
+
+**`assertValidExecutionResponse(response)`** - Validates execution results:
+```javascript
+const result = await client.executeJS('2 + 2', tabId);
+client.assertValidExecutionResponse(result);
+// Validates: value field exists (any type)
+expect(result.value).to.equal(4);
+```
 
 ## Writing Tests
 
@@ -148,6 +206,17 @@ describe('Command Name', function() {
   });
 
   it('should do something', async function() {
+    const result = await client.sendRequest('commandName', { params });
+    
+    // Validate response structure
+    client.assertValidResponse(result, {
+      requiredFields: ['field1', 'field2'],
+      fieldTypes: { field1: 'string', field2: 'number' }
+    });
+    
+    // Additional assertions
+    expect(result.field1).to.equal('expected value');
+  });
     const result = await client.sendRequest('action', { params });
     expect(result).to.have.property('expectedField');
   });

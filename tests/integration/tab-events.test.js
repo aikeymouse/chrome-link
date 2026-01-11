@@ -34,7 +34,8 @@ describe('Tab Events and State Management', function() {
     const beforeTabs = await client.listTabs();
     const beforeCount = beforeTabs.tabs.length;
     
-    await client.sendRequest('openTab', { url: TEST_URLS.EXAMPLE });
+    const newTab = await client.sendRequest('openTab', { url: TEST_URLS.EXAMPLE });
+    client.assertValidTab(newTab.tab);
     
     const afterTabs = await client.listTabs();
     const afterCount = afterTabs.tabs.length;
@@ -51,7 +52,8 @@ describe('Tab Events and State Management', function() {
     const beforeTabs = await client.listTabs();
     const beforeCount = beforeTabs.tabs.length;
     
-    await client.closeTab(tabId);
+    const closeResult = await client.closeTab(tabId);
+    client.assertValidSuccessResponse(closeResult);
     
     const afterTabs = await client.listTabs();
     const afterCount = afterTabs.tabs.length;

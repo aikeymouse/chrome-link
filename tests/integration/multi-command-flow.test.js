@@ -34,33 +34,38 @@ describe('Multi-Command Workflows', function() {
     const openResult = await client.sendRequest('openTab', { 
       url: TEST_URLS.EXAMPLE 
     });
+    client.assertValidTab(openResult.tab);
     const tabId = openResult.tab.id;
     
     await client.wait(1000);
     
     const execResult = await client.executeJS('document.title', tabId);
+    client.assertValidExecutionResponse(execResult);
     expect(execResult.value).to.be.a('string');
     
     const closeResult = await client.closeTab(tabId);
-    expect(closeResult.success).to.be.true;
+    client.assertValidSuccessResponse(closeResult);
   });
 
   it('should complete open -> navigate -> execute workflow', async function() {
     const openResult = await client.sendRequest('openTab', { 
       url: TEST_URLS.EXAMPLE 
     });
+    client.assertValidTab(openResult.tab);
     const tabId = openResult.tab.id;
     
     await client.wait(1000);
     
-    await client.sendRequest('navigateTab', {
+    const navResult = await client.sendRequest('navigateTab', {
       tabId: tabId,
       url: TEST_URLS.SELENIUM_FORM
     });
+    client.assertValidSuccessResponse(navResult);
     
     await client.wait(2000);
     
     const execResult = await client.executeJS('document.title', tabId);
+    client.assertValidExecutionResponse(execResult);
     expect(execResult.value).to.include('Web form');
   });
 
@@ -68,11 +73,16 @@ describe('Multi-Command Workflows', function() {
     const tab1 = await client.sendRequest('openTab', { url: TEST_URLS.EXAMPLE });
     const tab2 = await client.sendRequest('openTab', { url: TEST_URLS.SELENIUM_FORM });
     
+    client.assertValidTab(tab1.tab);
+    client.assertValidTab(tab2.tab);
+    
     await client.wait(2000);
     
     const result1 = await client.executeJS('document.title', tab1.tab.id);
     const result2 = await client.executeJS('document.title', tab2.tab.id);
     
+    client.assertValidExecutionResponse(result1);
+    client.assertValidExecutionResponse(result2);
     expect(result1.value).to.be.a('string');
     expect(result2.value).to.be.a('string');
     expect(result1.value).to.not.equal(result2.value);

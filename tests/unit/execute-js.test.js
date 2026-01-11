@@ -42,8 +42,9 @@ describe('executeJS command', function() {
   it('should execute simple JavaScript expression', async function() {
     const result = await client.executeJS('2 + 2', testTabId);
     
-    expect(result).to.have.property('value');
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.equal(4);
+    expect(result.type).to.equal('number');
   });
 
   it('should execute DOM query', async function() {
@@ -52,6 +53,7 @@ describe('executeJS command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('boolean');
   });
 
@@ -61,7 +63,9 @@ describe('executeJS command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.equal('test string');
+    expect(result.type).to.equal('string');
   });
 
   it('should return object values', async function() {
@@ -70,6 +74,7 @@ describe('executeJS command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.an('object');
     expect(result.value.foo).to.equal('bar');
     expect(result.value.num).to.equal(42);
@@ -81,6 +86,7 @@ describe('executeJS command', function() {
       testTabId
     );
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.include('example.com');
   });
 

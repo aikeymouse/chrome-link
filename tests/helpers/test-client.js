@@ -48,18 +48,88 @@ class TestClient extends ChromePilotClient {
   }
 
   /**
-   * Assert response is valid
+   * Assert response is valid according to protocol
+   * @param {Object} response - The response object
+   * @param {Object} options - Validation options
+   * @param {Array<string>} options.requiredFields - Fields that must exist
+   * @param {Object} options.fieldTypes - Map of field names to expected types
+   * @param {Function} options.customValidator - Custom validation function
    */
-  assertValidResponse(response, expectedFields = []) {
+  assertValidResponse(response, options = {}) {
+    const { requiredFields = [], fieldTypes = {}, customValidator } = options;
+    
     if (!response) {
       throw new Error('Response is null or undefined');
     }
-    for (const field of expectedFields) {
+    
+    // Check required fields exist
+    for (const field of requiredFields) {
       if (!(field in response)) {
-        throw new Error(`Response missing expected field: ${field}`);
+        throw new Error(`Response missing required field: ${field}`);
       }
     }
+    
+    // Check field types
+    for (const [field, expectedType] of Object.entries(fieldTypes)) {
+      if (field in response) {
+        const actualType = Array.isArray(response[field]) ? 'array' : typeof response[field];
+        if (actualType !== expectedType) {
+          throw new Error(`Field '${field}' has type '${actualType}', expected '${expectedType}'`);
+        }
+      }
+    }
+    
+    // Run custom validator if provided
+    if (customValidator && typeof customValidator === 'function') {
+      customValidator(response);
+    }
+    
     return true;
+  }
+
+  /**
+   * Validate tab object structure
+   */
+  assertValidTab(tab) {
+    return this.assertValidResponse(tab, {
+      requiredFields: ['id', 'url', 'title'],
+      fieldTypes: {
+        id: 'number',
+        url: 'string',
+        title: 'string',
+        active: 'boolean'
+      }
+    });
+  }
+
+  /**
+   * Validate success response
+   */
+  assertValidSuccessResponse(response) {
+    return this.assertValidResponse(response, {
+      requiredFields: ['success'],
+      fieldTypes: { success: 'boolean' },
+      customValidator: (res) => {
+        if (res.success !== true) {
+          throw new Error('Response success field is not true');
+        }
+      }
+    });
+  }
+
+  /**
+   * Validate executeJS/callHelper response
+   */
+  assertValidExecutionResponse(response) {
+    return this.assertValidResponse(response, {
+      requiredFields: ['value'],
+      customValidator: (res) => {
+        // Value can be any type
+        if (!('value' in res)) {
+          throw new Error('Response missing value field');
+        }
+      }
+    });
   }
 
   /**

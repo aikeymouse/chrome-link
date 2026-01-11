@@ -23,8 +23,10 @@ describe('listTabs command', function() {
   it('should return array of tabs', async function() {
     const result = await client.listTabs();
     
-    expect(result).to.be.an('object');
-    expect(result.tabs).to.be.an('array');
+    client.assertValidResponse(result, {
+      requiredFields: ['tabs'],
+      fieldTypes: { tabs: 'array' }
+    });
     expect(result.tabs.length).to.be.at.least(0);
   });
 
@@ -33,10 +35,7 @@ describe('listTabs command', function() {
     
     if (result.tabs.length > 0) {
       const tab = result.tabs[0];
-      expect(tab).to.have.property('id');
-      expect(tab).to.have.property('url');
-      expect(tab).to.have.property('title');
-      expect(tab.id).to.be.a('number');
+      client.assertValidTab(tab);
     }
   });
 

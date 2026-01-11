@@ -52,7 +52,7 @@ describe('Chunked Responses', function() {
     
     const result = await client.executeJS(code, testTabId);
     
-    expect(result).to.have.property('value');
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.a('string');
     expect(result.value.length).to.be.at.least(1024 * 100);
   });
@@ -72,6 +72,7 @@ describe('Chunked Responses', function() {
     
     const result = await client.executeJS(code, testTabId);
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.an('array');
     expect(result.value.length).to.equal(1000);
   });
@@ -94,6 +95,7 @@ describe('Chunked Responses', function() {
     
     const result = await client.executeJS(code, testTabId);
     
+    client.assertValidExecutionResponse(result);
     expect(result.value).to.be.an('object');
     expect(Object.keys(result.value).length).to.equal(1000);
   });

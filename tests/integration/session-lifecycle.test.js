@@ -11,7 +11,10 @@ describe('Session Lifecycle', function() {
     await client.connect();
     await client.waitForConnection();
     
-    expect(client.sessionId).to.be.a('string');
+    client.assertValidResponse(client, {
+      requiredFields: ['sessionId'],
+      fieldTypes: { sessionId: 'string' }
+    });
     expect(client.sessionId.length).to.be.at.least(1);
     
     client.close();
