@@ -123,12 +123,16 @@ function handleBackgroundMessage(message) {
       break;
       
     case 'sessionDetails':
+      console.log('⏰ Received sessionDetails, expiresAt:', message.session.expiresAt, 'now:', Date.now());
       handleSessionDetails(message);
       break;
       
     case 'logEntry':
       handleLogEntry(message);
       break;
+      
+    default:
+      console.warn('Unknown message type:', message.type);
   }
 }
 
@@ -210,13 +214,17 @@ function handleSessionsUpdate(message) {
 function handleSessionDetails(message) {
   const { session } = message;
   
+  console.log('Updating session details:', session);
+  
   // Update or create session with full details
   sessions.set(session.id, session);
   
   // Auto-select this session when it receives messages
   currentSessionId = session.id;
   
+  // Force immediate UI update
   updateSessionsUI();
+  updateSessionDetails();
 }
 
 /**
@@ -233,6 +241,7 @@ function handleLogEntry(message) {
  * Update sessions UI
  */
 function updateSessionsUI() {
+  console.log('📊 Updating sessions UI, sessions:', Array.from(sessions.entries()));
   clientCount.textContent = sessions.size;
   
   // Clear options
@@ -261,6 +270,7 @@ function updateSessionsUI() {
       // Format status/remaining time
       if (data.expiresAt) {
         const remaining = data.expiresAt - Date.now();
+        console.log(`⏱️ Session ${id} remaining: ${remaining}ms (${formatDuration(remaining)})`);
         if (remaining > 0) {
           sessionStatus.textContent = formatDuration(remaining);
           if (remaining < 60000) {

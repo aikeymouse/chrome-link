@@ -284,19 +284,19 @@ Update version in:
 cd native-host
 npm install --production
 cd ..
-tar -czf chrome-driver-native-host.tar.gz native-host/
+tar -czf chrome-pilot-native-host.tar.gz native-host/
 ```
 
 For Windows:
 ```powershell
-Compress-Archive -Path native-host -DestinationPath chrome-driver-native-host.zip
+Compress-Archive -Path native-host -DestinationPath chrome-pilot-native-host.zip
 ```
 
 ### 3. Package Extension
 
 ```bash
 cd extension
-zip -r chrome-driver-extension.zip .
+zip -r chrome-pilot-extension.zip .
 ```
 
 ### 4. Create GitHub Release
@@ -304,7 +304,7 @@ zip -r chrome-driver-extension.zip .
 1. Tag version: `git tag v1.0.0`
 2. Push: `git push origin v1.0.0`
 3. Create release on GitHub
-4. Upload `chrome-driver-native-host.tar.gz` and `chrome-driver-extension.zip`
+4. Upload `chrome-pilot-native-host.tar.gz` and `chrome-pilot-extension.zip`
 
 ## Best Practices
 

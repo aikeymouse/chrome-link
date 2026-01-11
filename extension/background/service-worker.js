@@ -102,6 +102,19 @@ async function handleNativeMessage(message) {
     return;
   }
   
+  if (message.type === 'sessionUpdated') {
+    // Session activity updated, refresh expiration time in UI
+    broadcastToSidePanel({
+      type: 'sessionDetails',
+      session: {
+        id: message.sessionId,
+        timeout: message.timeout,
+        expiresAt: message.expiresAt
+      }
+    });
+    return;
+  }
+  
   if (message.type === 'sessionExpired') {
     // Session expired, remove from tracking
     activeSessions.delete(message.sessionId);

@@ -63,6 +63,14 @@ class Session {
     this.lastActivity = Date.now();
     this.expiresAt = this.lastActivity + this.timeout;
     this.scheduleTimeout();
+    
+    // Notify extension about updated expiration time
+    sendNativeMessage({
+      type: 'sessionUpdated',
+      sessionId: this.sessionId,
+      timeout: this.timeout,
+      expiresAt: this.expiresAt
+    });
   }
   
   scheduleTimeout() {
