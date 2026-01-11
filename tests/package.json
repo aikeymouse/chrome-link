@@ -5,12 +5,16 @@
   "devDependencies": {
     "mocha": "^10.0.0",
     "chai": "^4.3.0",
-    "chai-as-promised": "^7.1.0"
+    "chai-as-promised": "^7.1.0",
+    "@playwright/test": "^1.40.0"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "npm run test:unit && npm run test:integration && npm run test:ui",
     "test:unit": "mocha 'unit/**/*.test.js'",
     "test:integration": "mocha 'integration/**/*.test.js'",
-    "test:watch": "mocha --watch"
+    "test:ui": "playwright test",
+    "test:watch": "mocha --watch",
+    "test:unit:watch": "mocha 'unit/**/*.test.js' --watch",
+    "test:integration:watch": "mocha 'integration/**/*.test.js' --watch"
   }
 }
