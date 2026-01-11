@@ -336,12 +336,6 @@ function Register-NativeHost {
 function Test-Installation {
     Write-Info "Verifying installation..."
     
-    $extensionManifest = Join-Path $script:INSTALL_DIR "extension\manifest.json"
-    if (-not (Test-Path $extensionManifest)) {
-        Write-ErrorMsg "Extension manifest not found"
-        throw "Extension manifest not found"
-    }
-    
     $serverScript = Join-Path $script:INSTALL_DIR "native-host\browser-pilot-server.js"
     if (-not (Test-Path $serverScript)) {
         Write-ErrorMsg "Native host server not found"
