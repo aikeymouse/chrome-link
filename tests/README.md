@@ -1,73 +1,262 @@
-# ChromePilot Tests
+# ChromePilot Test Suite
 
-This directory contains test utilities for ChromePilot.
+Comprehensive Mocha test suite for ChromePilot WebSocket automation.
 
-## Test Client
+## Prerequisites
 
-`test-client.js` - A comprehensive end-to-end test client that verifies all ChromePilot functionality.
+1. **ChromePilot Server Running**
+   ```bash
+   # Server must be running on ws://localhost:9000
+   # Check DEVELOPMENT.md for installation instructions
+   ```
 
-### Running Tests
+2. **Chrome Extension Loaded**
+   - Extension must be installed and active
+   - Side panel should show "Connected" status
+
+3. **Node.js Dependencies**
+   ```bash
+   cd tests
+   npm install
+   ```
+
+## Installation
+
+Install test dependencies:
 
 ```bash
-cd tests
-node test-client.js
+npm install
 ```
 
-### Prerequisites
+This installs:
+- `mocha` - Test framework
+- `chai` - Assertion library
+- `chai-as-promised` - Promise assertions
+- `ws` - WebSocket client
 
-- ChromePilot extension loaded in Chrome
-- Extension side panel open (click extension icon)
-- Native host running (automatically starts when side panel opens)
+## Running Tests
 
-### Test Coverage
-
-The test client verifies:
-1. **WebSocket Connection** - Connects to localhost:9000
-2. **List Tabs** - Retrieves all tabs in current window
-3. **Open Tab** - Opens new tab with specified URL
-4. **Execute JavaScript** - Runs code in tab context
-5. **Navigate Tab** - Changes tab URL
-6. **Session Management** - Tracks session ID and activity
-
-### Expected Output
-
-```
-🚀 ChromePilot Test Client
-
-Connecting to ws://localhost:9000/session...
-✓ Connected
-
-Test 1: Listing tabs...
-Session ID: <uuid>
-✓ Found X tabs in current window
-  1. [123] Tab Title...
-
-Test 2: Opening new tab...
-✓ Opened tab ID: 456
-
-Test 3: Getting page title...
-✓ Page title: "Example Domain"
-
-Test 4: Getting page URL...
-✓ Page URL: https://example.com
-
-Test 5: Navigating to Google...
-✓ Navigated tab 456
-
-Test 6: Verifying navigation...
-✓ New page title: "Google"
-
-Test 7: Listing tabs again...
-✓ Now have X tabs
-
-🎉 All tests passed!
+### Run All Tests
+```bash
+npm test
 ```
 
-### Troubleshooting
+### Run Unit Tests Only
+```bash
+npm run test:unit
+```
 
-If tests fail:
+### Run Integration Tests Only
+```bash
+npm run test:integration
+```
 
-1. **Connection timeout** - Make sure side panel is open
-2. **Not connected to Chrome extension** - Reload the extension
-3. **Tab not found** - Check if tab was closed during test
-4. **Script errors** - Check Chrome console for CSP issues
+### Watch Mode
+```bash
+npm run test:watch
+```
+
+### Run Specific Test File
+```bash
+npx mocha unit/list-tabs.test.js
+npx mocha integration/session-lifecycle.test.js
+```
+
+## Test Structure
+
+```
+tests/
+├── unit/                      # Unit tests for individual commands
+│   ├── list-tabs.test.js     # List tabs command
+│   ├── open-tab.test.js      # Open tab command
+│   ├── navigate-tab.test.js  # Navigate tab command
+│   ├── switch-tab.test.js    # Switch tab command
+│   ├── close-tab.test.js     # Close tab command
+│   ├── execute-js.test.js    # Execute JavaScript command
+│   └── call-helper.test.js   # Call helper function command
+├── integration/               # Integration tests
+│   ├── session-lifecycle.test.js   # Session creation/management
+│   ├── chunked-responses.test.js   # Large data handling
+│   ├── tab-events.test.js          # Tab state tracking
+│   └── multi-command-flow.test.js  # Complex workflows
+├── helpers/                   # Test utilities
+│   ├── hooks.js              # Global hooks and client factory
+│   ├── test-client.js        # Enhanced test client
+│   └── fixtures.js           # Test data and constants
+├── examples/                  # Example client scripts
+│   ├── chromepilot-client.js # Base WebSocket client
+│   ├── google-search-client.js
+│   ├── test-client.js
+│   └── test-client-new.js
+└── .mocharc.json             # Mocha configuration
+```
+
+## Test Features
+
+### Unit Tests
+- Test individual commands in isolation
+- Validate request/response format
+- Error handling and edge cases
+- Tab cleanup after each test
+- TAB_NOT_FOUND error validation
+- Timeout handling
+
+### Integration Tests
+- Session lifecycle management
+- Multi-command workflows
+- Chunked response handling (>1MB data)
+- Tab event tracking
+- Complex user scenarios
+
+### Test Helpers
+- `TestClient` - Enhanced client with helper methods
+- `createClient()` - Factory for test clients
+- `fixtures.js` - Test URLs and selectors
+- Automatic tab cleanup
+- Connection verification
+
+## Writing Tests
+
+### Basic Unit Test Template
+
+```javascript
+const { expect } = require('chai');
+const { createClient } = require('../helpers/hooks');
+
+describe('Command Name', function() {
+  let client;
+  let initialTabIds;
+
+  before(async function() {
+    client = createClient();
+    await client.connect();
+    await client.waitForConnection();
+  });
+
+  after(function() {
+    if (client) {
+      client.close();
+    }
+  });
+
+  beforeEach(async function() {
+    initialTabIds = await client.getInitialTabIds();
+  });
+
+  afterEach(async function() {
+    await client.cleanupTabs(initialTabIds);
+  });
+
+  it('should do something', async function() {
+    const result = await client.sendRequest('action', { params });
+    expect(result).to.have.property('expectedField');
+  });
+});
+```
+
+### Integration Test Template
+
+```javascript
+const { expect } = require('chai');
+const { createClient } = require('../helpers/hooks');
+const { TEST_URLS } = require('../helpers/fixtures');
+
+describe('Workflow Name', function() {
+  let client;
+  let initialTabIds;
+
+  before(async function() {
+    client = createClient();
+    await client.connect();
+    await client.waitForConnection();
+  });
+
+  after(function() {
+    if (client) {
+      client.close();
+    }
+  });
+
+  beforeEach(async function() {
+    initialTabIds = await client.getInitialTabIds();
+  });
+
+  afterEach(async function() {
+    await client.cleanupTabs(initialTabIds);
+  });
+
+  it('should complete workflow', async function() {
+    // Multi-step test
+  });
+});
+```
+
+## Test Data
+
+Test URLs defined in `helpers/fixtures.js`:
+- `TEST_URLS.EXAMPLE` - http://example.com
+- `TEST_URLS.SELENIUM_FORM` - Selenium web form for interaction tests
+- `TEST_URLS.HTTPBIN` - HTTP testing service
+
+## Troubleshooting
+
+### Tests Hang or Timeout
+- Verify ChromePilot server is running on ws://localhost:9000
+- Check Chrome extension is loaded and connected
+- Increase timeout in `.mocharc.json` if needed
+
+### Connection Errors
+- Ensure no firewall blocking localhost:9000
+- Check server logs in `native-host/logs/`
+- Verify extension ID matches in native-host manifest
+
+### Tab Cleanup Issues
+- Tests automatically clean up created tabs
+- If tabs persist, manually close them before re-running
+- Check afterEach hooks are executing
+
+### Random Failures
+- Some tests depend on page load timing
+- Increase wait times in test if pages load slowly
+- Check network connectivity for external URLs
+
+## CI/CD Integration
+
+Run tests in CI with validation script:
+
+```bash
+# From project root
+./run-tests.sh
+```
+
+This script:
+1. Validates server is running
+2. Checks extension is loaded
+3. Runs complete test suite
+4. Reports results
+
+## Contributing
+
+When adding new tests:
+1. Place unit tests in `unit/`
+2. Place integration tests in `integration/`
+3. Follow existing naming: `command-name.test.js`
+4. Include error handling tests
+5. Clean up resources in afterEach
+6. Update this README with new test descriptions
+
+## TODO
+
+### Future Enhancements
+
+1. **CSP Test Server**
+   - Create local test server serving pages with various CSP headers
+   - Validate helper injection works on CSP-restricted pages
+   - Test different CSP policy combinations
+
+2. **Performance Benchmarks**
+   - Add `tests/performance/` directory
+   - Measure command latency
+   - Analyze chunking overhead
+   - Track session creation time
+   - Test concurrent connection limits

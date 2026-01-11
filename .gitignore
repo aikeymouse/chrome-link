@@ -9,3 +9,6 @@ IMPLEMENTATION_SUMMARY.md
 tests/dev.notes.txt
 extension/sidepanel/panel.js
 tests/gemini-client.js
+TEST-IMPLEMENTATION-STATUS.md
+tests/examples/dev.notes.txt
+tests/examples/gemini-client.js

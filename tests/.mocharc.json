@@ -1,0 +1,6 @@
+{
+  "timeout": 10000,
+  "spec": ["unit/**/*.test.js", "integration/**/*.test.js"],
+  "reporter": "spec",
+  "exit": true
+}

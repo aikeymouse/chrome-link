@@ -1,5 +1,16 @@
 {
   "dependencies": {
     "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0",
+    "chai": "^4.3.0",
+    "chai-as-promised": "^7.1.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "test:unit": "mocha 'unit/**/*.test.js'",
+    "test:integration": "mocha 'integration/**/*.test.js'",
+    "test:watch": "mocha --watch"
   }
 }

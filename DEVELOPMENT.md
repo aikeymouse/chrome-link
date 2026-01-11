@@ -25,11 +25,16 @@ chrome-pilot/
 │   ├── install.sh             # macOS/Linux installer
 │   └── install.bat            # Windows installer
 ├── tests/                     # Test automation clients
-│   ├── chromepilot-client.js  # Base WebSocket client helper class
-│   ├── google-search-client.js # Google search automation example
-│   ├── test-client.js         # Simple test client example
-│   ├── test-client-new.js     # Extended test client
+│   ├── unit/                  # Unit tests for individual commands
+│   ├── integration/           # Integration tests for workflows
+│   ├── helpers/               # Test utilities and fixtures
+│   ├── examples/              # Example client scripts
+│   │   ├── chromepilot-client.js  # Base WebSocket client helper class
+│   │   ├── google-search-client.js # Google search automation example
+│   │   ├── test-client.js         # Simple test client example
+│   │   └── test-client-new.js     # Extended test client
 │   ├── package.json           # Test dependencies
+│   ├── .mocharc.json          # Mocha configuration
 │   └── README.md              # Test documentation
 ├── docs/
 │   └── PROTOCOL.md            # WebSocket protocol documentation
@@ -136,6 +141,52 @@ node browser-pilot-server.js
 After registering the native host, restart Chrome completely.
 
 ## Testing
+
+### Automated Test Suite
+
+ChromePilot includes a comprehensive Mocha test suite covering all WebSocket protocol commands.
+
+**Prerequisites:**
+- ChromePilot server running on ws://localhost:9000
+- Chrome extension loaded and active
+
+**Quick Start:**
+```bash
+# Run all tests
+./run-tests.sh
+
+# Or manually:
+cd tests
+npm install  # First time only
+npm test
+```
+
+**Test Commands:**
+```bash
+npm test                  # Run all tests
+npm run test:unit        # Unit tests only
+npm run test:integration # Integration tests only
+npm run test:watch       # Watch mode for development
+```
+
+**Test Coverage:**
+- **Unit Tests:** All 7 WebSocket commands (listTabs, openTab, navigateTab, switchTab, closeTab, executeJS, callHelper)
+- **Integration Tests:** Session lifecycle, chunked responses (>1MB), tab events, multi-command workflows
+- **Error Handling:** TAB_NOT_FOUND, timeouts, invalid parameters
+- **Cleanup:** Automatic tab cleanup with verification after each test
+
+**Test Structure:**
+```
+tests/
+├── unit/           # Command-specific tests
+├── integration/    # Workflow and system tests  
+├── helpers/        # Test utilities and fixtures
+└── examples/       # Example automation clients
+```
+
+See `tests/README.md` for detailed test documentation.
+
+### Manual Testing
 
 ### Test Native Host
 
