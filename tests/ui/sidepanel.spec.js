@@ -19,5 +19,102 @@ test.describe('ChromePilot Sidepanel UI', () => {
     // Check main container exists
     const container = page.locator('.container');
     await expect(container).toBeVisible();
-  }); 
+    
+    // Check header elements
+    const header = page.locator('header.header');
+    await expect(header).toBeVisible();
+    await expect(header.locator('h1')).toHaveText('ChromePilot');
+    
+    // Check status badge
+    const statusBadge = page.locator('#status-badge');
+    await expect(statusBadge).toBeVisible();
+    await expect(page.locator('#status-dot')).toBeVisible();
+    await expect(page.locator('#status-text')).toBeVisible();
+    
+    // Check Connected Clients section
+    const clientsSection = page.locator('.section').first();
+    await expect(clientsSection.locator('h2')).toHaveText('Connected Clients');
+    await expect(page.locator('#remove-expired-sessions')).toBeVisible();
+    await expect(page.locator('#client-count')).toBeVisible();
+    await expect(page.locator('#client-count')).toHaveText('0');
+    
+    // Check session selector
+    const sessionSelector = page.locator('#session-selector-wrapper');
+    await expect(sessionSelector).toBeVisible();
+    await expect(page.locator('#session-selector-trigger')).toBeVisible();
+    await expect(page.locator('.session-name')).toHaveText('No active sessions');
+    
+    // Check session details grid - should be empty when no sessions
+    const sessionDetails = page.locator('#session-details');
+    await expect(sessionDetails).toBeVisible();
+    await expect(page.locator('#session-id')).toBeEmpty();
+    await expect(page.locator('#session-timeout')).toBeEmpty();
+    
+    // Check Current Window Tabs section
+    const tabsSection = page.locator('.section').nth(1);
+    await expect(tabsSection.locator('h2')).toHaveText('Current Window Tabs');
+    await expect(page.locator('#tabs-header')).toHaveClass(/collapsible/);
+    await expect(page.locator('#refresh-tabs')).toBeVisible();
+    await expect(page.locator('#tabs-count')).toBeVisible();
+    await expect(page.locator('#tabs-count')).toHaveText('1'); // Extension tab itself
+    
+    // Check tabs list - collapsed by default with 1 tab
+    const tabsList = page.locator('#tabs-list');
+    await expect(tabsList).toHaveClass(/collapsed/);
+    
+    // Check Session Logs section
+    const logsSection = page.locator('.section').nth(2);
+    await expect(logsSection.locator('h2')).toHaveText('Session Logs');
+    
+    // Check log controls
+    await expect(page.locator('#log-retention')).toBeVisible();
+    await expect(page.locator('#log-retention')).toHaveValue('100');
+    await expect(page.locator('#clear-logs')).toBeVisible();
+    await expect(page.locator('#clear-logs')).toHaveText('Clear');
+    
+    // Check logs container
+    const logsContainer = page.locator('#logs-container');
+    await expect(logsContainer).toBeVisible();
+    await expect(logsContainer.locator('.empty-state')).toHaveText('No logs yet');
+    
+    // Check Material Symbols icons are loaded
+    const materialIcons = page.locator('.material-symbols-outlined');
+    await expect(materialIcons.first()).toBeVisible();
+    
+    // Check collapse icon
+    const collapseIcon = page.locator('.collapse-icon');
+    await expect(collapseIcon).toBeVisible();
+    await expect(collapseIcon).toHaveText('▼');
+    
+    // Test log retention input constraints
+    const logRetention = page.locator('#log-retention');
+    await expect(logRetention).toHaveAttribute('min', '10');
+    await expect(logRetention).toHaveAttribute('max', '1000');
+    await expect(logRetention).toHaveAttribute('step', '10');
+  });
+  
+  test('should expand and collapse tabs section', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/sidepanel/panel.html`);
+    await page.waitForLoadState('networkidle');
+    
+    const tabsList = page.locator('#tabs-list');
+    
+    // Initially collapsed
+    await expect(tabsList).toHaveClass(/collapsed/);
+    await expect(tabsList).not.toBeVisible();
+    
+    // Expand tabs section
+    await page.locator('#tabs-header').click();
+    await expect(tabsList).not.toHaveClass(/collapsed/);
+    await expect(tabsList).toBeVisible();
+    
+    // Verify tab content
+    const tabItems = tabsList.locator('.tab-item');
+    await expect(tabItems).toHaveCount(1); // Extension tab
+    
+    // Collapse it back
+    await page.locator('#tabs-header').click();
+    await expect(tabsList).toHaveClass(/collapsed/);
+    await expect(tabsList).not.toBeVisible();
+  });
 });
