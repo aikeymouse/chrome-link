@@ -112,6 +112,40 @@ test.describe('ChromePilot Sidepanel UI', () => {
     const tabItems = tabsList.locator('.tab-item');
     await expect(tabItems).toHaveCount(1); // Extension tab
     
+    // Verify tab item structure and values
+    const firstTab = tabItems.first();
+    await expect(firstTab).toBeVisible();
+    
+    // Check tab header elements
+    const tabHeader = firstTab.locator('.tab-header');
+    await expect(tabHeader).toBeVisible();
+    
+    // Get actual tab info from the page for verification
+    const currentTab = await page.evaluate(() => {
+      return {
+        id: chrome.devtools ? null : window.location.href.match(/\/\/([^\/]+)/)?.[1],
+        title: document.title,
+        url: window.location.href
+      };
+    });
+    
+    // Get tab values from the UI
+    const tabIdText = await tabHeader.locator('.tab-id').textContent();
+    const tabTitleText = await tabHeader.locator('.tab-title').textContent();
+    const tabUrlText = await firstTab.locator('.tab-url').textContent();
+    
+    // Verify tab ID format (should be #<number>)
+    await expect(tabHeader.locator('.tab-id')).toBeVisible();
+    expect(tabIdText).toMatch(/^#\d+$/);
+    
+    // Verify tab title matches panel title
+    await expect(tabHeader.locator('.tab-title')).toBeVisible();
+    expect(tabTitleText).toBe('ChromePilot Panel');
+    
+    // Verify tab URL contains extension ID
+    await expect(firstTab.locator('.tab-url')).toBeVisible();
+    expect(tabUrlText).toContain(`chrome-extension://${extensionId}/sidepanel/panel.html`);
+    
     // Collapse it back
     await page.locator('#tabs-header').click();
     await expect(tabsList).toHaveClass(/collapsed/);
