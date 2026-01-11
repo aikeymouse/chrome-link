@@ -153,6 +153,7 @@ ChromePilot includes a comprehensive Mocha test suite covering all WebSocket pro
 **Quick Start:**
 ```bash
 # Run all tests
+cd tests
 ./run-tests.sh
 
 # Or manually:

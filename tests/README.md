@@ -225,7 +225,7 @@ Test URLs defined in `helpers/fixtures.js`:
 Run tests in CI with validation script:
 
 ```bash
-# From project root
+# From tests directory
 ./run-tests.sh
 ```
 

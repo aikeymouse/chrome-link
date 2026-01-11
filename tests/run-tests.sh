@@ -40,11 +40,9 @@ echo ""
 
 # Check if test dependencies are installed
 echo "Checking test dependencies..."
-if [ ! -d "tests/node_modules" ]; then
+if [ ! -d "node_modules" ]; then
   echo "Installing test dependencies..."
-  cd tests
   npm install
-  cd ..
   echo "✓ Dependencies installed"
 else
   echo "✓ Dependencies already installed"
@@ -54,7 +52,6 @@ echo ""
 # Run tests
 echo "Running test suite..."
 echo ""
-cd tests
 npm test
 
 # Report results
