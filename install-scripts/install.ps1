@@ -206,26 +206,27 @@ function Restore-Installation {
 function Install-Local {
     Write-Info "Installing from local files..."
     
-    # Get script directory
+    # Get script directory and project root (matches install.sh)
     $scriptDir = $PSScriptRoot
+    $projectDir = Split-Path $scriptDir -Parent
     
-    # Try to find native-host directory
-    # Case 1: Release package - native-host is sibling to install.ps1
-    $nativeHostPath = Join-Path $scriptDir "native-host"
-    
-    # Case 2: Source repo - native-host is in parent directory (install-scripts/install.ps1)
-    if (-not (Test-Path $nativeHostPath)) {
-        $projectDir = Split-Path $scriptDir -Parent
-        $nativeHostPath = Join-Path $projectDir "native-host"
-    }
+    $nativeHostPath = Join-Path $projectDir "native-host"
     
     if (-not (Test-Path $nativeHostPath)) {
         Write-ErrorMsg "Native host directory not found"
-        Write-Host "Expected either:"
-        Write-Host "  - $scriptDir\native-host (release package)"
-        Write-Host "  - $(Join-Path (Split-Path $scriptDir -Parent) 'native-host') (source repository)"
+        Write-Host "Expected: $nativeHostPath"
         Write-Host ""
-        Write-Host "Current directory: $scriptDir"
+        Write-Host "Make sure you:"
+        Write-Host "  1. Downloaded chromepilot-native-host-v*.zip"
+        Write-Host "  2. Extracted it completely"
+        Write-Host "  3. Running install.ps1 from the install-scripts folder"
+        Write-Host ""
+        Write-Host "Directory structure should be:"
+        Write-Host "  chromepilot-native-host-v*/"
+        Write-Host "    ├── native-host/"
+        Write-Host "    ├── install-scripts/"
+        Write-Host "    │   └── install.ps1  (you are here)"
+        Write-Host "    └── README.md"
         throw "Native host directory not found"
     }
     
