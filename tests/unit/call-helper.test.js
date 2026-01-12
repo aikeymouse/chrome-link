@@ -203,7 +203,7 @@ describe('callHelper command', function() {
       'document.querySelector("h1").style.background',
       testTabId
     );
-    expect(bgResult.value).to.equal('yellow');
+    expect(bgResult.value).to.equal('rgba(255, 255, 0, 0.5)');
   });
 
   it('should call highlightElement helper on multiple elements', async function() {
@@ -223,7 +223,7 @@ describe('callHelper command', function() {
       'document.querySelector("label.form-label").style.background',
       testTabId
     );
-    expect(bgResult.value).to.equal('yellow');
+    expect(bgResult.value).to.equal('rgba(255, 255, 0, 0.5)');
   });
 
   it('should call removeHighlights helper', async function() {
