@@ -10,17 +10,10 @@
 
 ### Step 1: Install Native Host
 
-**macOS/Linux:**
+**All Platforms (macOS/Linux/Windows):**
 ```bash
-cd chrome-driver-extension
-chmod +x install-scripts/install.sh
-./install-scripts/install.sh
-```
-
-**Windows:**
-```cmd
-cd C:\Path\To\chrome-driver-extension
-install-scripts\install.bat
+cd chrome-driver-extension/install-scripts
+node install.js
 ```
 
 ### Step 2: Load Extension in Chrome

@@ -8,33 +8,34 @@
 # Download chromepilot-native-host-vX.Y.Z.zip from GitHub releases
 # Extract and run:
 
-# macOS/Linux
-./install-scripts/install.sh
-
-# Windows
-install-scripts\install.bat
+# All platforms (macOS/Linux/Windows)
+cd chromepilot/install-scripts
+node install.js
 ```
 
 ### Commands
 
 ```bash
 # Install or upgrade
-./install-scripts/install.sh install
-
-# Upgrade to latest version
-./install-scripts/install.sh upgrade
+node install.js
 
 # Run diagnostics (recommended if issues)
-./install-scripts/install.sh diagnose
+node install.js diagnose
+
+# Clear session logs
+node install.js clear-logs
 
 # Update extension ID after loading in Chrome
-./install-scripts/install.sh update-id <32-character-extension-id>
+node install.js update-id <32-character-extension-id>
 
 # Uninstall
-./install-scripts/install.sh uninstall
+node install.js uninstall
 
 # Show help
-./install-scripts/install.sh help
+node install.js help
+
+# Show version
+node install.js version
 ```
 
 ### Troubleshooting

@@ -38,20 +38,10 @@ Client App (WebSocket) ←→ Node.js Native Host ←→ Chrome Extension (Servi
 
 2. **Run installation script**
    
-   **Cross-Platform (Recommended):**
+   **All Platforms:**
    ```bash
-   node install-scripts/install.js
-   ```
-   
-   **macOS/Linux:**
-   ```bash
-   chmod +x install-scripts/install.sh
-   ./install-scripts/install.sh
-   ```
-   
-   **Windows (PowerShell):**
-   ```powershell
-   .\install-scripts\install.ps1
+   cd install-scripts
+   node install.js
    ```
 
 3. **Load extension in Chrome**
@@ -174,14 +164,15 @@ For large results (>1MB), responses are chunked:
 To update to the latest version:
 
 ```bash
-./install-scripts/install.sh --upgrade
+cd install-scripts
+node install.js
 ```
 
 This will:
-- Download the latest version
-- Preserve existing session logs
+- Preserve existing session logs during upgrade
 - Update the native host
-- Automatically restart the service
+- Restore logs from backup
+- Reinstall dependencies
 
 ## Configuration
 

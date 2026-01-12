@@ -22,8 +22,10 @@ chrome-pilot/
 │   ├── launch.bat             # Launch script for Windows
 │   └── logs/                  # Per-session log files
 ├── install-scripts/           # Installation scripts
-│   ├── install.sh             # macOS/Linux installer
-│   └── install.bat            # Windows installer
+│   ├── install.js             # Cross-platform Node.js installer
+│   ├── INSTALL.md             # Installation documentation
+│   └── dev/                   # Development utilities
+│       └── version.sh         # Version management
 ├── tests/                     # Test automation clients
 │   ├── unit/                  # Unit tests for individual commands
 │   ├── integration/           # Integration tests for workflows
@@ -67,13 +69,15 @@ npm install
 Run the installation script to set up the native host:
 
 ```bash
-./install-scripts/install.sh
+cd install-scripts
+node install.js
 ```
 
 This will:
 - Install the native host to `~/.chrome-pilot/`
-- Register it with Chrome
-- Start the WebSocket server automatically
+- Register it with Chrome (including Windows Registry on Windows)
+- Create platform-specific launch scripts
+- Start the WebSocket server automatically when extension connects
 
 ### 4. Development Workflow
 

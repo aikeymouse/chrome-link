@@ -49,12 +49,13 @@ else
 fi
 
 # Check if manifest exists
-if [ ! -f "$MANIFEST_PATH" ]; then
-    echo "❌ Error: Native host manifest not found"
-    echo "Expected location: $MANIFEST_PATH"
-    echo ""
-    echo "Please run the installation script first:"
-    echo "  ./install-scripts/install.sh"
+if [ ! -f \"$MANIFEST_PATH\" ]; then
+    echo \"❌ Error: Native host manifest not found\"
+    echo \"Expected location: $MANIFEST_PATH\"
+    echo \"\"
+    echo \"Please run the installation script first:\"
+    echo \"  cd install-scripts\"
+    echo \"  node install.js\"
     exit 1
 fi
 
