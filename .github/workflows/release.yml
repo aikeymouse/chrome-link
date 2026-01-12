@@ -152,22 +152,16 @@ jobs:
           echo "" >> CHANGELOG.md
           echo "### Step 1: Install Native Host" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "**macOS/Linux:**" >> CHANGELOG.md
+          echo "**Requirements:** Node.js 18+ and npm" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**All Platforms (macOS/Linux/Windows):**" >> CHANGELOG.md
           echo '```bash' >> CHANGELOG.md
           echo "# Download and extract chromepilot-native-host-v${VERSION}.zip" >> CHANGELOG.md
           echo "unzip chromepilot-native-host-v${VERSION}.zip -d chromepilot" >> CHANGELOG.md
-          echo "cd chromepilot" >> CHANGELOG.md
+          echo "cd chromepilot/install-scripts" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "# Run installer" >> CHANGELOG.md
-          echo "chmod +x install-scripts/install.sh" >> CHANGELOG.md
-          echo "./install-scripts/install.sh" >> CHANGELOG.md
-          echo '```' >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "**Windows:**" >> CHANGELOG.md
-          echo '```cmd' >> CHANGELOG.md
-          echo "REM Download and extract chromepilot-native-host-v${VERSION}.zip" >> CHANGELOG.md
-          echo "REM Run installer" >> CHANGELOG.md
-          echo "install-scripts\\install.bat" >> CHANGELOG.md
+          echo "# Run installer (same command on all platforms)" >> CHANGELOG.md
+          echo "node install.js" >> CHANGELOG.md
           echo '```' >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "### Step 2: Install Extension" >> CHANGELOG.md
@@ -182,19 +176,47 @@ jobs:
           echo "### Step 3: Connect Extension to Native Host" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "1. Copy your extension ID from \`chrome://extensions/\`" >> CHANGELOG.md
-          echo "2. Run: \`./install-scripts/install.sh update-id <your-extension-id>\`" >> CHANGELOG.md
+          echo "2. Run: \`node install.js update-id <your-extension-id>\`" >> CHANGELOG.md
           echo "3. Restart Chrome" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Verify Installation" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Run comprehensive diagnostics:" >> CHANGELOG.md
+          echo '```bash' >> CHANGELOG.md
+          echo "node install.js diagnose" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "This checks:" >> CHANGELOG.md
+          echo "- Node.js and npm versions" >> CHANGELOG.md
+          echo "- Installation directories and files" >> CHANGELOG.md
+          echo "- Native messaging manifest" >> CHANGELOG.md
+          echo "- Windows Registry (Windows only)" >> CHANGELOG.md
+          echo "- Extension ID configuration" >> CHANGELOG.md
+          echo "- Server status (port 9000)" >> CHANGELOG.md
+          echo "- Log files and locations" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Additional Commands" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo '```bash' >> CHANGELOG.md
+          echo "node install.js help          # Show all commands" >> CHANGELOG.md
+          echo "node install.js clear-logs    # Clear session logs" >> CHANGELOG.md
+          echo "node install.js uninstall     # Remove installation" >> CHANGELOG.md
+          echo "node install.js version       # Show installed version" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "## Troubleshooting" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "Run diagnostics:" >> CHANGELOG.md
+          echo "If you encounter issues:" >> CHANGELOG.md
           echo '```bash' >> CHANGELOG.md
-          echo "# macOS/Linux" >> CHANGELOG.md
-          echo "./install-scripts/install.sh diagnose" >> CHANGELOG.md
+          echo "# Run diagnostics to identify problems" >> CHANGELOG.md
+          echo "node install.js diagnose" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "# Windows" >> CHANGELOG.md
-          echo "install-scripts\\install.bat diagnose" >> CHANGELOG.md
+          echo "# Check logs location (shown in diagnostics)" >> CHANGELOG.md
+          echo "# macOS/Linux: ~/.chrome-pilot/native-host/logs/" >> CHANGELOG.md
+          echo "# Windows: %USERPROFILE%\\.chrome-pilot\\native-host\\logs\\" >> CHANGELOG.md
           echo '```' >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**Windows 11 Note:** Both manifest file AND registry entry are required (install.js handles this automatically)" >> CHANGELOG.md
           
           cat CHANGELOG.md
       

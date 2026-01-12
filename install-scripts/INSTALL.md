@@ -44,12 +44,17 @@ node install.js install
 **Installation paths:**
 - **macOS**: `~/.chrome-pilot/native-host/`
 - **Linux**: `~/.chrome-pilot/native-host/`
-- **Windows**: `%LOCALAPPDATA%\ChromePilot\native-host\`
+- **Windows**: `%USERPROFILE%\.chrome-pilot\native-host\`
 
 **Native messaging manifest:**
 - **macOS**: `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
 - **Linux**: `~/.config/google-chrome/NativeMessagingHosts/`
 - **Windows**: `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\`
+
+**Windows Registry:**
+- **Key**: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension`
+- **Value**: Path to manifest JSON file
+- **Note**: Registry entry is required on Windows in addition to the manifest file
 
 ### diagnose
 Run diagnostic checks on your installation
@@ -64,8 +69,10 @@ node install.js diagnose
 - Native host server file exists
 - Node.js dependencies installed
 - Native messaging manifest registered
+- Windows Registry entry (Windows only)
 - Extension ID configured
-- Recent log files
+- Server status (port 9000 listening)
+- Recent log files with location
 
 **Output example:**
 ```
@@ -84,12 +91,43 @@ Installation Status:
 
 Native Messaging Manifest:
   Location: .../com.chromepilot.extension.json [OK]
-  Extension ID: Set [OK]
+  Extension ID: abcdefghijklmnopqrstuvwxyzabcdef [OK]
+  Launch Script: launch.sh
+    Path: /Users/user/.chrome-pilot/native-host/launch.sh
+    Exists: [OK]
+
+Windows Registry:  (Windows only)
+  Registry Key: [OK]
+    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
+    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromepilot.extension.json
+
+Server Status:
+  Server Process: Running (PID: 12345) [OK]
+  Port 9000: Listening [OK]
 
 Recent Logs:
-  session-abc123-1768108888180.log (94905 bytes)
-  ...
+  Location: /Users/user/.chrome-pilot/native-host/logs [OK]
+  Files: 2 log file(s)
+    - session-abc123-1768108888180.log (94905 bytes)
+    - session-xyz789-1768109999999.log (12340 bytes)
 ```
+
+### clear-logs
+Clear session log files
+
+```bash
+node install.js clear-logs
+```
+
+**What it does:**
+- Removes all `.log` files from the logs directory
+- Shows count of files deleted
+- Preserves the logs directory itself
+
+**Use when:**
+- Logs are taking up too much space
+- You want a clean slate for debugging
+- Before sharing diagnostics output
 
 ### update-id
 Update the Chrome extension ID in the native messaging manifest
@@ -126,8 +164,9 @@ node install.js uninstall
 ```
 
 **What it removes:**
-- Installation directory (`~/.chrome-pilot/` or `%LOCALAPPDATA%\ChromePilot\`)
+- Installation directory (`~/.chrome-pilot/` or `%USERPROFILE%\.chrome-pilot\`)
 - Native messaging manifest
+- Windows Registry entry (Windows only)
 - All logs and data
 - Running server processes
 
@@ -269,15 +308,20 @@ taskkill /PID <PID> /F
 
 **Solution:** Check log files
 - **macOS/Linux**: `~/.chrome-pilot/native-host/logs/`
-- **Windows**: `%LOCALAPPDATA%\ChromePilot\native-host\logs\`
+- **Windows**: `%USERPROFILE%\.chrome-pilot\native-host\logs\`
 
 View recent logs:
 ```bash
 # macOS/Linux
 tail -f ~/.chrome-pilot/native-host/logs/*.log
 
-# Windows
-Get-Content $env:LOCALAPPDATA\ChromePilot\native-host\logs\*.log -Tail 50
+# Windows (PowerShell)
+Get-Content $env:USERPROFILE\.chrome-pilot\native-host\logs\*.log -Tail 50
+```
+
+Clear logs:
+```bash
+node install.js clear-logs
 ```
 
 ## Upgrading
@@ -323,18 +367,23 @@ node install.js uninstall
 
 ### Windows
 
-- Installation directory: `%LOCALAPPDATA%\ChromePilot\`
+- Installation directory: `%USERPROFILE%\.chrome-pilot\`
 - Manifest location: `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\`
-- May require PowerShell execution policy adjustment
+- Registry entry: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension`
+- Server runs via `launch.bat` script (not direct node.exe command)
+- **Important**: Windows 11 requires both manifest file AND registry entry
+- Uninstall waits for processes to terminate before removing files
 
 ## Files Created
 
 ### Installation Directory Structure
 
 ```
-~/.chrome-pilot/  (or %LOCALAPPDATA%\ChromePilot\ on Windows)
+~/.chrome-pilot/  (or %USERPROFILE%\.chrome-pilot\ on Windows)
 └── native-host/
     ├── browser-pilot-server.js    # Main server
+    ├── launch.sh                  # Launch script (macOS/Linux)
+    ├── launch.bat                 # Launch script (Windows)
     ├── package.json               # Dependencies
     ├── node_modules/              # Installed packages
     └── logs/                      # Session logs
@@ -345,19 +394,33 @@ node install.js uninstall
 
 **File:** `com.chromepilot.extension.json`
 
-**Contents:**
+**Contents (macOS/Linux):**
 ```json
 {
   "name": "com.chromepilot.extension",
   "description": "ChromePilot Native Messaging Host",
-  "path": "/path/to/node",
+  "path": "/Users/user/.chrome-pilot/native-host/launch.sh",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://<your-extension-id>/"
-  ],
-  "command": ["/path/to/node", "/path/to/browser-pilot-server.js"]
+  ]
 }
 ```
+
+**Contents (Windows):**
+```json
+{
+  "name": "com.chromepilot.extension",
+  "description": "ChromePilot Native Messaging Host",
+  "path": "C:/Users/user/.chrome-pilot/native-host/launch.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://<your-extension-id>/"
+  ]
+}
+```
+
+**Note:** All platforms now use launch scripts (launch.sh or launch.bat) instead of direct node command arrays.
 
 ## Environment Variables
 
@@ -426,18 +489,17 @@ node install.js
 # This installs from ../native-host/
 ```
 
-## Differences from Platform-Specific Installers
+## Why install.js?
 
-The Node.js installer (`install.js`) is the recommended cross-platform solution:
+The Node.js installer (`install.js`) is the only installer provided:
 
 - ✅ Works on macOS, Linux, and Windows
 - ✅ Single codebase, easier to maintain
 - ✅ Better error handling with JavaScript
 - ✅ No shell/PowerShell version conflicts
 - ✅ Consistent behavior across platforms
+- ✅ Windows 11 tested with registry support
+- ✅ Comprehensive diagnostics with server status
+- ✅ Log management (view location, clear logs)
 
-Alternative installers:
-- `install.sh` - Bash script for macOS/Linux
-- `install.ps1` - PowerShell script for Windows
-
-All installers provide the same functionality.
+Previous shell-based installers (install.sh, install.bat, install.ps1) have been removed in favor of this unified solution.

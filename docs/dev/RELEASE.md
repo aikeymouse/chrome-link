@@ -142,13 +142,113 @@ Contains:
 ### chromepilot-native-host-vX.Y.Z.zip
 
 Contains:
-- `native-host/` - Server code with dependencies
+- `native-host/` - Server code with Node.js dependencies
+  - `browser-pilot-server.js` - Main WebSocket server
+  - `launch.sh` - Launch script for macOS/Linux
+  - `launch.bat` - Launch script for Windows
+  - `package.json` - Dependencies manifest
 - `install-scripts/` - Installation and management scripts
-  - `install.sh` - macOS/Linux installer
-  - `install.bat` - Windows installer
-  - `version.sh` - Version management
+  - `install.js` - Cross-platform Node.js installer (macOS/Linux/Windows)
+  - `INSTALL.md` - Complete installation documentation
+  - `dev/version.sh` - Version management (development)
 - `README.md` - Documentation
 - `QUICKSTART.md` - Quick start guide
+
+## Install.js Commands
+
+The unified Node.js installer provides several commands:
+
+### install (default)
+Install or upgrade ChromePilot native host:
+```bash
+node install.js
+# or explicitly
+node install.js install
+```
+
+### diagnose
+Run comprehensive diagnostics:
+```bash
+node install.js diagnose
+```
+
+Checks:
+- Node.js and npm versions
+- Installation directory and files
+- Native messaging manifest
+- Windows Registry (Windows only)
+- Extension ID configuration
+- Launch script existence
+- Server status (port 9000)
+- Recent log files with location
+
+Example output:
+```
+[INFO] ChromePilot - Diagnostics
+==========================
+
+System Information:
+  OS: darwin
+  Node.js: v22.16.0
+  npm: 10.9.2
+
+Installation Status:
+  Install Dir: /Users/user/.chrome-pilot [OK]
+  Native Host: Found [OK]
+  Dependencies: Installed [OK]
+
+Native Messaging Manifest:
+  Location: .../com.chromepilot.extension.json [OK]
+  Extension ID: abcdefghijklmnopqrstuvwxyzabcdef [OK]
+  Launch Script: launch.sh
+    Path: /Users/user/.chrome-pilot/native-host/launch.sh
+    Exists: [OK]
+
+Windows Registry:  (Windows only)
+  Registry Key: [OK]
+    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
+    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromepilot.extension.json
+
+Server Status:
+  Server Process: Running (PID: 12345) [OK]
+  Port 9000: Listening [OK]
+
+Recent Logs:
+  Location: /Users/user/.chrome-pilot/native-host/logs [OK]
+  Files: 2 log file(s)
+    - session-abc123-1768108888180.log (94905 bytes)
+    - session-xyz789-1768109999999.log (12340 bytes)
+```
+
+### clear-logs
+Clear session log files:
+```bash
+node install.js clear-logs
+```
+
+### update-id
+Update extension ID in manifest:
+```bash
+node install.js update-id <32-char-extension-id>
+```
+
+### uninstall
+Remove ChromePilot installation:
+```bash
+node install.js uninstall
+```
+
+### help
+Show all available commands:
+```bash
+node install.js help
+```
+
+### version
+Show installed version:
+```bash
+node install.js version
+```
 
 ## Post-Release
 
@@ -159,15 +259,13 @@ Contains:
 3. Test installation on clean system:
 
 ```bash
-# macOS/Linux
+# macOS/Linux/Windows - All platforms use the same installer
 unzip chromepilot-native-host-v1.0.0.zip -d chromepilot
-cd chromepilot
-chmod +x install-scripts/install.sh
-./install-scripts/install.sh
+cd chromepilot/install-scripts
+node install.js
 
-# Windows
-REM Extract zip
-install-scripts\install.bat
+# Verify installation
+node install.js diagnose
 ```
 
 ### Announce Release
@@ -224,7 +322,10 @@ git commit -m "Update dependencies"
 - [ ] Tag created and pushed
 - [ ] GitHub Actions completed successfully
 - [ ] Release artifacts available
-- [ ] Installation tested
+- [ ] Installation tested with `node install.js`
+- [ ] Diagnostics verified with `node install.js diagnose`
+- [ ] Windows Registry support tested (Windows only)
+- [ ] Launch scripts verified (launch.sh/launch.bat)
 - [ ] Documentation updated
 
 ## Emergency Rollback
@@ -284,12 +385,53 @@ git push --tags
 
 1. **Always use install-scripts/dev/version.sh** - Don't manually edit version numbers
 2. **Test before release** - Run full test suite
-3. **Meaningful commits** - Write clear commit messages (used in changelog)
-4. **Annotated tags** - Use `git tag -a` with messages
-5. **Follow semver** - Stick to semantic versioning
-6. **Document changes** - Keep CHANGELOG.md updated
-7. **Test installation** - Verify install scripts work
-8. **Backup releases** - Keep previous release artifacts
+3. **Test on all platforms** - Verify macOS, Linux, and Windows
+4. **Windows testing** - Ensure registry support works (`install.js diagnose`)
+5. **Meaningful commits** - Write clear commit messages (used in changelog)
+6. **Annotated tags** - Use `git tag -a` with messages
+7. **Follow semver** - Stick to semantic versioning
+8. **Document changes** - Keep CHANGELOG.md updated
+9. **Test installation** - Verify install.js works on clean system
+10. **Check diagnostics** - Run `node install.js diagnose` on each platform
+11. **Backup releases** - Keep previous release artifacts
+
+## Platform-Specific Testing
+
+### macOS
+```bash
+node install.js
+node install.js diagnose
+# Verify:
+# - Launch script: launch.sh exists and is executable
+# - Manifest location: ~/Library/Application Support/Google/Chrome/NativeMessagingHosts/
+# - Install dir: ~/.chrome-pilot/
+```
+
+### Linux
+```bash
+node install.js
+node install.js diagnose
+# Verify:
+# - Launch script: launch.sh exists and is executable
+# - Manifest location: ~/.config/google-chrome/NativeMessagingHosts/
+# - Install dir: ~/.chrome-pilot/
+```
+
+### Windows
+```bash
+node install.js
+node install.js diagnose
+# Verify:
+# - Launch script: launch.bat exists
+# - Manifest location: %LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\
+# - Registry: HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
+# - Install dir: %USERPROFILE%\.chrome-pilot\
+```
+
+**Critical Windows Requirements:**
+- Windows 11 requires BOTH manifest file AND registry entry
+- Uses launch.bat (not direct node.exe command)
+- Uninstall waits for processes to terminate
 
 ## Support
 
@@ -297,4 +439,5 @@ For release issues:
 1. Check GitHub Actions logs
 2. Review this guide
 3. Test locally before pushing tags
-4. Open issue if automated release fails
+4. Run `node install.js diagnose` to verify installation
+5. Open issue if automated release fails
