@@ -526,74 +526,36 @@ function diagnose() {
   let serverRunning = false;
   let serverPid = null;
   
-  try {
-    if (PLATFORM === 'win32') {
-      // Windows: Use tasklist to find node.exe processes
-      const output = execSync('tasklist /FI "IMAGENAME eq node.exe" /V /FO CSV', { encoding: 'utf-8' });
-      const lines = output.split('\n').filter(line => line.includes('browser-pilot-server.js'));
-      if (lines.length > 0) {
-        // Extract PID from CSV format - second column
-        const match = lines[0].match(/"node\.exe","(\d+)"/);
-        if (match) {
-          serverRunning = true;
-          serverPid = match[1];
-        }
-      }
-    } else {
-      // macOS/Linux: Use pgrep
-      const output = execSync('pgrep -f browser-pilot-server.js', { encoding: 'utf-8' }).trim();
-      if (output) {
-        serverRunning = true;
-        serverPid = output.split('\n')[0];
-      }
-    }
-  } catch {
-    // Process not found
-    serverRunning = false;
-  }
-  
-  if (serverRunning) {
-    console.log(`  Server Process: Running (PID: ${serverPid}) ${okTag}`);
-  } else {
-    console.log(`  Server Process: Not Running ${warnTag}`);
-    console.log('  Note: Server starts automatically when Chrome extension connects');
-  }
-  
-  // Check port 9000
-  let portInUse = false;
-  let portPid = null;
-  
+  // Check port 9000 first - more reliable indicator
   try {
     if (PLATFORM === 'win32') {
       // Windows: netstat
       const output = execSync('netstat -ano | findstr :9000', { encoding: 'utf-8' });
       const match = output.match(/LISTENING\s+(\d+)/);
       if (match) {
-        portInUse = true;
-        portPid = match[1];
+        serverRunning = true;
+        serverPid = match[1];
       }
     } else {
       // macOS/Linux: lsof
       const output = execSync('lsof -ti :9000', { encoding: 'utf-8' }).trim();
       if (output) {
-        portInUse = true;
-        portPid = output.split('\n')[0];
+        serverRunning = true;
+        serverPid = output.split('\n')[0];
       }
     }
   } catch {
     // Port not in use
-    portInUse = false;
+    serverRunning = false;
   }
   
-  if (portInUse) {
-    if (serverPid && portPid === serverPid) {
-      console.log(`  Port 9000: Listening ${okTag}`);
-    } else {
-      console.log(`  Port 9000: In use by different process (PID: ${portPid}) ${warnTag}`);
-    }
+  if (serverRunning) {
+    console.log(`  Server Process: Running (PID: ${serverPid}) ${okTag}`);
+    console.log(`  Port 9000: Listening ${okTag}`);
   } else {
+    console.log(`  Server Process: Not Running ${warnTag}`);
     console.log(`  Port 9000: Available ${warnTag}`);
-    console.log('  Note: Port will be used when server starts');
+    console.log('  Note: Server starts automatically when Chrome extension connects');
   }
   console.log('');
   
