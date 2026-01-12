@@ -200,6 +200,137 @@ window.__chromePilotHelper = {
     window.__chromePilotHighlights.clear();
     
     return removedCount;
+  },
+
+  /**
+   * Get element bounds for all matching elements
+   * Returns array of bounds objects (empty array if no elements found)
+   */
+  getElementBounds(selector) {
+    const elements = document.querySelectorAll(selector);
+    
+    if (elements.length === 0) {
+      return [];
+    }
+    
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    
+    const boundsArray = [];
+    elements.forEach((el, index) => {
+      const rect = el.getBoundingClientRect();
+      boundsArray.push({
+        index: index,
+        x: Math.round(rect.left),
+        y: Math.round(rect.top),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        absoluteX: Math.round(rect.left + scrollX),
+        absoluteY: Math.round(rect.top + scrollY)
+      });
+    });
+    
+    return boundsArray;
+  },
+
+  /**
+   * Scroll specific element into view by selector and index
+   * If index not provided or -1, scrolls first element (index 0)
+   * Returns bounds array after scrolling (empty array if no elements found)
+   */
+  scrollElementIntoView(selector, index = 0) {
+    const elements = document.querySelectorAll(selector);
+    if (elements.length === 0) {
+      return [];
+    }
+    
+    // Clamp index to valid range
+    const targetIndex = Math.max(0, Math.min(index, elements.length - 1));
+    const el = elements[targetIndex];
+    
+    el.scrollIntoView({ 
+      behavior: 'instant',
+      block: 'center',
+      inline: 'center'
+    });
+    
+    // Return bounds for all matching elements after scrolling
+    return window.__chromePilotHelper.getElementBounds(selector);
+  },
+
+  /**
+   * Crop screenshot to element bounds using Canvas API
+   * Returns array of cropped screenshots as base64 data URLs
+   * If no bounds provided, returns empty array
+   */
+  async cropScreenshotToElements(fullScreenshotDataUrl, boundsArray) {
+    if (!boundsArray || boundsArray.length === 0) {
+      return [];
+    }
+    
+    const results = [];
+    const dpr = window.devicePixelRatio || 1;
+    
+    for (const bounds of boundsArray) {
+      try {
+        const croppedDataUrl = await new Promise((resolve, reject) => {
+          const img = new Image();
+          
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              const padding = 10; // Add 10px padding on all sides
+              
+              // Account for device pixel ratio
+              const x = Math.max(0, (bounds.x - padding) * dpr);
+              const y = Math.max(0, (bounds.y - padding) * dpr);
+              const width = Math.min((bounds.width + (padding * 2)) * dpr, img.width - x);
+              const height = Math.min((bounds.height + (padding * 2)) * dpr, img.height - y);
+              
+              // Canvas uses CSS pixels
+              canvas.width = width / dpr;
+              canvas.height = height / dpr;
+              
+              const ctx = canvas.getContext('2d');
+              // Scale context to account for device pixel ratio
+              ctx.scale(1/dpr, 1/dpr);
+              ctx.drawImage(
+                img,
+                x, y,
+                width, height,
+                0, 0,
+                width, height
+              );
+              
+              resolve(canvas.toDataURL('image/png'));
+            } catch (err) {
+              reject(new Error(`Crop failed: ${err.message}`));
+            }
+          };
+          
+          img.onerror = () => {
+            reject(new Error('Failed to load screenshot image'));
+          };
+          
+          img.src = fullScreenshotDataUrl;
+        });
+        
+        results.push({
+          index: bounds.index,
+          dataUrl: croppedDataUrl,
+          bounds: bounds,
+          devicePixelRatio: dpr
+        });
+      } catch (err) {
+        results.push({
+          index: bounds.index,
+          error: err.message,
+          bounds: bounds
+        });
+      }
+    }
+    
+    return results;
   }
 };
 

@@ -448,8 +448,11 @@ Call a predefined DOM helper function for CSP-restricted pages. This command is 
 8. **elementExists(selector)** - Check if element exists
 9. **isVisible(selector)** - Check if element is visible
 10. **waitForElement(selector, timeoutMs)** - Wait for element to appear
-11. **highlightElement(selector)** - Highlight all matching elements with yellow background
-12. **removeHighlights()** - Remove all highlights from the page
+11. **highlightElement(selector)** - Highlight all matching elements with yellow background (returns count)
+12. **removeHighlights()** - Remove all highlights from the page (returns count)
+13. **getElementBounds(selector)** - Get position and size of all matching elements (returns array)
+14. **scrollElementIntoView(selector, index)** - Scroll element into view by index (returns bounds array)
+15. **cropScreenshotToElements(dataUrl, boundsArray)** - Crop screenshot to element bounds with device pixel ratio support (returns array)
 
 **Response:**
 ```json
@@ -581,6 +584,175 @@ Response:
 - Highlights persist until explicitly removed with `removeHighlights()`
 - Highlights are cleared automatically on page navigation
 - Calling `highlightElement` with the same selector multiple times won't duplicate highlights
+
+**Screenshot Examples:**
+
+Get element bounds:
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getElementBounds",
+    "args": ["button.submit"]
+  },
+  "requestId": "req-010"
+}
+```
+
+Response (array of bounds for all matching elements):
+```json
+{
+  "requestId": "req-010",
+  "result": {
+    "value": [
+      {
+        "index": 0,
+        "x": 100,
+        "y": 200,
+        "width": 150,
+        "height": 50,
+        "absoluteX": 100,
+        "absoluteY": 1200
+      },
+      {
+        "index": 1,
+        "x": 100,
+        "y": 400,
+        "width": 150,
+        "height": 50,
+        "absoluteX": 100,
+        "absoluteY": 1400
+      }
+    ],
+    "type": "object"
+  },
+  "error": null
+}
+```
+
+Returns empty array if no elements found:
+```json
+{
+  "requestId": "req-010",
+  "result": {
+    "value": [],
+    "type": "object"
+  },
+  "error": null
+}
+```
+
+Scroll element into view (with optional index for multiple elements):
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "scrollElementIntoView",
+    "args": ["button.submit", 1]
+  },
+  "requestId": "req-011"
+}
+```
+
+Response (bounds array after scrolling):
+```json
+{
+  "requestId": "req-011",
+  "result": {
+    "value": [
+      {
+        "index": 0,
+        "x": 100,
+        "y": 50,
+        "width": 150,
+        "height": 50,
+        "absoluteX": 100,
+        "absoluteY": 1200
+      },
+      {
+        "index": 1,
+        "x": 100,
+        "y": 250,
+        "width": 150,
+        "height": 50,
+        "absoluteX": 100,
+        "absoluteY": 1400
+      }
+    ],
+    "type": "object"
+  },
+  "error": null
+}
+```
+
+Crop screenshot to elements (after capturing with chrome.tabs.captureVisibleTab):
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "cropScreenshotToElements",
+    "args": [
+      "data:image/png;base64,iVBORw0KGgo...",
+      [
+        {"index": 0, "x": 100, "y": 200, "width": 150, "height": 50},
+        {"index": 1, "x": 100, "y": 400, "width": 150, "height": 50}
+      ]
+    ]
+  },
+  "requestId": "req-012"
+}
+```
+
+Response (array of cropped screenshots):
+```json
+{
+  "requestId": "req-012",
+  "result": {
+    "value": [
+      {
+        "index": 0,
+        "dataUrl": "data:image/png;base64,iVBORw0KGgo...",
+        "bounds": {
+          "index": 0,
+          "x": 100,
+          "y": 200,
+          "width": 150,
+          "height": 50
+        },
+        "devicePixelRatio": 2
+      },
+      {
+        "index": 1,
+        "dataUrl": "data:image/png;base64,iVBORw0KGgo...",
+        "bounds": {
+          "index": 1,
+          "x": 100,
+          "y": 400,
+          "width": 150,
+          "height": 50
+        },
+        "devicePixelRatio": 2
+      }
+    ],
+    "type": "object"
+  },
+  "error": null
+}
+```
+
+**Screenshot Workflow:**
+
+1. Capture viewport: `captureScreenshot` command captures the visible viewport
+2. Get element bounds: `callHelper('getElementBounds', ['selector'])` - gets current position in viewport
+3. Crop to elements: `callHelper('cropScreenshotToElements', [dataUrl, boundsArray])` - automatically accounts for device pixel ratio
+
+**Optional:** Use `scrollElementIntoView(selector, index)` before capture if element is not in viewport.
+
+**Note:** `captureScreenshot` uses `chrome.tabs.captureVisibleTab` which:
+- Only captures the visible viewport (not full page)
+- Captures at device resolution (2x on Retina displays)
+- Requires element to be visible in current viewport
+- `cropScreenshotToElements` automatically handles device pixel ratio scaling
 
 ## Event Messages
 

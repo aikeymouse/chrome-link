@@ -14,3 +14,4 @@ tests/examples/dev.notes.txt
 tests/examples/gemini-client.js
 tests/test-results/
 tests/playwright-report/
+tests/examples/*.png

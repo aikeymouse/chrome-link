@@ -219,6 +219,9 @@ async function handleCommand(sessionId, command) {
       case 'executeJS':
         result = await executeJS(params);
         break;
+      case 'captureScreenshot':
+        result = await captureScreenshot(params);
+        break;
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -458,6 +461,46 @@ async function executeJS(params) {
   const result = await executeScriptWithTimeout(tabId, code, timeout);
   
   return result;
+}
+
+async function captureScreenshot(params) {
+  let { tabId, format = 'png', quality = 90 } = params;
+  
+  // If no tabId, use active tab
+  if (!tabId) {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tabs.length === 0) {
+      throw { code: 'TAB_NOT_FOUND', message: 'No active tab found' };
+    }
+    tabId = tabs[0].id;
+  }
+  
+  // Validate tab exists and get window ID
+  let windowId;
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    windowId = tab.windowId;
+    
+    // Make sure the tab is active and window is focused
+    if (!tab.active) {
+      await chrome.tabs.update(tabId, { active: true });
+    }
+    await chrome.windows.update(windowId, { focused: true });
+    
+    // Wait a bit for the tab to become visible
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+  } catch (err) {
+    throw { code: 'TAB_NOT_FOUND', message: `Tab with ID ${tabId} not found or was closed` };
+  }
+  
+  // Capture the visible tab in the specified window
+  const dataUrl = await chrome.tabs.captureVisibleTab(windowId, {
+    format: format === 'jpeg' ? 'jpeg' : 'png',
+    quality: format === 'jpeg' ? quality : undefined
+  });
+  
+  return { dataUrl };
 }
 
 /**
