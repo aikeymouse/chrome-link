@@ -667,7 +667,6 @@ function showUsage() {
   console.log('Commands:');
   console.log('  install           Install ChromePilot (default)');
   console.log('  diagnose          Run diagnostic checks');
-  console.log('  test              Test native host execution (Windows)');
   console.log('  update-id <ID>    Update extension ID in manifest');
   console.log('  uninstall         Remove ChromePilot installation');
   console.log('  help              Show this help message');
@@ -768,107 +767,11 @@ function main() {
       doInstall();
       break;
       
-    case 'test':
-      testNativeHost();
-      break;
-      
     default:
       printError(`Unknown command: ${command}`);
       console.log('');
       showUsage();
       process.exit(1);
-  }
-}
-
-// Test native host
-function testNativeHost() {
-  console.log('');
-  printInfo('ChromePilot - Native Host Test');
-  console.log('==========================');
-  console.log('');
-  
-  const manifestFile = path.join(CHROME_DIR, `${NATIVE_HOST_NAME}.json`);
-  
-  if (!exists(manifestFile)) {
-    printError('Manifest not found. Run: node install.js install');
-    process.exit(1);
-  }
-  
-  const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf-8'));
-  
-  if (!manifest.path) {
-    printError('Invalid manifest: no path specified');
-    process.exit(1);
-  }
-  
-  const launchScript = manifest.path.replace(/\//g, path.sep);
-  
-  if (!exists(launchScript)) {
-    printError(`Launch script not found: ${launchScript}`);
-    process.exit(1);
-  }
-  
-  printInfo(`Testing: ${launchScript}`);
-  console.log('');
-  
-  try {
-    // Spawn the process to see its output
-    printInfo('Starting native host (will auto-terminate after 3 seconds)...');
-    console.log('');
-    
-    const isWindows = PLATFORM === 'win32';
-    const proc = spawn(isWindows ? 'cmd.exe' : launchScript, isWindows ? ['/c', launchScript] : [], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      windowsHide: true
-    });
-    
-    let stdout = '';
-    let stderr = '';
-    
-    proc.stdout.on('data', (data) => {
-      stdout += data.toString();
-      process.stdout.write(data);
-    });
-    
-    proc.stderr.on('data', (data) => {
-      stderr += data.toString();
-      process.stderr.write(data);
-    });
-    
-    // Auto-kill after 3 seconds
-    setTimeout(() => {
-      if (!proc.killed) {
-        proc.kill();
-      }
-    }, 3000);
-    
-    proc.on('exit', (code, signal) => {
-      console.log('');
-      if (stdout.includes('WebSocket server') || stdout.includes('listening on')) {
-        printSuccess('Native host started successfully!');
-        console.log(`Process exited (code: ${code}, signal: ${signal})`);
-      } else if (code === 0) {
-        printSuccess('Native host executable!');
-      } else {
-        printError(`Process exited with code: ${code}`);
-      }
-      
-      if (stderr) {
-        console.log('');
-        printWarn('Errors detected:');
-        console.log(stderr);
-      }
-      
-      console.log('');
-      printInfo('This test verifies the native host can start.');
-      printInfo('The actual connection will be made by Chrome extension.');
-    });
-    
-  } catch (err) {
-    printError('Failed to execute native host');
-    console.log('Error:', err.message);
-    console.log('');
-    printWarn('Chrome will also fail to start the native host.');
   }
 }
 
