@@ -435,6 +435,29 @@ function diagnose() {
       } else {
         console.log(`  Extension ID: Set ${okTag}`);
       }
+      
+      // Show manifest command and paths
+      if (manifest.command && manifest.command.length > 0) {
+        console.log('  Command:');
+        console.log(`    Node: ${manifest.command[0]}`);
+        console.log(`    Server: ${manifest.command[1]}`);
+        
+        // Verify paths exist
+        const nodePath = manifest.command[0].replace(/\//g, path.sep);
+        const serverPath = manifest.command[1].replace(/\//g, path.sep);
+        
+        if (exists(nodePath)) {
+          console.log(`    Node exists: ${okTag}`);
+        } else {
+          console.log(`    Node exists: NOT FOUND ${errTag}`);
+        }
+        
+        if (exists(serverPath)) {
+          console.log(`    Server exists: ${okTag}`);
+        } else {
+          console.log(`    Server exists: NOT FOUND ${errTag}`);
+        }
+      }
     } catch (err) {
       console.log(`  Extension ID: Error reading manifest ${errTag}`);
     }
