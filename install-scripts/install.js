@@ -438,6 +438,7 @@ function diagnose() {
       
       // Show manifest command and paths
       if (manifest.command && manifest.command.length > 0) {
+        // New format (install.js)
         console.log('  Command:');
         console.log(`    Node: ${manifest.command[0]}`);
         console.log(`    Server: ${manifest.command[1]}`);
@@ -457,6 +458,20 @@ function diagnose() {
         } else {
           console.log(`    Server exists: NOT FOUND ${errTag}`);
         }
+      } else if (manifest.path) {
+        // Old format (install.sh)
+        console.log('  Path:');
+        console.log(`    Script: ${manifest.path}`);
+        
+        const scriptPath = manifest.path.replace(/\//g, path.sep);
+        if (exists(scriptPath)) {
+          console.log(`    Script exists: ${okTag}`);
+        } else {
+          console.log(`    Script exists: NOT FOUND ${errTag}`);
+        }
+        
+        console.log(`  ${warnTag} Old installer format detected`);
+        console.log('  Consider reinstalling: node install.js');
       }
     } catch (err) {
       console.log(`  Extension ID: Error reading manifest ${errTag}`);
