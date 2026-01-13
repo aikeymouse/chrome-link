@@ -593,21 +593,48 @@ window.__chromePilotHelper = {
     
     // Highlight element if requested
     if (shouldHighlight) {
+      // Clear any existing highlight timeout for this element
+      if (window.__chromePilotHighlightTimeout) {
+        clearTimeout(window.__chromePilotHighlightTimeout);
+      }
+      
+      // Clear any previously highlighted element
+      if (window.__chromePilotHighlightedElement) {
+        const prev = window.__chromePilotHighlightedElement;
+        prev.element.style.outline = prev.originalOutline;
+        prev.element.style.outlineOffset = prev.originalOutlineOffset;
+        if (!prev.originalOutline) {
+          prev.element.style.removeProperty('outline');
+        }
+        if (!prev.originalOutlineOffset) {
+          prev.element.style.removeProperty('outline-offset');
+        }
+      }
+      
+      // Store original styles
       const originalStyles = {
-        outline: element.style.outline,
-        outlineOffset: element.style.outlineOffset
+        element: element,
+        originalOutline: element.style.outline,
+        originalOutlineOffset: element.style.outlineOffset
       };
+      window.__chromePilotHighlightedElement = originalStyles;
+      
+      // Apply highlight
       element.style.setProperty('outline', '2px solid #1a73e8', 'important');
       element.style.setProperty('outline-offset', '2px', 'important');
-      setTimeout(() => {
-        element.style.outline = originalStyles.outline;
-        element.style.outlineOffset = originalStyles.outlineOffset;
-        if (!originalStyles.outline) {
+      
+      // Set timeout to remove highlight
+      window.__chromePilotHighlightTimeout = setTimeout(() => {
+        element.style.outline = originalStyles.originalOutline;
+        element.style.outlineOffset = originalStyles.originalOutlineOffset;
+        if (!originalStyles.originalOutline) {
           element.style.removeProperty('outline');
         }
-        if (!originalStyles.outlineOffset) {
+        if (!originalStyles.originalOutlineOffset) {
           element.style.removeProperty('outline-offset');
         }
+        window.__chromePilotHighlightedElement = null;
+        window.__chromePilotHighlightTimeout = null;
       }, 3000);
     }
     
