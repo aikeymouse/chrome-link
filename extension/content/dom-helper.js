@@ -345,6 +345,32 @@ window.__chromePilotHelper = {
       }
     }
     
+    // Try name attribute (common for form elements but can be on any element)
+    if (element.name) {
+      const nameSelector = `${element.tagName.toLowerCase()}[name="${CSS.escape(element.name)}"]`;
+      const matches = document.querySelectorAll(nameSelector);
+      if (matches.length === 1) {
+        return nameSelector;
+      }
+      // If multiple matches and element has type attribute, try combining
+      if (element.type) {
+        const typeNameSelector = `${element.tagName.toLowerCase()}[type="${CSS.escape(element.type)}"][name="${CSS.escape(element.name)}"]`;
+        if (document.querySelectorAll(typeNameSelector).length === 1) {
+          return typeNameSelector;
+        }
+      }
+    }
+    
+    // Try any data-* attributes
+    for (const attr of element.attributes) {
+      if (attr.name.startsWith('data-')) {
+        const dataSelector = `[${CSS.escape(attr.name)}="${CSS.escape(attr.value)}"]`;
+        if (document.querySelectorAll(dataSelector).length === 1) {
+          return dataSelector;
+        }
+      }
+    }
+    
     // Try unique class combination
     const classes = Array.from(element.classList);
     if (classes.length > 0) {
@@ -354,7 +380,44 @@ window.__chromePilotHelper = {
       }
     }
     
-    // Build nth-child path
+    // Try unique attribute combinations for specific elements
+    if (element.tagName === 'A' && element.href) {
+      const hrefSelector = `a[href="${CSS.escape(element.getAttribute('href'))}"]`;
+      if (document.querySelectorAll(hrefSelector).length === 1) {
+        return hrefSelector;
+      }
+    }
+    
+    if (element.tagName === 'IMG' && element.src) {
+      const srcSelector = `img[src="${CSS.escape(element.getAttribute('src'))}"]`;
+      if (document.querySelectorAll(srcSelector).length === 1) {
+        return srcSelector;
+      }
+    }
+    
+    // For option elements, try value attribute combined with parent select
+    if (element.tagName === 'OPTION' && element.value) {
+      const parent = element.closest('select');
+      if (parent) {
+        let parentSelector = '';
+        if (parent.id) {
+          parentSelector = `#${CSS.escape(parent.id)}`;
+        } else if (parent.name) {
+          parentSelector = `select[name="${CSS.escape(parent.name)}"]`;
+        } else if (parent.classList.length > 0) {
+          parentSelector = 'select.' + Array.from(parent.classList).map(c => CSS.escape(c)).join('.');
+        }
+        
+        if (parentSelector) {
+          const optionSelector = `${parentSelector} option[value="${CSS.escape(element.value)}"]`;
+          if (document.querySelectorAll(optionSelector).length === 1) {
+            return optionSelector;
+          }
+        }
+      }
+    }
+    
+    // Build nth-child path as last resort
     const path = [];
     let current = element;
     while (current && current !== document.body) {
