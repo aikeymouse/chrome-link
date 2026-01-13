@@ -813,16 +813,17 @@ body {
 /* Element Tree Styles */
 .element-tree-container {
   display: flex;
+  flex-direction: column;
   gap: 16px;
   min-height: 200px;
 }
 
 .element-tree {
-  flex: 0 0 40%;
-  border-right: 1px solid #e0e0e0;
-  padding-right: 12px;
+  flex-shrink: 0;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 12px;
   overflow-y: auto;
-  max-height: 400px;
+  max-height: 300px;
 }
 
 .tree-structure {
@@ -841,6 +842,8 @@ body {
   transition: background 0.15s;
   font-size: 12px;
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .tree-node:hover {
@@ -867,18 +870,22 @@ body {
   font-family: 'Courier New', monospace;
   color: #d73a49;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .tree-id {
   font-family: 'Courier New', monospace;
   color: #005cc5;
   font-size: 11px;
+  flex-shrink: 0;
 }
 
 .tree-class {
   font-family: 'Courier New', monospace;
   color: #6f42c1;
   font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tree-badge {
@@ -890,16 +897,17 @@ body {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .element-details-divider {
-  width: 1px;
-  background: #e0e0e0;
+  display: none;
 }
 
 .element-details-panel {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
   max-height: 400px;
 }
 
