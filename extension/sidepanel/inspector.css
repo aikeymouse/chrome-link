@@ -18,66 +18,52 @@
   border: 1px solid rgba(255, 152, 0, 0.4);
 }
 
-/* Inspector Controls */
-.inspector-controls {
-  padding: 12px 16px;
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.inspect-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: #1a73e8;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.inspect-btn:hover {
-  background: #1557b0;
-}
-
-.inspect-btn:active {
-  background: #0d47a1;
-}
-
-.inspect-btn .material-symbols-outlined {
-  font-size: 18px;
-}
-
+/* Inspector Buttons */
+.inspect-btn,
 .exit-inspector-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: #5f6368;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  justify-content: center;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.inspect-btn {
+  color: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.inspect-btn:hover {
+  background: #e8f0fe;
+  border-color: #1557b0;
+  color: #1557b0;
+}
+
+.inspect-btn:active {
+  background: #d2e3fc;
+}
+
+.exit-inspector-btn {
+  color: #d32f2f;
+  border-color: #d32f2f;
 }
 
 .exit-inspector-btn:hover {
-  background: #4a4d50;
+  background: #fce4ec;
+  border-color: #c62828;
+  color: #c62828;
 }
 
 .exit-inspector-btn:active {
-  background: #3c4043;
-}
-
-.exit-inspector-btn .material-symbols-outlined {
-  font-size: 18px;
+  background: #f8bbd0;
 }
 
 /* Inspected Element Container */

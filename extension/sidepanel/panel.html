@@ -59,22 +59,17 @@
           <h2 id="tabs-section-title">Current Window Tabs</h2>
         </div>
         <div class="section-header-right">
+          <button id="inspect-btn" class="inspect-btn" title="Start inspector mode">
+            INSPECT
+          </button>
+          <button id="exit-inspector-btn" class="exit-inspector-btn" style="display: none;" title="Exit inspector mode">
+            EXIT
+          </button>
           <button id="refresh-tabs" class="icon-btn" title="Refresh tabs">
             <span class="material-symbols-outlined">refresh</span>
           </button>
           <span class="badge" id="tabs-count">0</span>
         </div>
-      </div>
-      
-      <div class="inspector-controls">
-        <button id="inspect-btn" class="inspect-btn" title="Start inspector mode">
-          <span class="material-symbols-outlined">search</span>
-          Inspect
-        </button>
-        <button id="exit-inspector-btn" class="exit-inspector-btn" style="display: none;" title="Exit inspector mode">
-          <span class="material-symbols-outlined">close</span>
-          Exit Inspector
-        </button>
       </div>
       
       <div id="tabs-list" class="tabs-list collapsed">
