@@ -484,8 +484,9 @@ window.__chromePilotHelper = {
         const tagName = el.tagName.toLowerCase();
         const firstClass = el.classList.length > 0 ? el.classList[0] : null;
         
-        // Count siblings with same tag and first class
+        // Count siblings with same tag and first class (exclude inspector indicator)
         return siblings.filter(sibling => {
+          if (sibling.id === '__chromepilot-inspector-indicator') return false;
           if (sibling.tagName.toLowerCase() !== tagName) return false;
           if (!firstClass) return sibling.classList.length === 0;
           return sibling.classList.contains(firstClass);
@@ -496,6 +497,11 @@ window.__chromePilotHelper = {
       const parents = [];
       let currentParent = element.parentElement;
       while (currentParent && currentParent !== document.body) {
+        // Skip inspector indicator
+        if (currentParent.id === '__chromepilot-inspector-indicator') {
+          currentParent = currentParent.parentElement;
+          continue;
+        }
         const parentInfo = buildElementInfo(currentParent);
         parentInfo.siblingCount = calculateSiblingCount(currentParent);
         parents.unshift(parentInfo);
@@ -506,12 +512,14 @@ window.__chromePilotHelper = {
       const clickedInfo = buildElementInfo(element);
       clickedInfo.siblingCount = calculateSiblingCount(element);
       
-      // Get children (direct children only)
-      const children = Array.from(element.children).map(child => {
-        const childInfo = buildElementInfo(child);
-        childInfo.siblingCount = calculateSiblingCount(child);
-        return childInfo;
-      });
+      // Get children (direct children only, exclude inspector indicator)
+      const children = Array.from(element.children)
+        .filter(child => child.id !== '__chromepilot-inspector-indicator')
+        .map(child => {
+          const childInfo = buildElementInfo(child);
+          childInfo.siblingCount = calculateSiblingCount(child);
+          return childInfo;
+        });
       
       // Get element details
       const elementData = {
