@@ -447,10 +447,6 @@ window.__chromePilotHelper = {
     const element = document.querySelector(selector);
     if (!element) throw new Error(`Element not found: ${selector}`);
     
-    if (!window.__chromePilotBuildElementTree) {
-      throw new Error('Inspector mode not initialized. Call enableClickTracking() first.');
-    }
-    
     return window.__chromePilotBuildElementTree(element, false);
   },
 
@@ -458,110 +454,12 @@ window.__chromePilotHelper = {
    * Enable click tracking for inspector mode
    */
   enableClickTracking() {
-    // Helper function to build element info
-    const buildElementInfo = (el, clickedElement = null, includeText = true) => {
-      const info = {
-        tagName: el.tagName.toLowerCase(),
-        selector: window.__chromePilotHelper.generateSelector(el),
-        attributes: {},
-        isClickedElement: el === clickedElement
-      };
-      
-      // Only include text for parents, clicked element, and children
-      if (includeText) {
-        info.textContent = el.textContent ? el.textContent.trim() : '';
-      }
-      
-      // Collect relevant attributes
-      const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid', 'placeholder', 'value'];
-      relevantAttrs.forEach(attr => {
-        if (el.hasAttribute(attr)) {
-          info.attributes[attr] = el.getAttribute(attr);
-        }
-      });
-      
-      return info;
-    };
-    
-    // Helper function to calculate sibling count
-    const calculateSiblingCount = (el) => {
-      if (!el.parentElement) return 0;
-      
-      const siblings = Array.from(el.parentElement.children);
-      const tagName = el.tagName.toLowerCase();
-      const firstClass = el.classList.length > 0 ? el.classList[0] : null;
-      
-      // Count siblings with same tag and first class (exclude inspector indicator)
-      return siblings.filter(sibling => {
-        if (sibling.id === '__chromepilot-inspector-indicator') return false;
-        if (sibling.tagName.toLowerCase() !== tagName) return false;
-        if (firstClass) {
-          return sibling.classList.contains(firstClass);
-        }
-        return sibling.classList.length === 0;
-      }).length;
-    };
-    
-    // Shared function to build element tree and optionally highlight
-    const buildElementTree = (element, shouldHighlight = true) => {
-      // Build element tree data
-      const parents = [];
-      let currentParent = element.parentElement;
-      while (currentParent && currentParent !== document.body) {
-        if (currentParent.id !== '__chromepilot-inspector-indicator') {
-          const parentInfo = buildElementInfo(currentParent, element);
-          parentInfo.siblingCount = calculateSiblingCount(currentParent);
-          parents.unshift(parentInfo);
-        }
-        currentParent = currentParent.parentElement;
-      }
-      
-      const clickedInfo = buildElementInfo(element, element);
-      clickedInfo.siblingCount = calculateSiblingCount(element);
-      
-      const children = Array.from(element.children)
-        .filter(child => child.id !== '__chromepilot-inspector-indicator')
-        .map(child => {
-          const childInfo = buildElementInfo(child, element);
-          childInfo.siblingCount = calculateSiblingCount(child);
-          return childInfo;
-        });
-      
-      // Highlight element if requested
-      if (shouldHighlight) {
-        const originalStyles = {
-          outline: element.style.outline,
-          outlineOffset: element.style.outlineOffset
-        };
-        element.style.setProperty('outline', '2px solid #1a73e8', 'important');
-        element.style.setProperty('outline-offset', '2px', 'important');
-        setTimeout(() => {
-          element.style.outline = originalStyles.outline;
-          element.style.outlineOffset = originalStyles.outlineOffset;
-          if (!originalStyles.outline) {
-            element.style.removeProperty('outline');
-          }
-          if (!originalStyles.outlineOffset) {
-            element.style.removeProperty('outline-offset');
-          }
-        }, 3000);
-      }
-      
-      return {
-        clickedElement: clickedInfo,
-        parents: parents,
-        children: children,
-        timestamp: Date.now()
-      };
-    };
-    
-    // Store helpers globally so they can be reused
-    window.__chromePilotBuildElementInfo = buildElementInfo;
-    window.__chromePilotCalculateSiblingCount = calculateSiblingCount;
-    window.__chromePilotBuildElementTree = buildElementTree;
+    // Click handler uses the globally stored buildElementTree
+    const buildElementTree = window.__chromePilotBuildElementTree;
     
     // Store click handler so we can remove it later
     window.__chromePilotClickHandler = (event) => {
+
       // Don't prevent default to avoid breaking page functionality
       event.stopPropagation();
       
@@ -620,6 +518,112 @@ window.__chromePilotHelper = {
     return { disabled: true };
   }
 };
+
+// Initialize helper functions for inspector mode
+// These are available globally so inspectElement can work without enableClickTracking
+(function() {
+  // Helper function to build element info
+  const buildElementInfo = (el, clickedElement = null, includeText = true) => {
+    const info = {
+      tagName: el.tagName.toLowerCase(),
+      selector: window.__chromePilotHelper.generateSelector(el),
+      attributes: {},
+      isClickedElement: el === clickedElement
+    };
+    
+    // Only include text for parents, clicked element, and children
+    if (includeText) {
+      info.textContent = el.textContent ? el.textContent.trim() : '';
+    }
+    
+    // Collect relevant attributes
+    const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid', 'placeholder', 'value'];
+    relevantAttrs.forEach(attr => {
+      if (el.hasAttribute(attr)) {
+        info.attributes[attr] = el.getAttribute(attr);
+      }
+    });
+    
+    return info;
+  };
+  
+  // Helper function to calculate sibling count
+  const calculateSiblingCount = (el) => {
+    if (!el.parentElement) return 0;
+    
+    const siblings = Array.from(el.parentElement.children);
+    const tagName = el.tagName.toLowerCase();
+    const firstClass = el.classList.length > 0 ? el.classList[0] : null;
+    
+    // Count siblings with same tag and first class (exclude inspector indicator)
+    return siblings.filter(sibling => {
+      if (sibling.id === '__chromepilot-inspector-indicator') return false;
+      if (sibling.tagName.toLowerCase() !== tagName) return false;
+      if (firstClass) {
+        return sibling.classList.contains(firstClass);
+      }
+      return sibling.classList.length === 0;
+    }).length;
+  };
+  
+  // Shared function to build element tree and optionally highlight
+  const buildElementTree = (element, shouldHighlight = true) => {
+    // Build element tree data
+    const parents = [];
+    let currentParent = element.parentElement;
+    while (currentParent && currentParent !== document.body) {
+      if (currentParent.id !== '__chromepilot-inspector-indicator') {
+        const parentInfo = buildElementInfo(currentParent, element);
+        parentInfo.siblingCount = calculateSiblingCount(currentParent);
+        parents.unshift(parentInfo);
+      }
+      currentParent = currentParent.parentElement;
+    }
+    
+    const clickedInfo = buildElementInfo(element, element);
+    clickedInfo.siblingCount = calculateSiblingCount(element);
+    
+    const children = Array.from(element.children)
+      .filter(child => child.id !== '__chromepilot-inspector-indicator')
+      .map(child => {
+        const childInfo = buildElementInfo(child, element);
+        childInfo.siblingCount = calculateSiblingCount(child);
+        return childInfo;
+      });
+    
+    // Highlight element if requested
+    if (shouldHighlight) {
+      const originalStyles = {
+        outline: element.style.outline,
+        outlineOffset: element.style.outlineOffset
+      };
+      element.style.setProperty('outline', '2px solid #1a73e8', 'important');
+      element.style.setProperty('outline-offset', '2px', 'important');
+      setTimeout(() => {
+        element.style.outline = originalStyles.outline;
+        element.style.outlineOffset = originalStyles.outlineOffset;
+        if (!originalStyles.outline) {
+          element.style.removeProperty('outline');
+        }
+        if (!originalStyles.outlineOffset) {
+          element.style.removeProperty('outline-offset');
+        }
+      }, 3000);
+    }
+    
+    return {
+      clickedElement: clickedInfo,
+      parents: parents,
+      children: children,
+      timestamp: Date.now()
+    };
+  };
+  
+  // Store helpers globally
+  window.__chromePilotBuildElementInfo = buildElementInfo;
+  window.__chromePilotCalculateSiblingCount = calculateSiblingCount;
+  window.__chromePilotBuildElementTree = buildElementTree;
+})();
 
 // Listen for simulate click events from inspector bridge
 window.addEventListener('__chromepilot_simulate_click', (event) => {
