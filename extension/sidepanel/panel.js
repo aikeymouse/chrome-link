@@ -828,6 +828,10 @@ function renderInspectedElement() {
     return;
   }
   
+  // Save scroll position
+  const treeContainer = inspectedElementContent.querySelector('.element-tree');
+  const scrollTop = treeContainer ? treeContainer.scrollTop : 0;
+  
   // Build tree HTML
   const treeHTML = buildElementTree();
   
@@ -845,6 +849,12 @@ function renderInspectedElement() {
       </div>
     </div>
   `;
+  
+  // Restore scroll position
+  const newTreeContainer = inspectedElementContent.querySelector('.element-tree');
+  if (newTreeContainer) {
+    newTreeContainer.scrollTop = scrollTop;
+  }
   
   // Add click handlers to tree nodes
   const treeNodes = inspectedElementContent.querySelectorAll('.tree-node');
