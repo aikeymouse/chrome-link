@@ -13,6 +13,7 @@ let countdownInterval = null;
 let isInspectorMode = false;
 let inspectorTabId = null;
 let inspectedElement = null;
+let selectedTreeElement = null; // Currently selected element in tree
 
 // DOM Elements
 const statusBadge = document.getElementById('status-badge');
@@ -803,12 +804,13 @@ function handleElementClicked(message) {
   }
   
   inspectedElement = message.element;
+  selectedTreeElement = inspectedElement.clickedElement; // Default to clicked element
   console.log('Inspected element set:', inspectedElement);
   renderInspectedElement();
 }
 
 /**
- * Render inspected element
+ * Render inspected element tree and details
  */
 function renderInspectedElement() {
   console.log('Rendering inspected element:', inspectedElement);
@@ -817,10 +819,117 @@ function renderInspectedElement() {
     return;
   }
   
-  const { tagName, selector, textContent, attributes } = inspectedElement;
-  console.log('Element details:', { tagName, selector, textContent, attributes });
+  // Build tree HTML
+  const treeHTML = buildElementTree();
+  
+  // Build details HTML for selected element
+  const detailsHTML = buildElementDetails(selectedTreeElement);
   
   inspectedElementContent.innerHTML = `
+    <div class="element-tree-container">
+      <div class="element-tree">
+        ${treeHTML}
+      </div>
+      <div class="element-details-divider"></div>
+      <div class="element-details-panel">
+        ${detailsHTML}
+      </div>
+    </div>
+  `;
+  
+  // Add click handlers to tree nodes
+  const treeNodes = inspectedElementContent.querySelectorAll('.tree-node');
+  treeNodes.forEach(node => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const elementType = node.dataset.elementType;
+      const elementIndex = parseInt(node.dataset.elementIndex);
+      
+      // Update selected element based on type
+      if (elementType === 'parent') {
+        selectedTreeElement = inspectedElement.parents[elementIndex];
+      } else if (elementType === 'clicked') {
+        selectedTreeElement = inspectedElement.clickedElement;
+      } else if (elementType === 'child') {
+        selectedTreeElement = inspectedElement.children[elementIndex];
+      }
+      
+      // Re-render to update selection and details
+      renderInspectedElement();
+    });
+  });
+  
+  console.log('Element rendered to DOM');
+}
+
+/**
+ * Build element tree HTML
+ */
+function buildElementTree() {
+  const { parents, clickedElement, children } = inspectedElement;
+  
+  let html = '<div class="tree-structure">';
+  
+  // Render parents
+  parents.forEach((parent, index) => {
+    const isSelected = selectedTreeElement === parent;
+    const indent = index * 16;
+    html += `
+      <div class="tree-node ${isSelected ? 'selected' : ''}" 
+           data-element-type="parent" 
+           data-element-index="${index}"
+           style="padding-left: ${indent}px">
+        <span class="tree-tag">&lt;${escapeHtml(parent.tagName)}&gt;</span>
+        ${parent.attributes.id ? `<span class="tree-id">#${escapeHtml(parent.attributes.id)}</span>` : ''}
+        ${parent.attributes.class ? `<span class="tree-class">.${escapeHtml(parent.attributes.class.split(' ')[0])}</span>` : ''}
+      </div>
+    `;
+  });
+  
+  // Render clicked element (highlighted)
+  const isClickedSelected = selectedTreeElement === clickedElement;
+  const clickedIndent = parents.length * 16;
+  html += `
+    <div class="tree-node clicked ${isClickedSelected ? 'selected' : ''}" 
+         data-element-type="clicked" 
+         data-element-index="0"
+         style="padding-left: ${clickedIndent}px">
+      <span class="tree-tag">&lt;${escapeHtml(clickedElement.tagName)}&gt;</span>
+      ${clickedElement.attributes.id ? `<span class="tree-id">#${escapeHtml(clickedElement.attributes.id)}</span>` : ''}
+      ${clickedElement.attributes.class ? `<span class="tree-class">.${escapeHtml(clickedElement.attributes.class.split(' ')[0])}</span>` : ''}
+      <span class="tree-badge">CLICKED</span>
+    </div>
+  `;
+  
+  // Render children
+  const childIndent = (parents.length + 1) * 16;
+  children.forEach((child, index) => {
+    const isSelected = selectedTreeElement === child;
+    html += `
+      <div class="tree-node child ${isSelected ? 'selected' : ''}" 
+           data-element-type="child" 
+           data-element-index="${index}"
+           style="padding-left: ${childIndent}px">
+        <span class="tree-tag">&lt;${escapeHtml(child.tagName)}&gt;</span>
+        ${child.attributes.id ? `<span class="tree-id">#${escapeHtml(child.attributes.id)}</span>` : ''}
+        ${child.attributes.class ? `<span class="tree-class">.${escapeHtml(child.attributes.class.split(' ')[0])}</span>` : ''}
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+/**
+ * Build element details HTML
+ */
+function buildElementDetails(element) {
+  if (!element) return '<div class="empty-state">No element selected</div>';
+  
+  const { tagName, selector, textContent, attributes } = element;
+  
+  return `
     <div class="element-detail">
       <div class="element-row">
         <label>Tag:</label>
@@ -848,7 +957,6 @@ function renderInspectedElement() {
       ` : ''}
     </div>
   `;
-  console.log('Element rendered to DOM');
 }
 
 /**

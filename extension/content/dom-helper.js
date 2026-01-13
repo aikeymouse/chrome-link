@@ -385,21 +385,47 @@ window.__chromePilotHelper = {
       // Generate selector
       const selector = window.__chromePilotHelper.generateSelector(element);
       
-      // Get element details
-      const elementData = {
-        tagName: element.tagName.toLowerCase(),
-        selector: selector,
-        textContent: element.textContent ? element.textContent.trim() : '',
-        attributes: {}
+      // Build element tree: parents -> clicked element -> children
+      const buildElementInfo = (el) => {
+        const info = {
+          tagName: el.tagName.toLowerCase(),
+          selector: window.__chromePilotHelper.generateSelector(el),
+          textContent: el.childNodes.length > 0 && el.childNodes[0].nodeType === 3 
+            ? el.childNodes[0].textContent.trim() 
+            : '',
+          attributes: {},
+          isClickedElement: el === element
+        };
+        
+        // Collect relevant attributes
+        const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid', 'placeholder', 'value'];
+        relevantAttrs.forEach(attr => {
+          if (el.hasAttribute(attr)) {
+            info.attributes[attr] = el.getAttribute(attr);
+          }
+        });
+        
+        return info;
       };
       
-      // Collect relevant attributes
-      const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid'];
-      relevantAttrs.forEach(attr => {
-        if (element.hasAttribute(attr)) {
-          elementData.attributes[attr] = element.getAttribute(attr);
-        }
-      });
+      // Get parent chain (up to body)
+      const parents = [];
+      let currentParent = element.parentElement;
+      while (currentParent && currentParent !== document.body) {
+        parents.unshift(buildElementInfo(currentParent));
+        currentParent = currentParent.parentElement;
+      }
+      
+      // Get children (direct children only)
+      const children = Array.from(element.children).map(child => buildElementInfo(child));
+      
+      // Get element details
+      const elementData = {
+        clickedElement: buildElementInfo(element),
+        parents: parents,
+        children: children,
+        timestamp: Date.now()
+      };
       
       // Highlight element for 3 seconds
       const originalStyles = {
