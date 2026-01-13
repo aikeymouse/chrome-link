@@ -170,9 +170,10 @@ function renderInspectedElement() {
     newTreeContainer.scrollLeft = scrollLeft;
   }
   
-  // Add click handlers to tree badge items
+  // Add click and double-click handlers to tree badge items
   const treeBadges = inspectedElementContent.querySelectorAll('.tree-badge-item');
   treeBadges.forEach(badge => {
+    // Single click - select element
     badge.addEventListener('click', (e) => {
       e.stopPropagation();
       const elementType = badge.dataset.elementType;
@@ -189,6 +190,32 @@ function renderInspectedElement() {
       
       // Re-render to update selection and details
       renderInspectedElement();
+    });
+    
+    // Double click - set as new clicked element and get fresh data from DOM
+    badge.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      const elementType = badge.dataset.elementType;
+      const elementIndex = parseInt(badge.dataset.elementIndex);
+      
+      let targetElement;
+      if (elementType === 'parent') {
+        targetElement = inspectedElement.parents[elementIndex];
+      } else if (elementType === 'clicked') {
+        targetElement = inspectedElement.clickedElement;
+      } else if (elementType === 'child') {
+        targetElement = inspectedElement.children[elementIndex];
+      }
+      
+      // Send message to content script to simulate a click on this element
+      if (targetElement && targetElement.selector && inspectorTabId) {
+        chrome.tabs.sendMessage(inspectorTabId, {
+          action: 'simulateInspectorClick',
+          selector: targetElement.selector
+        }).catch(err => {
+          console.error('Failed to simulate click:', err);
+        });
+      }
     });
   });
   

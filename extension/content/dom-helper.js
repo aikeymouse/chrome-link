@@ -443,57 +443,60 @@ window.__chromePilotHelper = {
    * Enable click tracking for inspector mode
    */
   enableClickTracking() {
+    // Helper function to build element info
+    const buildElementInfo = (el, clickedElement = null, includeText = true) => {
+      const info = {
+        tagName: el.tagName.toLowerCase(),
+        selector: window.__chromePilotHelper.generateSelector(el),
+        attributes: {},
+        isClickedElement: el === clickedElement
+      };
+      
+      // Only include text for parents, clicked element, and children
+      if (includeText) {
+        info.textContent = el.textContent ? el.textContent.trim() : '';
+      }
+      
+      // Collect relevant attributes
+      const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid', 'placeholder', 'value'];
+      relevantAttrs.forEach(attr => {
+        if (el.hasAttribute(attr)) {
+          info.attributes[attr] = el.getAttribute(attr);
+        }
+      });
+      
+      return info;
+    };
+    
+    // Helper function to calculate sibling count
+    const calculateSiblingCount = (el) => {
+      if (!el.parentElement) return 0;
+      
+      const siblings = Array.from(el.parentElement.children);
+      const tagName = el.tagName.toLowerCase();
+      const firstClass = el.classList.length > 0 ? el.classList[0] : null;
+      
+      // Count siblings with same tag and first class (exclude inspector indicator)
+      return siblings.filter(sibling => {
+        if (sibling.id === '__chromepilot-inspector-indicator') return false;
+        if (sibling.tagName.toLowerCase() !== tagName) return false;
+        if (firstClass) {
+          return sibling.classList.contains(firstClass);
+        }
+        return sibling.classList.length === 0;
+      }).length;
+    };
+    
+    // Store helpers globally so simulate click can use them
+    window.__chromePilotBuildElementInfo = buildElementInfo;
+    window.__chromePilotCalculateSiblingCount = calculateSiblingCount;
+    
     // Store click handler so we can remove it later
     window.__chromePilotClickHandler = (event) => {
       // Don't prevent default to avoid breaking page functionality
       event.stopPropagation();
       
       const element = event.target;
-      
-      // Generate selector
-      const selector = window.__chromePilotHelper.generateSelector(element);
-      
-      // Build element tree: parents -> clicked element -> children
-      const buildElementInfo = (el, includeText = true) => {
-        const info = {
-          tagName: el.tagName.toLowerCase(),
-          selector: window.__chromePilotHelper.generateSelector(el),
-          attributes: {},
-          isClickedElement: el === element
-        };
-        
-        // Only include text for parents, clicked element, and children
-        if (includeText) {
-          info.textContent = el.textContent ? el.textContent.trim() : '';
-        }
-        
-        // Collect relevant attributes
-        const relevantAttrs = ['id', 'class', 'name', 'type', 'href', 'src', 'data-test', 'data-testid', 'placeholder', 'value'];
-        relevantAttrs.forEach(attr => {
-          if (el.hasAttribute(attr)) {
-            info.attributes[attr] = el.getAttribute(attr);
-          }
-        });
-        
-        return info;
-      };
-      
-      // Calculate how many siblings match the same tag+firstClass selector
-      const calculateSiblingCount = (el) => {
-        if (!el.parentElement) return 0;
-        
-        const siblings = Array.from(el.parentElement.children);
-        const tagName = el.tagName.toLowerCase();
-        const firstClass = el.classList.length > 0 ? el.classList[0] : null;
-        
-        // Count siblings with same tag and first class (exclude inspector indicator)
-        return siblings.filter(sibling => {
-          if (sibling.id === '__chromepilot-inspector-indicator') return false;
-          if (sibling.tagName.toLowerCase() !== tagName) return false;
-          if (!firstClass) return sibling.classList.length === 0;
-          return sibling.classList.contains(firstClass);
-        }).length;
-      };
       
       // Get parent chain (up to body)
       const parents = [];
@@ -504,21 +507,21 @@ window.__chromePilotHelper = {
           currentParent = currentParent.parentElement;
           continue;
         }
-        const parentInfo = buildElementInfo(currentParent);
+        const parentInfo = buildElementInfo(currentParent, element);
         parentInfo.siblingCount = calculateSiblingCount(currentParent);
         parents.unshift(parentInfo);
         currentParent = currentParent.parentElement;
       }
       
       // Get clicked element info
-      const clickedInfo = buildElementInfo(element);
+      const clickedInfo = buildElementInfo(element, element);
       clickedInfo.siblingCount = calculateSiblingCount(element);
       
       // Get children (direct children only, exclude inspector indicator)
       const children = Array.from(element.children)
         .filter(child => child.id !== '__chromepilot-inspector-indicator')
         .map(child => {
-          const childInfo = buildElementInfo(child);
+          const childInfo = buildElementInfo(child, element);
           childInfo.siblingCount = calculateSiblingCount(child);
           return childInfo;
         });
@@ -602,6 +605,75 @@ window.__chromePilotHelper = {
     return { disabled: true };
   }
 };
+
+// Listen for simulate click events from inspector bridge
+window.addEventListener('__chromepilot_simulate_click', (event) => {
+  const { selector } = event.detail;
+  if (selector && window.__chromePilotBuildElementInfo && window.__chromePilotCalculateSiblingCount) {
+    try {
+      const element = document.querySelector(selector);
+      if (element) {
+        const buildElementInfo = window.__chromePilotBuildElementInfo;
+        const calculateSiblingCount = window.__chromePilotCalculateSiblingCount;
+        
+        // Build element tree data directly
+        const parents = [];
+        let currentParent = element.parentElement;
+        while (currentParent && currentParent !== document.body) {
+          if (currentParent.id !== '__chromepilot-inspector-indicator') {
+            const parentInfo = buildElementInfo(currentParent, element);
+            parentInfo.siblingCount = calculateSiblingCount(currentParent);
+            parents.unshift(parentInfo);
+          }
+          currentParent = currentParent.parentElement;
+        }
+        
+        const clickedInfo = buildElementInfo(element, element);
+        clickedInfo.siblingCount = calculateSiblingCount(element);
+        
+        const children = Array.from(element.children)
+          .filter(child => child.id !== '__chromepilot-inspector-indicator')
+          .map(child => {
+            const childInfo = buildElementInfo(child, element);
+            childInfo.siblingCount = calculateSiblingCount(child);
+            return childInfo;
+          });
+        
+        const elementData = {
+          clickedElement: clickedInfo,
+          parents: parents,
+          children: children,
+          timestamp: Date.now()
+        };
+        
+        // Highlight element
+        const originalStyles = {
+          outline: element.style.outline,
+          outlineOffset: element.style.outlineOffset
+        };
+        element.style.setProperty('outline', '2px solid #1a73e8', 'important');
+        element.style.setProperty('outline-offset', '2px', 'important');
+        setTimeout(() => {
+          element.style.outline = originalStyles.outline;
+          element.style.outlineOffset = originalStyles.outlineOffset;
+          if (!originalStyles.outline) {
+            element.style.removeProperty('outline');
+          }
+          if (!originalStyles.outlineOffset) {
+            element.style.removeProperty('outline-offset');
+          }
+        }, 3000);
+        
+        // Dispatch the element data
+        window.dispatchEvent(new CustomEvent('__chromepilot_element_clicked', {
+          detail: elementData
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to simulate inspector click:', err);
+    }
+  }
+});
 
 console.log('ChromePilot DOM Helper loaded');
 
