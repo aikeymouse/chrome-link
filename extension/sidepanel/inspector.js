@@ -23,6 +23,9 @@ async function startInspectorMode() {
     inspectorTabId = activeTab.id;
     isInspectorMode = true;
     
+    // Add inspector mode class to body
+    document.body.classList.add('inspector-mode');
+    
     // Hide other sections
     document.getElementById('clients-section').style.display = 'none';
     document.getElementById('logs-section').style.display = 'none';
@@ -76,6 +79,9 @@ function exitInspectorMode() {
   inspectorTabId = null;
   inspectedElement = null;
   selectedTreeElement = null;
+  
+  // Remove inspector mode class from body
+  document.body.classList.remove('inspector-mode');
   
   // Show other sections
   document.getElementById('clients-section').style.display = 'block';
