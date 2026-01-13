@@ -16,6 +16,13 @@ cd chrome-driver-extension/install-scripts
 node install.js
 ```
 
+This will:
+- Create installation directory (`~/.chrome-pilot/` on macOS/Linux or `%USERPROFILE%\.chrome-pilot\` on Windows)
+- Copy native host files
+- Install Node.js dependencies
+- Register native messaging host with Chrome
+- Preserve existing logs during upgrade
+
 ### Step 2: Load Extension in Chrome
 
 1. Open Chrome: `chrome://extensions/`
@@ -26,23 +33,18 @@ node install.js
 
 ### Step 3: Update Extension ID
 
-Edit the native host manifest:
+Use the installer to update your extension ID:
 
-**macOS:**
 ```bash
-nano ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chromepilot.extension.json
+node install.js update-id <your-extension-id>
 ```
 
-**Linux:**
+**Example:**
 ```bash
-nano ~/.config/google-chrome/NativeMessagingHosts/com.chromepilot.extension.json
+node install.js update-id abcdefghijklmnopqrstuvwxyzabcdef
 ```
 
-**Windows:**
-
-The installer will prompt you for the extension ID during installation.
-
-Replace `EXTENSION_ID_PLACEHOLDER` with your actual extension ID from Step 2.
+This automatically updates the native messaging manifest with your extension ID.
 
 ### Step 4: Restart Chrome
 
@@ -120,6 +122,23 @@ ws.on('message', (data) => {
 
 ## Verify Installation
 
+### Check Installation Status
+
+Use the diagnostic command to verify everything is set up correctly:
+
+```bash
+cd chrome-driver-extension/install-scripts
+node install.js diagnose
+```
+
+This checks:
+- Node.js and npm versions
+- Installation directory and files
+- Native messaging manifest
+- Extension ID configuration
+- Server status (port 9000)
+- Recent log files
+
 ### Check Native Host
 
 ```bash
@@ -149,21 +168,23 @@ lsof -i :9000
 ### "Disconnected" Status in Side Panel
 
 **Fix:**
-1. Check native host is running: `lsof -i :9000`
-2. If not running, restart Chrome
-3. Check extension ID matches in manifest
+1. Check installation status: `node install.js diagnose`
+2. Verify native host is running: `lsof -i :9000` (macOS/Linux)
+3. If not running, restart Chrome
+4. Check extension ID matches in manifest
 
 ### "Cannot connect to native host"
 
 **Fix:**
 ```bash
-# Verify manifest exists (macOS)
-ls -la ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
+# Run diagnostics
+cd chrome-driver-extension/install-scripts
+node install.js diagnose
 
-# Check manifest content
-cat ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chromepilot.extension.json
+# Verify extension ID is set correctly
+node install.js update-id <your-extension-id>
 
-# Verify extension ID matches
+# Restart Chrome completely
 ```
 
 ### WebSocket Connection Refused
@@ -179,6 +200,32 @@ cat ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chrome
 - Read full documentation: `README.md`
 - See API protocol: `docs/PROTOCOL.md`
 - Development guide: `docs/dev/DEVELOPMENT.md`
+- Installation details: `install-scripts/INSTALL.md`
+
+## Additional Commands
+
+### Clear Logs
+
+Remove all session log files:
+```bash
+node install.js clear-logs
+```
+
+### Uninstall
+
+Remove ChromePilot completely:
+```bash
+node install.js uninstall
+```
+
+Then manually remove the Chrome extension from `chrome://extensions/`
+
+### Get Version
+
+Check installed version:
+```bash
+node install.js version
+```
 
 ## Example Client
 
