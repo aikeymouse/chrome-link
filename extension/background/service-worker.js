@@ -397,6 +397,14 @@ async function callHelper(params) {
     throw { code: 'MISSING_PARAMS', message: 'Missing required parameter: functionName' };
   }
   
+  // Prevent clients from calling internal UI functions (prefixed with _internal_)
+  if (functionName.startsWith('_internal_')) {
+    throw { 
+      code: 'PERMISSION_DENIED', 
+      message: `Function '${functionName}' is restricted to internal use only. Use public API functions like 'inspectElement' instead.` 
+    };
+  }
+  
   // If no tabId, use active tab
   if (!tabId) {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -522,7 +530,7 @@ async function captureScreenshot(params) {
     // Crop to elements
     const cropResult = await callHelper({
       tabId,
-      functionName: 'cropScreenshotToElements',
+      functionName: '_internal_cropScreenshotToElements',
       args: [dataUrl, boundsResult.value]
     });
     
@@ -780,7 +788,7 @@ async function enableInspector(params) {
     // Enable click tracking
     const results = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => window.__chromePilotHelper.enableClickTracking(),
+      func: () => window.__chromePilotHelper._internal_enableClickTracking(),
       world: 'MAIN'
     });
     
@@ -811,7 +819,7 @@ async function disableInspector(params) {
     // Disable click tracking
     await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => window.__chromePilotHelper.disableClickTracking(),
+      func: () => window.__chromePilotHelper._internal_disableClickTracking(),
       world: 'MAIN'
     });
     

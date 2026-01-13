@@ -263,7 +263,7 @@ window.__chromePilotHelper = {
    * Called by captureScreenshot command in service-worker
    * Returns array of cropped screenshots as base64 data URLs
    */
-  async cropScreenshotToElements(fullScreenshotDataUrl, boundsArray) {
+  async _internal_cropScreenshotToElements(fullScreenshotDataUrl, boundsArray) {
     if (!boundsArray || boundsArray.length === 0) {
       return [];
     }
@@ -334,9 +334,9 @@ window.__chromePilotHelper = {
   },
 
   /**
-   * Generate a unique CSS selector for an element
+   * Generate a unique CSS selector for an element (internal helper)
    */
-  generateSelector(element) {
+  _internal_generateSelector(element) {
     // Helper to escape attribute values (only escape quotes, not the whole value)
     const escapeAttributeValue = (value) => {
       return value.replace(/"/g, '\\"');
@@ -451,9 +451,9 @@ window.__chromePilotHelper = {
   },
 
   /**
-   * Enable click tracking for inspector mode
+   * Enable click tracking for inspector mode (Internal UI only - not available via callHelper)
    */
-  enableClickTracking() {
+  _internal_enableClickTracking() {
     // Click handler uses the globally stored buildElementTree
     const buildElementTree = window.__chromePilotBuildElementTree;
     
@@ -500,9 +500,9 @@ window.__chromePilotHelper = {
   },
 
   /**
-   * Disable click tracking for inspector mode
+   * Disable click tracking for inspector mode (Internal UI only - not available via callHelper)
    */
-  disableClickTracking() {
+  _internal_disableClickTracking() {
     // Remove click handler
     if (window.__chromePilotClickHandler) {
       document.removeEventListener('click', window.__chromePilotClickHandler, true);
@@ -526,7 +526,7 @@ window.__chromePilotHelper = {
   const buildElementInfo = (el, clickedElement = null, includeText = true) => {
     const info = {
       tagName: el.tagName.toLowerCase(),
-      selector: window.__chromePilotHelper.generateSelector(el),
+      selector: window.__chromePilotHelper._internal_generateSelector(el),
       attributes: {},
       isClickedElement: el === clickedElement
     };
