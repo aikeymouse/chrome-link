@@ -822,6 +822,7 @@ body {
   flex-shrink: 0;
   border-bottom: 2px solid #e0e0e0;
   padding-bottom: 12px;
+  overflow-x: auto;
   overflow-y: auto;
   max-height: 300px;
 }
@@ -830,6 +831,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: max-content;
 }
 
 .tree-node {
@@ -843,7 +845,7 @@ body {
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-  overflow: hidden;
+  min-width: max-content;
 }
 
 .tree-node:hover {
@@ -884,8 +886,7 @@ body {
   font-family: 'Courier New', monospace;
   color: #6f42c1;
   font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tree-badge {
