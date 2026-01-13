@@ -118,6 +118,14 @@ function handleElementClicked(message) {
   selectedTreeElement = inspectedElement.clickedElement; // Default to clicked element
   console.log('Inspected element set:', inspectedElement);
   renderInspectedElement();
+  
+  // Auto-scroll to bottom after new element is clicked
+  const inspectedElementContent = document.getElementById('inspected-element-content');
+  if (inspectedElementContent) {
+    setTimeout(() => {
+      inspectedElementContent.scrollTop = inspectedElementContent.scrollHeight;
+    }, 0);
+  }
 }
 
 /**
