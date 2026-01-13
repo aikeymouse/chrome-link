@@ -401,17 +401,24 @@ window.__chromePilotHelper = {
         }
       });
       
-      // Highlight element for 1 second
+      // Highlight element for 3 seconds
       const originalStyles = {
         outline: element.style.outline,
         outlineOffset: element.style.outlineOffset
       };
-      element.style.outline = '2px solid #1a73e8';
-      element.style.outlineOffset = '2px';
+      element.style.setProperty('outline', '2px solid #1a73e8', 'important');
+      element.style.setProperty('outline-offset', '2px', 'important');
       setTimeout(() => {
         element.style.outline = originalStyles.outline;
         element.style.outlineOffset = originalStyles.outlineOffset;
-      }, 1000);
+        // Remove important flag by resetting
+        if (!originalStyles.outline) {
+          element.style.removeProperty('outline');
+        }
+        if (!originalStyles.outlineOffset) {
+          element.style.removeProperty('outline-offset');
+        }
+      }, 3000);
       
       // Send message via custom event (since we're in MAIN world, chrome.runtime is not available)
       console.log('Dispatching element clicked event:', elementData);
