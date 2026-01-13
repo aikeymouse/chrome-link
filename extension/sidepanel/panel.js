@@ -895,6 +895,7 @@ function buildElementTree() {
   parents.forEach((parent, index) => {
     const isSelected = selectedTreeElement === parent;
     const firstClass = parent.attributes?.class ? parent.attributes.class.split(' ')[0] : '';
+    const count = parent.siblingCount || 0;
     
     html += `
       <div class="tree-badge-item ${isSelected ? 'selected' : ''}" 
@@ -902,6 +903,7 @@ function buildElementTree() {
            data-element-index="${index}">
         <span class="badge-tag">&lt;${escapeHtml(parent.tagName)}&gt;</span>
         ${firstClass ? `<span class="badge-attrs">.${escapeHtml(firstClass)}</span>` : ''}
+        ${count > 1 ? `<span class="badge-count">${count}</span>` : ''}
       </div>
       <span class="badge-separator">›</span>
     `;
@@ -910,6 +912,7 @@ function buildElementTree() {
   // Render clicked element (highlighted)
   const isClickedSelected = selectedTreeElement === clickedElement;
   const clickedFirstClass = clickedElement.attributes?.class ? clickedElement.attributes.class.split(' ')[0] : '';
+  const clickedCount = clickedElement.siblingCount || 0;
   
   html += `
     <div class="tree-badge-item clicked ${isClickedSelected ? 'selected' : ''}" 
@@ -917,6 +920,7 @@ function buildElementTree() {
          data-element-index="0">
       <span class="badge-tag">&lt;${escapeHtml(clickedElement.tagName)}&gt;</span>
       ${clickedFirstClass ? `<span class="badge-attrs">.${escapeHtml(clickedFirstClass)}</span>` : ''}
+      ${clickedCount > 1 ? `<span class="badge-count">${clickedCount}</span>` : ''}
       <span class="badge-label">CLICKED</span>
     </div>
   `;
@@ -928,6 +932,7 @@ function buildElementTree() {
     children.forEach((child, index) => {
       const isSelected = selectedTreeElement === child;
       const childFirstClass = child.attributes?.class ? child.attributes.class.split(' ')[0] : '';
+      const childCount = child.siblingCount || 0;
       
       html += `
         <div class="tree-badge-item child ${isSelected ? 'selected' : ''}" 
@@ -935,6 +940,7 @@ function buildElementTree() {
              data-element-index="${index}">
           <span class="badge-tag">&lt;${escapeHtml(child.tagName)}&gt;</span>
           ${childFirstClass ? `<span class="badge-attrs">.${escapeHtml(childFirstClass)}</span>` : ''}
+          ${childCount > 1 ? `<span class="badge-count">${childCount}</span>` : ''}
         </div>
       `;
     });

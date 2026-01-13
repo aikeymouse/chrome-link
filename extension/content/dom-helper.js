@@ -408,20 +408,46 @@ window.__chromePilotHelper = {
         return info;
       };
       
+      // Calculate how many siblings match the same tag+firstClass selector
+      const calculateSiblingCount = (el) => {
+        if (!el.parentElement) return 0;
+        
+        const siblings = Array.from(el.parentElement.children);
+        const tagName = el.tagName.toLowerCase();
+        const firstClass = el.classList.length > 0 ? el.classList[0] : null;
+        
+        // Count siblings with same tag and first class
+        return siblings.filter(sibling => {
+          if (sibling.tagName.toLowerCase() !== tagName) return false;
+          if (!firstClass) return sibling.classList.length === 0;
+          return sibling.classList.contains(firstClass);
+        }).length;
+      };
+      
       // Get parent chain (up to body)
       const parents = [];
       let currentParent = element.parentElement;
       while (currentParent && currentParent !== document.body) {
-        parents.unshift(buildElementInfo(currentParent));
+        const parentInfo = buildElementInfo(currentParent);
+        parentInfo.siblingCount = calculateSiblingCount(currentParent);
+        parents.unshift(parentInfo);
         currentParent = currentParent.parentElement;
       }
       
+      // Get clicked element info
+      const clickedInfo = buildElementInfo(element);
+      clickedInfo.siblingCount = calculateSiblingCount(element);
+      
       // Get children (direct children only)
-      const children = Array.from(element.children).map(child => buildElementInfo(child));
+      const children = Array.from(element.children).map(child => {
+        const childInfo = buildElementInfo(child);
+        childInfo.siblingCount = calculateSiblingCount(child);
+        return childInfo;
+      });
       
       // Get element details
       const elementData = {
-        clickedElement: buildElementInfo(element),
+        clickedElement: clickedInfo,
         parents: parents,
         children: children,
         timestamp: Date.now()
