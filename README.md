@@ -4,14 +4,6 @@ Remote Chrome tab control via WebSocket API with session management and side pan
 
 [![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/aikeymouse)
 
-## Screenshots
-
-### Session Logs
-![Session Logs](docs/chromepilot_session_logs.png)
-
-### Inspector Mode
-![Inspector Mode](docs/chromepilot_inspector_mode.png)
-
 ## Features
 
 - **WebSocket API**: Control Chrome tabs remotely via WebSocket connection
@@ -24,6 +16,14 @@ Remote Chrome tab control via WebSocket API with session management and side pan
 - **Per-Session Logging**: All requests/responses logged to dedicated session files
 - **Chunked Messages**: Handle large results with automatic 1MB chunking
 - **Auto-Restart**: Native host automatically restarts on extension updates
+
+## Screenshots
+
+### Session Logs
+![Session Logs](docs/chromepilot_session_logs.png)
+
+### Inspector Mode
+![Inspector Mode](docs/chromepilot_inspector_mode.png)
 
 ## Architecture
 
