@@ -18,4 +18,3 @@ tests/examples/*.png
 examples/dev.notes.txt
 examples/page-source.txt
 examples/*.png
-examples/analyze-form/output/
