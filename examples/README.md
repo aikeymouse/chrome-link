@@ -5,7 +5,7 @@ WebSocket client examples for ChromePilot browser automation.
 ## Quick Start
 
 ```bash
-cd tests/examples
+cd examples
 npm install
 npm test
 ```

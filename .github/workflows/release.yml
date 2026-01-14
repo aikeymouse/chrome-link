@@ -104,7 +104,7 @@ jobs:
           
           # Copy examples
           mkdir -p release-tmp/examples
-          cp -r tests/examples/* release-tmp/examples/
+          cp -r examples/* release-tmp/examples/
           
           # Copy documentation
           cp README.md release-tmp/
@@ -129,16 +129,17 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           ZIP_NAME="chromepilot-examples-v${VERSION}.zip"
           
-          cd tests/examples
-          zip -r "../../$ZIP_NAME" . \
+          cd examples
+          zip -r "../$ZIP_NAME" . \
             -x "*.DS_Store" \
             -x "node_modules/*" \
+            -x "*/node_modules/*" \
             -x ".git/*" \
             -x "*.log" \
             -x "*.png" \
             -x "*.txt"
           
-          cd ../..
+          cd ..
           echo "✓ Created $ZIP_NAME"
           ls -lh "$ZIP_NAME"
       
