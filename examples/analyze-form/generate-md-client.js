@@ -208,9 +208,14 @@ class MarkdownReportGenerator {
 
   /**
    * Capture screenshot of label+field pair with highlighting
+   * If label wraps field (uses :has()), captures only label (which includes field)
+   * If label doesn't wrap (uses [for=]), captures both separately
    */
   async capturePairScreenshot(tabId, labelSelector, fieldSelector, filename) {
     try {
+      // Check if label wraps the field (contains :has())
+      const labelWrapsField = labelSelector.includes(':has(');
+      
       // Highlight both elements
       await this.client.sendRequest('callHelper', {
         tabId,
@@ -226,12 +231,21 @@ class MarkdownReportGenerator {
       // Wait for highlight animation
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Combine both selectors with comma to capture both elements
-      const combinedSelector = `${labelSelector}, ${fieldSelector}`;
-      const captureResult = await this.client.sendRequest('captureScreenshot', {
-        tabId,
-        selector: combinedSelector
-      });
+      let captureResult;
+      if (labelWrapsField) {
+        // Label wraps field - only capture label (which includes field visually)
+        captureResult = await this.client.sendRequest('captureScreenshot', {
+          tabId,
+          selector: labelSelector
+        });
+      } else {
+        // Label doesn't wrap - capture both separately
+        const combinedSelector = `${labelSelector}, ${fieldSelector}`;
+        captureResult = await this.client.sendRequest('captureScreenshot', {
+          tabId,
+          selector: combinedSelector
+        });
+      }
 
       // Remove highlights
       await this.client.sendRequest('callHelper', {
@@ -240,18 +254,26 @@ class MarkdownReportGenerator {
         args: []
       });
 
-      // Save screenshots (will get multiple screenshots - one for each element)
+      // Handle the result
       if (captureResult.screenshots && captureResult.screenshots.length > 0) {
-        // Save all screenshots and return array of paths
-        const paths = [];
-        for (let i = 0; i < captureResult.screenshots.length; i++) {
-          const screenshot = captureResult.screenshots[i];
-          const filenamePart = filename.replace('.png', `_${i}.png`);
-          const filepath = this.saveScreenshot(screenshot.dataUrl, filenamePart);
-          paths.push(path.relative(path.join(__dirname, 'output'), filepath));
+        if (captureResult.screenshots.length === 1) {
+          // Single screenshot
+          const screenshot = captureResult.screenshots[0];
+          const filepath = this.saveScreenshot(screenshot.dataUrl, filename);
+          console.log(`  ✓ Saved screenshot: ${filename}`);
+          return path.relative(path.join(__dirname, 'output'), filepath);
+        } else {
+          // Multiple screenshots - save all and return array
+          const paths = [];
+          for (let i = 0; i < captureResult.screenshots.length; i++) {
+            const screenshot = captureResult.screenshots[i];
+            const filenamePart = filename.replace('.png', `-${i}.png`);
+            const filepath = this.saveScreenshot(screenshot.dataUrl, filenamePart);
+            paths.push(path.relative(path.join(__dirname, 'output'), filepath));
+          }
+          console.log(`  ✓ Saved ${paths.length} screenshots: ${filename}`);
+          return paths;
         }
-        console.log(`  ✓ Saved ${paths.length} screenshot(s): ${filename}`);
-        return paths;
       } else {
         console.log(`  ⚠ No screenshot captured for pair`);
         return null;
@@ -318,7 +340,7 @@ class MarkdownReportGenerator {
           console.log(`  [${elementIndex}] ${label.selector} + ${field.selector}`);
           
           // Capture combined screenshot
-          const screenshotPaths = await this.capturePairScreenshot(
+          const screenshotPath = await this.capturePairScreenshot(
             tabId,
             label.selector,
             field.selector,
@@ -329,9 +351,15 @@ class MarkdownReportGenerator {
           const elementTitle = label.textContent || field.name || field.id || `Field ${elementIndex}`;
           lines.push(`\n### ${elementTitle.substring(0, 50)}\n`);
 
-          // Screenshots (label and field)
-          if (screenshotPaths && screenshotPaths.length > 0) {
-            for (const screenshotPath of screenshotPaths) {
+          // Screenshot(s) - may be single combined or multiple
+          if (screenshotPath) {
+            if (Array.isArray(screenshotPath)) {
+              // Multiple screenshots
+              for (const path of screenshotPath) {
+                lines.push(`![${field.selector}](${path})\n`);
+              }
+            } else {
+              // Single screenshot
               lines.push(`![${field.selector}](${screenshotPath})\n`);
             }
           }
