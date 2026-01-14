@@ -237,6 +237,55 @@ class FormAnalyzer {
       })
     };
     
+    // Step 5: Validate selectors by testing with highlightElement
+    console.log('Step 5: Validating selectors...');
+    const validationResults = [];
+    
+    for (const [index, element] of analyzed.elements.entries()) {
+      const result = await this.client.sendRequest('callHelper', {
+        tabId,
+        functionName: 'highlightElement',
+        args: [element.selector]
+      });
+      
+      const matchCount = result.value;
+      const isValid = matchCount === 1;
+      
+      validationResults.push({
+        selector: element.selector,
+        matchCount,
+        isValid,
+        tagName: element.tagName,
+        type: element.type
+      });
+      
+      if (!isValid) {
+        console.log(`  ⚠ ${element.selector} matches ${matchCount} elements (expected 1)`);
+      }
+    }
+    
+    const validCount = validationResults.filter(r => r.isValid).length;
+    const totalCount = validationResults.length;
+    console.log(`  ✓ Validated ${totalCount} selectors: ${validCount} unique, ${totalCount - validCount} ambiguous`);
+    console.log(`  ⏳ Keeping highlights visible for 5 seconds...\n`);
+    
+    // Wait 5 seconds before clearing highlights
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    // Clear highlights
+    await this.client.sendRequest('callHelper', {
+      tabId,
+      functionName: 'removeHighlights',
+      args: []
+    });
+    
+    analyzed.validation = {
+      total: totalCount,
+      unique: validCount,
+      ambiguous: totalCount - validCount,
+      results: validationResults
+    };
+    
     return analyzed;
   }
 
@@ -256,6 +305,19 @@ class FormAnalyzer {
     if (analysis.container.class) console.log(`   Class:    ${analysis.container.class}`);
     console.log('');
     
+    // Display validation summary
+    if (analysis.validation) {
+      const { total, unique, ambiguous } = analysis.validation;
+      const percentage = ((unique / total) * 100).toFixed(1);
+      console.log('✅ Selector Validation:');
+      console.log(`   Total:     ${total}`);
+      console.log(`   Unique:    ${unique} (${percentage}%)`);
+      if (ambiguous > 0) {
+        console.log(`   Ambiguous: ${ambiguous}`);
+      }
+      console.log('');
+    }
+    
     console.log('📝 Form Elements:');
     console.log('');
     
@@ -270,7 +332,11 @@ class FormAnalyzer {
     for (const [type, elements] of Object.entries(grouped)) {
       console.log(`  ${type.toUpperCase()} (${elements.length}):`);
       for (const el of elements) {
-        console.log(`    • ${el.selector}`);
+        // Check if selector is validated
+        const validation = analysis.validation?.results.find(r => r.selector === el.selector);
+        const validationMark = validation ? (validation.isValid ? '✓' : `⚠(${validation.matchCount})`) : '';
+        
+        console.log(`    ${validationMark ? validationMark + ' ' : ''}• ${el.selector}`);
         if (el.label) console.log(`      Label: ${el.label}`);
         if (el.name) console.log(`      Name: ${el.name}`);
         if (el.placeholder) console.log(`      Placeholder: ${el.placeholder}`);
