@@ -446,6 +446,8 @@ async function main() {
     process.exit(1);
   } finally {
     analyzer.close();
+    // Force exit immediately after closing
+    process.exit(0);
   }
 }
 

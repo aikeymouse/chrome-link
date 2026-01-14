@@ -280,6 +280,7 @@ class ChromePilotClient {
   close() {
     if (this.ws) {
       this.ws.close();
+      this.ws = null;
     }
   }
 }
