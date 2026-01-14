@@ -6,14 +6,21 @@
 chrome-pilot/
 ├── extension/                  # Chrome extension files
 │   ├── manifest.json          # Extension manifest (Manifest V3)
+│   ├── icons/
+│   │   └── icon.png           # Extension icon
 │   ├── background/
 │   │   └── service-worker.js  # Background service worker & native messaging bridge
 │   ├── content/
-│   │   └── dom-helper.js      # DOM helper functions for CSP-restricted pages
+│   │   ├── dom-helper.js      # DOM helper functions for CSP-restricted pages
+│   │   └── inspector-bridge.js # Inspector mode communication bridge
 │   └── sidepanel/
 │       ├── panel.html         # Side panel UI
 │       ├── panel.js           # Side panel logic with custom dropdown & session management
-│       └── panel.css          # Side panel styles
+│       ├── panel.css          # Side panel styles
+│       ├── inspector.js       # Element inspector functionality
+│       ├── inspector.css      # Inspector styles
+│       ├── material-symbols.css              # Material Symbols font CSS
+│       └── material-symbols-outlined.woff2   # Material Symbols font file
 ├── native-host/               # Native messaging host
 │   ├── browser-pilot-server.js # WebSocket server + native messaging + session management
 │   ├── package.json           # Node.js dependencies
@@ -26,22 +33,30 @@ chrome-pilot/
 │   ├── INSTALL.md             # Installation documentation
 │   └── dev/                   # Development utilities
 │       └── version.sh         # Version management
-├── tests/                     # Test automation clients
+├── tests/                     # Test suite
 │   ├── unit/                  # Unit tests for individual commands
 │   ├── integration/           # Integration tests for workflows
-│   ├── helpers/               # Test utilities and fixtures
-│   ├── examples/              # Example client scripts
-│   │   ├── chromepilot-client.js  # Base WebSocket client helper class
-│   │   ├── google-search-client.js # Google search automation example
-│   │   ├── test-client.js         # Simple test client example
-│   │   └── test-client-new.js     # Extended test client
+│   ├── ui/                    # UI tests (Playwright)
+│   ├── helpers/               # Test utilities and shared client
+│   │   ├── chromepilot-client.js  # Enhanced WebSocket client with test helpers
+│   │   ├── hooks.js               # Global hooks and client factory
+│   │   ├── test-data.js           # Test URLs and selectors
+│   │   ├── server-helper.js       # Server lifecycle management
+│   │   └── session-helper.js      # Session utilities
+│   ├── fixtures/              # Playwright fixtures
 │   ├── package.json           # Test dependencies
 │   ├── .mocharc.json          # Mocha configuration
+│   ├── playwright.config.js  # Playwright configuration
 │   └── README.md              # Test documentation
+├── examples/                  # Example client scripts
+│   ├── chromepilot-client.js  # WebSocket client (copied from tests/helpers)
+│   ├── google-search-client.js # Google search automation example
+│   └── analyze-form-client.js  # Form analyzer tool
 ├── docs/
-│   └── PROTOCOL.md            # WebSocket protocol documentation
+│   ├── PROTOCOL.md            # WebSocket protocol documentation
+│   └── dev/
+│       └── DEVELOPMENT.md     # This file - development guide
 ├── update-server.sh           # Development helper: update installed server
-├── DEVELOPMENT.md             # This file - development guide
 ├── PLAN.md                    # Implementation plan
 └── README.md                  # User documentation
 

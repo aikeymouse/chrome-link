@@ -108,13 +108,11 @@ tests/
 │   ├── test-data.js          # Test URLs and selectors
 │   ├── server-helper.js      # Server lifecycle management
 │   └── session-helper.js     # Session utilities
-├── examples/                  # Example client scripts
-│   ├── chromepilot-client.js # WebSocket client (symlinked/copied from helpers)
-│   ├── google-search-client.js
-│   └── analyze-form-client.js # Form analyzer tool
 ├── .mocharc.json             # Mocha configuration
 └── playwright.config.js      # Playwright configuration
 ```
+
+**Note:** Example client scripts are located in `/examples/` at the project root.
 
 ## Test Features
 
