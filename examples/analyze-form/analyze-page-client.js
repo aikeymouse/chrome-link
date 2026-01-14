@@ -4,12 +4,12 @@
  * Analyzes DOM tree to find form containers and extract all form elements with stable selectors
  * 
  * Usage:
- *   node analyze-form-client.js <url> [startSelector] [--output <file>]
+ *   node analyze-page-client.js <url> [startSelector] [--output <file>]
  * 
  * Examples:
- *   node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html
- *   node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html "form"
- *   node analyze-form-client.js https://github.com/login "input[type=text]" --output login-form.json
+ *   node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html
+ *   node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html "form"
+ *   node analyze-page-client.js https://github.com/login "input[type=text]" --output login-form.json
  * 
  * Limitations:
  *   - None - works on all pages including CSP-restricted sites
@@ -423,7 +423,7 @@ async function main() {
     console.log('Analyzes web page forms and generates stable CSS selectors for automation.');
     console.log('');
     console.log(c.bold('Usage:'));
-    console.log(c.dim('  node analyze-form-client.js <url> [startSelector] [--output <file>]'));
+    console.log(c.dim('  node analyze-page-client.js <url> [startSelector] [--output <file>]'));
     console.log('');
     console.log(c.bold('Arguments:'));
     console.log(`  ${c.info('url')}            URL to analyze`);
@@ -433,9 +433,9 @@ async function main() {
     console.log(`                 ${c.dim('Default: form-analysis.json in current directory')}`);
     console.log('');
     console.log(c.bold('Examples:'));
-    console.log(c.dim('  node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html'));
-    console.log(c.dim('  node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html "form"'));
-    console.log(c.dim('  node analyze-form-client.js https://github.com/login "input[type=text]" --output login.json'));
+    console.log(c.dim('  node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html'));
+    console.log(c.dim('  node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html "form"'));
+    console.log(c.dim('  node analyze-page-client.js https://github.com/login "input[type=text]" --output login.json'));
     console.log('');
     process.exit(0);
   }

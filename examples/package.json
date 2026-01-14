@@ -7,7 +7,7 @@
     "test": "node test-client.js",
     "google": "node google-search-client.js",
     "screenshot": "node screenshot-client.js",
-    "analyze": "node analyze-form/analyze-form-client.js"
+    "analyze": "node analyze-form/analyze-page-client.js"
   },
   "keywords": [
     "chromepilot",

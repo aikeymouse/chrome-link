@@ -2,12 +2,12 @@
   "name": "chromepilot-form-analyzer",
   "version": "1.1.0",
   "description": "ChromePilot Form Analyzer - Extract form elements with stable CSS selectors",
-  "main": "analyze-form-client.js",
+  "main": "analyze-page-client.js",
   "bin": {
-    "analyze-form": "./analyze-form-client.js"
+    "analyze-page": "./analyze-page-client.js"
   },
   "scripts": {
-    "analyze": "node analyze-form-client.js"
+    "analyze": "node analyze-page-client.js"
   },
   "keywords": [
     "chromepilot",
