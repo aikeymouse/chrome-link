@@ -4,12 +4,12 @@
  * Analyzes DOM tree to find form containers and extract all form elements with stable selectors
  * 
  * Usage:
- *   node analyze-form-client.js <url> [startSelector]
+ *   node analyze-form-client.js <url> [startSelector] [--output <file>]
  * 
  * Examples:
  *   node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html
  *   node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html "form"
- *   node analyze-form-client.js https://github.com/login "input[type=text]"
+ *   node analyze-form-client.js https://github.com/login "input[type=text]" --output login-form.json
  * 
  * Limitations:
  *   - None - works on all pages including CSP-restricted sites
@@ -423,23 +423,47 @@ async function main() {
     console.log('Analyzes web page forms and generates stable CSS selectors for automation.');
     console.log('');
     console.log(c.bold('Usage:'));
-    console.log(c.dim('  node analyze-form-client.js <url> [startSelector]'));
+    console.log(c.dim('  node analyze-form-client.js <url> [startSelector] [--output <file>]'));
     console.log('');
     console.log(c.bold('Arguments:'));
     console.log(`  ${c.info('url')}            URL to analyze`);
     console.log(`  ${c.info('startSelector')}  CSS selector to start analysis from (optional)`);
     console.log(`                 ${c.dim('Default: "form input, form button, form select, form textarea"')}`);
+    console.log(`  ${c.info('--output')}       Save JSON output to file (optional)`);
+    console.log(`                 ${c.dim('Default: form-analysis.json in current directory')}`);
     console.log('');
     console.log(c.bold('Examples:'));
     console.log(c.dim('  node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html'));
     console.log(c.dim('  node analyze-form-client.js https://www.selenium.dev/selenium/web/web-form.html "form"'));
-    console.log(c.dim('  node analyze-form-client.js https://github.com/login "input[type=text]"'));
+    console.log(c.dim('  node analyze-form-client.js https://github.com/login "input[type=text]" --output login.json'));
     console.log('');
     process.exit(0);
   }
   
-  const url = args[0];
-  const startSelector = args[1] || 'form input, form button, form select, form textarea';
+  // Parse arguments
+  let url = null;
+  let startSelector = null;
+  let outputFile = null;
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--output' || args[i] === '-o') {
+      outputFile = args[i + 1];
+      i++; // Skip next argument
+    } else if (!url) {
+      url = args[i];
+    } else if (!startSelector) {
+      startSelector = args[i];
+    }
+  }
+  
+  if (!url) {
+    console.error(c.error('Error: URL is required'));
+    console.log('Run with --help for usage information');
+    process.exit(1);
+  }
+  
+  startSelector = startSelector || 'form input, form button, form select, form textarea';
+  outputFile = outputFile || 'form-analysis.json';
   
   const analyzer = new FormAnalyzer();
   
@@ -473,9 +497,12 @@ async function main() {
     // Display results
     analyzer.displayResults(analysis);
     
-    // Output JSON for programmatic use
-    console.log(c.bold('📄 JSON Output:'));
-    console.log(c.dim(JSON.stringify(analysis, null, 2)));
+    // Save JSON to file
+    const fs = require('fs');
+    const path = require('path');
+    const outputPath = path.resolve(outputFile);
+    fs.writeFileSync(outputPath, JSON.stringify(analysis, null, 2), 'utf8');
+    console.log(`${c.success('✓ JSON saved to:')} ${c.code(outputPath)}`);
     console.log('');
     
     // Close the tab
