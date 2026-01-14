@@ -84,7 +84,7 @@ function exitInspectorMode() {
   document.body.classList.remove('inspector-mode');
   
   // Show other sections
-  document.getElementById('clients-section').style.display = 'block';
+  document.getElementById('clients-section').style.display = '';
   document.getElementById('logs-section').style.display = '';
   
   // Update UI
