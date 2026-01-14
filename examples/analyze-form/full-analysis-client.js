@@ -27,7 +27,8 @@ function parseArgs() {
   const params = {
     url: null,
     selector: null,
-    outputDir: 'output'
+    outputDir: 'output',
+    excludeHidden: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -44,6 +45,8 @@ function parseArgs() {
       params.selector = args[++i];
     } else if (arg === '--output-dir' && i + 1 < args.length) {
       params.outputDir = args[++i];
+    } else if (arg === '--exclude-hidden') {
+      params.excludeHidden = true;
     }
   }
 
@@ -68,6 +71,7 @@ ${c.cyan('Options:')}
                           ${c.dim('(default: "form input, form button, form select, form textarea")')}
   --output-dir <dir>       Directory for all output files
                           ${c.dim('(default: "output")')}
+  --exclude-hidden         Exclude hidden input fields from analysis
   -h, --help              Show this help message
 
 ${c.cyan('Examples:')}
@@ -149,6 +153,10 @@ async function main() {
     
     if (params.selector) {
       analyzeArgs.splice(2, 0, params.selector);
+    }
+    
+    if (params.excludeHidden) {
+      analyzeArgs.push('--exclude-hidden');
     }
 
     await runCommand(

@@ -134,7 +134,7 @@ class FormAnalyzer {
   /**
    * Analyze form starting from a specific element
    */
-  async analyzeForm(tabId, startSelector = 'form input, form button, form select, form textarea, form a, form label') {
+  async analyzeForm(tabId, startSelector = 'form input, form button, form select, form textarea, form a, form label', excludeHidden = false) {
     console.log(`\n${c.bold('🔍 Starting form analysis...')}\n`);
     console.log(`${c.info('📍 Start selector:')} ${c.dim(startSelector)}\n`);
     
@@ -189,6 +189,19 @@ class FormAnalyzer {
     
     if (elements.length === 0) {
       throw new Error(`No form elements found in container: ${container.selector}`);
+    }
+    
+    // Filter hidden input elements if requested
+    const totalElements = elements.length;
+    if (excludeHidden) {
+      elements = elements.filter(el => {
+        const attrs = el.attributes || {};
+        return !(el.tagName === 'input' && attrs.type === 'hidden');
+      });
+      const hiddenCount = totalElements - elements.length;
+      if (hiddenCount > 0) {
+        console.log(`  ${c.info('ℹ')} Excluded ${c.dim(hiddenCount)} hidden input(s)`);
+      }
     }
     
     console.log(`  ${c.success('✓')} Found ${c.highlight(' ' + elements.length + ' ')} form element(s)\n`);
@@ -390,19 +403,22 @@ async function main() {
     console.log('Analyzes web page forms and generates stable CSS selectors for automation.');
     console.log('');
     console.log(c.bold('Usage:'));
-    console.log(c.dim('  node analyze-page-client.js <url> [startSelector] [--output <file>]'));
+    console.log(c.dim('  node analyze-page-client.js <url> [startSelector] [options]'));
     console.log('');
     console.log(c.bold('Arguments:'));
     console.log(`  ${c.info('url')}            URL to analyze`);
     console.log(`  ${c.info('startSelector')}  CSS selector to start analysis from (optional)`);
     console.log(`                 ${c.dim('Default: "form input, form button, form select, form textarea"')}`);
-    console.log(`  ${c.info('--output')}       Save JSON output to file (optional)`);
-    console.log(`                 ${c.dim('Default: output/page-analysis.json')}`);
+    console.log('');
+    console.log(c.bold('Options:'));
+    console.log(`  ${c.info('--output, -o')}        Save JSON output to file`);
+    console.log(`                         ${c.dim('Default: output/page-analysis.json')}`);
+    console.log(`  ${c.info('--exclude-hidden')}    Exclude hidden input fields from analysis`);
     console.log('');
     console.log(c.bold('Examples:'));
     console.log(c.dim('  node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html'));
     console.log(c.dim('  node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html "form"'));
-    console.log(c.dim('  node analyze-page-client.js https://github.com/login "input[type=text]" --output login.json'));
+    console.log(c.dim('  node analyze-page-client.js https://github.com/login --exclude-hidden --output login.json'));
     console.log('');
     process.exit(0);
   }
@@ -411,11 +427,14 @@ async function main() {
   let url = null;
   let startSelector = null;
   let outputFile = null;
+  let excludeHidden = false;
   
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--output' || args[i] === '-o') {
       outputFile = args[i + 1];
       i++; // Skip next argument
+    } else if (args[i] === '--exclude-hidden') {
+      excludeHidden = true;
     } else if (!url) {
       url = args[i];
     } else if (!startSelector) {
@@ -459,7 +478,7 @@ async function main() {
     console.log(c.success('✓ Page loaded\n'));
     
     // Analyze form
-    const analysis = await analyzer.analyzeForm(tabId, startSelector);
+    const analysis = await analyzer.analyzeForm(tabId, startSelector, excludeHidden);
     
     // Display results
     analyzer.displayResults(analysis);
