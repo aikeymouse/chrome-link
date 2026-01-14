@@ -26,7 +26,8 @@
 Found 4 item(s)
 
 ### Text input
-![#my-text-id](screenshots/element-001.png)
+![#my-text-id](screenshots/element-001_0.png)
+![#my-text-id](screenshots/element-001_1.png)
 
 **Label Selector:**
 ```css
@@ -53,7 +54,8 @@ label:has(#my-text-id)
 ---
 
 ### Disabled input
-![input[name="my-disabled"]](screenshots/element-002.png)
+![input[name="my-disabled"]](screenshots/element-002_0.png)
+![input[name="my-disabled"]](screenshots/element-002_1.png)
 
 **Label Selector:**
 ```css
@@ -80,7 +82,8 @@ input[name="my-disabled"]
 ---
 
 ### Readonly input
-![input[name="my-readonly"]](screenshots/element-003.png)
+![input[name="my-readonly"]](screenshots/element-003_0.png)
+![input[name="my-readonly"]](screenshots/element-003_1.png)
 
 **Label Selector:**
 ```css
@@ -107,7 +110,8 @@ input[name="my-readonly"]
 ---
 
 ### Date picker
-![input[name="my-date"]](screenshots/element-004.png)
+![input[name="my-date"]](screenshots/element-004_0.png)
+![input[name="my-date"]](screenshots/element-004_1.png)
 
 **Label Selector:**
 ```css
@@ -136,7 +140,8 @@ input[name="my-date"]
 Found 1 item(s)
 
 ### Password
-![input[name="my-password"]](screenshots/element-005.png)
+![input[name="my-password"]](screenshots/element-005_0.png)
+![input[name="my-password"]](screenshots/element-005_1.png)
 
 **Label Selector:**
 ```css
@@ -165,7 +170,8 @@ input[name="my-password"]
 Found 1 item(s)
 
 ### Textarea
-![textarea[name="my-textarea"]](screenshots/element-006.png)
+![textarea[name="my-textarea"]](screenshots/element-006_0.png)
+![textarea[name="my-textarea"]](screenshots/element-006_1.png)
 
 **Label Selector:**
 ```css
@@ -217,7 +223,8 @@ Found 1 item(s)
 ### Dropdown (select)
               
                 O
-![select[name="my-select"]](screenshots/element-008.png)
+![select[name="my-select"]](screenshots/element-008_0.png)
+![select[name="my-select"]](screenshots/element-008_1.png)
 
 **Label Selector:**
 ```css
@@ -247,7 +254,8 @@ select[name="my-select"]
 Found 1 item(s)
 
 ### Dropdown (datalist)
-![input[name="my-datalist"]](screenshots/element-009.png)
+![input[name="my-datalist"]](screenshots/element-009_0.png)
+![input[name="my-datalist"]](screenshots/element-009_1.png)
 
 **Label Selector:**
 ```css
@@ -276,7 +284,8 @@ input[name="my-datalist"]
 Found 1 item(s)
 
 ### File input
-![input[name="my-file"]](screenshots/element-010.png)
+![input[name="my-file"]](screenshots/element-010_0.png)
+![input[name="my-file"]](screenshots/element-010_1.png)
 
 **Label Selector:**
 ```css
@@ -305,7 +314,8 @@ input[name="my-file"]
 Found 2 item(s)
 
 ### Checked checkbox
-![#my-check-1](screenshots/element-011.png)
+![#my-check-1](screenshots/element-011_0.png)
+![#my-check-1](screenshots/element-011_1.png)
 
 **Label Selector:**
 ```css
@@ -332,7 +342,8 @@ label:has(#my-check-1)
 ---
 
 ### Default checkbox
-![#my-check-2](screenshots/element-012.png)
+![#my-check-2](screenshots/element-012_0.png)
+![#my-check-2](screenshots/element-012_1.png)
 
 **Label Selector:**
 ```css
@@ -362,7 +373,8 @@ label:has(#my-check-2)
 Found 2 item(s)
 
 ### Checked radio
-![#my-radio-1](screenshots/element-013.png)
+![#my-radio-1](screenshots/element-013_0.png)
+![#my-radio-1](screenshots/element-013_1.png)
 
 **Label Selector:**
 ```css
@@ -389,7 +401,8 @@ label:has(#my-radio-1)
 ---
 
 ### Default radio
-![#my-radio-2](screenshots/element-014.png)
+![#my-radio-2](screenshots/element-014_0.png)
+![#my-radio-2](screenshots/element-014_1.png)
 
 **Label Selector:**
 ```css
@@ -442,7 +455,8 @@ button[type="submit"]
 Found 1 item(s)
 
 ### Color picker
-![input[name="my-colors"]](screenshots/element-016.png)
+![input[name="my-colors"]](screenshots/element-016_0.png)
+![input[name="my-colors"]](screenshots/element-016_1.png)
 
 **Label Selector:**
 ```css
@@ -472,7 +486,8 @@ input[name="my-colors"]
 Found 1 item(s)
 
 ### Example range
-![input[name="my-range"]](screenshots/element-017.png)
+![input[name="my-range"]](screenshots/element-017_0.png)
+![input[name="my-range"]](screenshots/element-017_1.png)
 
 **Label Selector:**
 ```css
@@ -524,4 +539,4 @@ input[name="my-hidden"]
 
 ---
 
-*Generated on 1/14/2026, 1:08:40 PM*
+*Generated on 1/14/2026, 1:20:06 PM*

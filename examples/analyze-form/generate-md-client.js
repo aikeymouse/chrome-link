@@ -226,10 +226,11 @@ class MarkdownReportGenerator {
       // Wait for highlight animation
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Capture screenshot of the field (which should include the label if they're close)
+      // Combine both selectors with comma to capture both elements
+      const combinedSelector = `${labelSelector}, ${fieldSelector}`;
       const captureResult = await this.client.sendRequest('captureScreenshot', {
         tabId,
-        selector: fieldSelector
+        selector: combinedSelector
       });
 
       // Remove highlights
@@ -239,12 +240,18 @@ class MarkdownReportGenerator {
         args: []
       });
 
-      // Save screenshot
+      // Save screenshots (will get multiple screenshots - one for each element)
       if (captureResult.screenshots && captureResult.screenshots.length > 0) {
-        const screenshot = captureResult.screenshots[0];
-        const filepath = this.saveScreenshot(screenshot.dataUrl, filename);
-        console.log(`  ✓ Saved screenshot: ${filename}`);
-        return path.relative(path.join(__dirname, 'output'), filepath);
+        // Save all screenshots and return array of paths
+        const paths = [];
+        for (let i = 0; i < captureResult.screenshots.length; i++) {
+          const screenshot = captureResult.screenshots[i];
+          const filenamePart = filename.replace('.png', `_${i}.png`);
+          const filepath = this.saveScreenshot(screenshot.dataUrl, filenamePart);
+          paths.push(path.relative(path.join(__dirname, 'output'), filepath));
+        }
+        console.log(`  ✓ Saved ${paths.length} screenshot(s): ${filename}`);
+        return paths;
       } else {
         console.log(`  ⚠ No screenshot captured for pair`);
         return null;
@@ -311,7 +318,7 @@ class MarkdownReportGenerator {
           console.log(`  [${elementIndex}] ${label.selector} + ${field.selector}`);
           
           // Capture combined screenshot
-          const screenshotPath = await this.capturePairScreenshot(
+          const screenshotPaths = await this.capturePairScreenshot(
             tabId,
             label.selector,
             field.selector,
@@ -322,9 +329,11 @@ class MarkdownReportGenerator {
           const elementTitle = label.textContent || field.name || field.id || `Field ${elementIndex}`;
           lines.push(`\n### ${elementTitle.substring(0, 50)}\n`);
 
-          // Screenshot
-          if (screenshotPath) {
-            lines.push(`![${field.selector}](${screenshotPath})\n`);
+          // Screenshots (label and field)
+          if (screenshotPaths && screenshotPaths.length > 0) {
+            for (const screenshotPath of screenshotPaths) {
+              lines.push(`![${field.selector}](${screenshotPath})\n`);
+            }
           }
 
           // Label Selector
