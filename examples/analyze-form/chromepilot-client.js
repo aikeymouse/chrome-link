@@ -75,8 +75,6 @@ class ChromePilotClient {
    * Handle incoming messages
    */
   handleMessage(message) {
-    console.log('← Received:', JSON.stringify(message, null, 2));
-
     // Handle response messages (either with type='response' or with requestId)
     if (message.type === 'response' || (message.requestId && message.hasOwnProperty('result'))) {
       const { requestId, result, error } = message;
@@ -108,8 +106,6 @@ class ChromePilotClient {
         requestId
       };
 
-      console.log('→ Sending:', JSON.stringify(message, null, 2));
-
       this.pendingRequests.set(requestId, { resolve, reject });
       this.ws.send(JSON.stringify(message));
 
@@ -135,11 +131,8 @@ class ChromePilotClient {
    * Navigate to URL (opens in new tab and focuses it)
    */
   async navigate(url) {
-    console.log(`→ Navigating to: ${url}`);
     const result = await this.sendRequest('openTab', { url, focus: true });
-    console.log('✓ Navigation complete, result:', JSON.stringify(result, null, 2));
     this.currentTabId = result.tab.id;
-    console.log(`✓ Current tab ID set to: ${this.currentTabId}`);
     return result;
   }
 
@@ -148,9 +141,7 @@ class ChromePilotClient {
    */
   async executeJS(code, tabId = null) {
     const targetTabId = tabId || this.currentTabId;
-    console.log(`→ Executing JS in tab ${targetTabId}: ${code.substring(0, 50)}...`);
     const result = await this.sendRequest('executeJS', { code, tabId: targetTabId });
-    console.log(`✓ Result: ${JSON.stringify(result.value)}`);
     return result;
   }
 
@@ -159,13 +150,11 @@ class ChromePilotClient {
    */
   async callHelper(functionName, args = [], tabId = null) {
     const targetTabId = tabId || this.currentTabId;
-    console.log(`→ Calling helper: ${functionName}(${args.join(', ')})`);
     const result = await this.sendRequest('callHelper', { 
       functionName, 
       args, 
       tabId: targetTabId 
     });
-    console.log(`✓ Result: ${JSON.stringify(result.value)}`);
     return result;
   }
 
@@ -173,7 +162,6 @@ class ChromePilotClient {
    * Wait for element (using polling with executeJS)
    */
   async waitForElement(selector, timeout = 10000) {
-    console.log(`→ Waiting for element: ${selector}`);
     const start = Date.now();
     
     while (Date.now() - start < timeout) {
@@ -197,11 +185,9 @@ class ChromePilotClient {
    * Click element
    */
   async click(selector) {
-    console.log(`→ Clicking element: ${selector}`);
     const escapedSelector = selector.replace(/'/g, "\\'");
     const code = `(function() { document.querySelector('${escapedSelector}').click(); return true; })()`;
     const result = await this.executeJS(code);
-    console.log('✓ Click complete');
     return result;
   }
 
@@ -209,7 +195,6 @@ class ChromePilotClient {
    * Type text into element
    */
   async type(selector, text) {
-    console.log(`→ Typing "${text}" into: ${selector}`);
     const escapedSelector = selector.replace(/'/g, "\\'");
     const escapedText = text.replace(/'/g, "\\'");
     const code = `(function() {
@@ -220,7 +205,6 @@ class ChromePilotClient {
       return true;
     })()`;
     const result = await this.executeJS(code);
-    console.log('✓ Type complete');
     return result;
   }
 
@@ -228,10 +212,8 @@ class ChromePilotClient {
    * Get element text
    */
   async getText(selector) {
-    console.log(`→ Getting text from: ${selector}`);
     const code = `document.querySelector('${selector}').textContent`;
     const result = await this.executeJS(code);
-    console.log(`✓ Text: "${result.value}"`);
     return { text: result.value };
   }
 
@@ -239,9 +221,7 @@ class ChromePilotClient {
    * List tabs
    */
   async listTabs() {
-    console.log('→ Listing tabs');
     const result = await this.sendRequest('listTabs');
-    console.log(`✓ Found ${result.tabs.length} tabs`);
     return result;
   }
 
@@ -249,9 +229,7 @@ class ChromePilotClient {
    * Close a tab
    */
   async closeTab(tabId) {
-    console.log(`→ Closing tab: ${tabId}`);
     const result = await this.sendRequest('closeTab', { tabId });
-    console.log('✓ Tab closed');
     return result;
   }
 
@@ -260,7 +238,6 @@ class ChromePilotClient {
    */
   async closeSession() {
     if (this.sessionId) {
-      console.log(`→ Closing WebSocket connection (session will expire on timeout)`);
       this.sessionId = null;
       return { closed: true };
     }

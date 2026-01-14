@@ -430,7 +430,7 @@ async function main() {
     console.log(`  ${c.info('startSelector')}  CSS selector to start analysis from (optional)`);
     console.log(`                 ${c.dim('Default: "form input, form button, form select, form textarea"')}`);
     console.log(`  ${c.info('--output')}       Save JSON output to file (optional)`);
-    console.log(`                 ${c.dim('Default: form-analysis.json in current directory')}`);
+    console.log(`                 ${c.dim('Default: output/page-analysis.json')}`);
     console.log('');
     console.log(c.bold('Examples:'));
     console.log(c.dim('  node analyze-page-client.js https://www.selenium.dev/selenium/web/web-form.html'));
@@ -463,7 +463,7 @@ async function main() {
   }
   
   startSelector = startSelector || 'form input, form button, form select, form textarea';
-  outputFile = outputFile || 'form-analysis.json';
+  outputFile = outputFile || 'output/page-analysis.json';
   
   const analyzer = new FormAnalyzer();
   
@@ -501,6 +501,13 @@ async function main() {
     const fs = require('fs');
     const path = require('path');
     const outputPath = path.resolve(outputFile);
+    const outputDir = path.dirname(outputPath);
+    
+    // Create output directory if it doesn't exist
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
     fs.writeFileSync(outputPath, JSON.stringify(analysis, null, 2), 'utf8');
     console.log(`${c.success('✓ JSON saved to:')} ${c.code(outputPath)}`);
     console.log('');
