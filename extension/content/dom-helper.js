@@ -335,6 +335,8 @@ window.__chromePilotHelper = {
 
   /**
    * Generate a unique CSS selector for an element (internal helper)
+   * Priority order: id > radio/checkbox name+value > name > name+type > data-* > 
+   * aria-label > type+placeholder > unique class > element-specific attrs > nth-child path
    */
   _internal_generateSelector(element) {
     // Helper to escape attribute values (only escape quotes, not the whole value)
@@ -342,7 +344,7 @@ window.__chromePilotHelper = {
       return value.replace(/"/g, '\\"');
     };
     
-    // Try ID first
+    // 1. Try ID first (highest priority)
     if (element.id) {
       const idSelector = `#${CSS.escape(element.id)}`;
       if (document.querySelectorAll(idSelector).length === 1) {
@@ -350,14 +352,23 @@ window.__chromePilotHelper = {
       }
     }
     
-    // Try name attribute (common for form elements but can be on any element)
+    // 2. For radio/checkbox groups, use name + value to differentiate
+    if (element.tagName === 'INPUT' && element.name && element.value && 
+        (element.type === 'radio' || element.type === 'checkbox')) {
+      const radioCheckSelector = `input[name="${escapeAttributeValue(element.name)}"][value="${escapeAttributeValue(element.value)}"]`;
+      if (document.querySelectorAll(radioCheckSelector).length === 1) {
+        return radioCheckSelector;
+      }
+    }
+    
+    // 3. Try name attribute (common for form elements)
     if (element.name) {
       const nameSelector = `${element.tagName.toLowerCase()}[name="${escapeAttributeValue(element.name)}"]`;
       const matches = document.querySelectorAll(nameSelector);
       if (matches.length === 1) {
         return nameSelector;
       }
-      // If multiple matches and element has type attribute, try combining
+      // 4. If multiple matches and element has type attribute, try combining
       if (element.type) {
         const typeNameSelector = `${element.tagName.toLowerCase()}[type="${escapeAttributeValue(element.type)}"][name="${escapeAttributeValue(element.name)}"]`;
         if (document.querySelectorAll(typeNameSelector).length === 1) {
@@ -366,7 +377,7 @@ window.__chromePilotHelper = {
       }
     }
     
-    // Try any data-* attributes
+    // 5. Try any data-* attributes (common for test automation and component identification)
     for (const attr of element.attributes) {
       if (attr.name.startsWith('data-')) {
         const dataSelector = `[${attr.name}="${escapeAttributeValue(attr.value)}"]`;
@@ -376,9 +387,37 @@ window.__chromePilotHelper = {
       }
     }
     
-    // Try unique class combination
-    const classes = Array.from(element.classList);
+    // 6. Try aria-label for accessibility-labeled elements
+    if (element.hasAttribute('aria-label')) {
+      const ariaSelector = `${element.tagName.toLowerCase()}[aria-label="${escapeAttributeValue(element.getAttribute('aria-label'))}"]`;
+      if (document.querySelectorAll(ariaSelector).length === 1) {
+        return ariaSelector;
+      }
+    }
+    
+    // 7. For input elements, try type + placeholder combination
+    if (element.tagName === 'INPUT' && element.type && element.placeholder) {
+      const typePlaceholderSelector = `input[type="${escapeAttributeValue(element.type)}"][placeholder="${escapeAttributeValue(element.placeholder)}"]`;
+      if (document.querySelectorAll(typePlaceholderSelector).length === 1) {
+        return typePlaceholderSelector;
+      }
+    }
+    
+    // 8. Try unique class (filter out common utility classes)
+    const classes = Array.from(element.classList).filter(cls => {
+      // Skip generic utility classes (Bootstrap, Tailwind-like patterns)
+      return !cls.match(/^(btn|button|input|form|text|label|field|container|wrapper|col|row|mt|mb|ml|mr|pt|pb|pl|pr|m-|p-|w-|h-|flex|grid|d-|align|justify)(-|\d|$)/);
+    });
+    
     if (classes.length > 0) {
+      // Try single class first
+      for (const cls of classes) {
+        const singleClassSelector = '.' + CSS.escape(cls);
+        if (document.querySelectorAll(singleClassSelector).length === 1) {
+          return singleClassSelector;
+        }
+      }
+      // Try class combination as fallback
       const classSelector = '.' + classes.map(c => CSS.escape(c)).join('.');
       if (document.querySelectorAll(classSelector).length === 1) {
         return classSelector;
@@ -448,6 +487,47 @@ window.__chromePilotHelper = {
     if (!element) throw new Error(`Element not found: ${selector}`);
     
     return window.__chromePilotBuildElementTree(element, false);
+  },
+
+  /**
+   * Get all elements within a container matching optional filter
+   * Returns array of element data with attributes and visibility flag
+   * @param {string} containerSelector - CSS selector for container element
+   * @param {string} elementSelector - Optional CSS selector filter for elements (default: '*' for all descendants)
+   * @returns {Array} Array of {tagName, selector, attributes, textContent, visible}
+   */
+  getContainerElements(containerSelector, elementSelector = '*') {
+    const container = document.querySelector(containerSelector);
+    if (!container) throw new Error(`Container not found: ${containerSelector}`);
+    
+    // Query all descendants matching the filter
+    const elements = Array.from(container.querySelectorAll(elementSelector));
+    
+    // Map each element to structured data
+    return elements.map(el => {
+      // Collect all attributes
+      const attributes = {};
+      if (el.attributes) {
+        for (let i = 0; i < el.attributes.length; i++) {
+          const attr = el.attributes[i];
+          attributes[attr.name] = attr.value;
+        }
+      }
+      
+      // Check visibility
+      const style = window.getComputedStyle(el);
+      const visible = style.display !== 'none' && 
+                     style.visibility !== 'hidden' && 
+                     style.opacity !== '0';
+      
+      return {
+        tagName: el.tagName.toLowerCase(),
+        selector: window.__chromePilotHelper._internal_generateSelector(el),
+        attributes: attributes,
+        textContent: el.textContent ? el.textContent.trim() : '',
+        visible: visible
+      };
+    });
   },
 
   /**
