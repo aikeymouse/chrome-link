@@ -132,7 +132,7 @@ class FormAnalyzer {
   /**
    * Analyze form starting from a specific element
    */
-  async analyzeForm(tabId, startSelector = 'form input, form button, form select, form textarea') {
+  async analyzeForm(tabId, startSelector = 'form input, form button, form select, form textarea, form a, form label') {
     console.log('\n🔍 Starting form analysis...\n');
     console.log(`📍 Start selector: ${startSelector}\n`);
     
@@ -166,12 +166,13 @@ class FormAnalyzer {
     try {
       const containerSelector = container.selector;
       
-      // Use getContainerElements helper to extract all form elements in one call
+      // Use getContainerElements helper to extract all interactive elements in one call
       // This is CSP-compatible and much more efficient than looping
+      // Include: form controls (input, button, select, textarea) + links (a) + labels
       const result = await this.client.sendRequest('callHelper', {
         tabId,
         functionName: 'getContainerElements',
-        args: [containerSelector, 'input, button, select, textarea']
+        args: [containerSelector, 'input, button, select, textarea, a, label']
       });
       
       if (!result || !result.value) {
@@ -424,6 +425,11 @@ async function main() {
     console.log('📄 JSON Output:');
     console.log(JSON.stringify(analysis, null, 2));
     console.log('');
+    
+    // Close the tab
+    console.log('🧹 Closing tab...');
+    await analyzer.client.sendRequest('closeTab', { tabId });
+    console.log('✓ Tab closed\n');
     
   } catch (error) {
     console.error('\n❌ Error:', error.message);
