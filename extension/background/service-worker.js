@@ -164,6 +164,9 @@ async function handleNativeMessage(message) {
     activeSessions.delete(message.sessionId);
     broadcastSessionUpdate();
     
+    // Clean up all injections associated with this session
+    cleanupSessionInjections(message.sessionId);
+    
     // Notify side panel
     broadcastToSidePanel({
       type: 'sessionExpired',
@@ -229,7 +232,7 @@ async function handleCommand(sessionId, command) {
         result = await disableInspector(params);
         break;
       case 'registerInjection':
-        result = await registerInjection(params);
+        result = await registerInjection({ ...params, sessionId });
         break;
       case 'unregisterInjection':
         result = await unregisterInjection(params);
@@ -886,7 +889,7 @@ const registeredInjections = new Map();
  * Register early script injection for WebView2 testing and page mocking
  */
 async function registerInjection(params) {
-  const { id, code, matches = ['<all_urls>'], runAt = 'document_start' } = params;
+  const { id, code, matches = ['<all_urls>'], runAt = 'document_start', sessionId } = params;
   
   if (!id || !code) {
     throw { code: 'MISSING_PARAMS', message: 'Missing required parameters: id, code' };
@@ -898,7 +901,8 @@ async function registerInjection(params) {
       code,
       matches,
       runAt,
-      active: true
+      active: true,
+      sessionId: sessionId || null
     });
     
     // Listen for tab updates to inject the script
@@ -974,6 +978,29 @@ async function unregisterInjection(params) {
   }
 }
 
+/**
+ * Clean up all injections associated with a session
+ */
+function cleanupSessionInjections(sessionId) {
+  let cleanedCount = 0;
+  
+  for (const [id, injection] of registeredInjections.entries()) {
+    if (injection.sessionId === sessionId) {
+      // Mark as inactive and remove listener
+      injection.active = false;
+      if (injection.listener) {
+        chrome.tabs.onUpdated.removeListener(injection.listener);
+      }
+      registeredInjections.delete(id);
+      cleanedCount++;
+      console.log('Cleaned up injection:', id, 'for expired session:', sessionId);
+    }
+  }
+  
+  if (cleanedCount > 0) {
+    console.log(`Cleaned up ${cleanedCount} injection(s) for session ${sessionId}`);
+  }
+}
 /**
  * Tab event listeners
  */

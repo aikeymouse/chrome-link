@@ -14,7 +14,7 @@ async function main() {
   try {
     // Connect to ChromePilot
     console.log('Connecting to ChromePilot...');
-    await client.connect('ws://localhost:9000', 600000); // 10 minute timeout
+    await client.connect('ws://localhost:9000', 120000); // 2 minutes timeout
     
     // Register injection for Selenium pages
     console.log('\nRegistering script injection for Selenium...');
