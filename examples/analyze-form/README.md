@@ -18,7 +18,12 @@ node full-analysis-client.js --url https://example.com --output-dir results
 Runs complete analysis and generates all outputs in one command.
 
 ```bash
-node full-analysis-client.js --url <url> [--selector <selector>] [--output-dir <dir>]
+node full-analysis-client.js --url <url> [--selector <selector>] [--output-dir <dir>] [--exclude-hidden]
+```
+
+**Example:**
+```bash
+node full-analysis-client.js --url "https://github.com/login" --output-dir "report-example/login-page" --exclude-hidden
 ```
 
 **Output:**
@@ -53,13 +58,14 @@ node generate-md-client.js https://github.com/login --input login.json --markdow
 ## Options
 
 | Option | Description | Default |
-|--------|-------------|---------|
+|--------|-------------|---------||
 | `--url` | URL to analyze | Required |
 | `--selector` | Starting CSS selector | `form input, form button, form select, form textarea` |
 | `--output-dir` | Output directory for all files | `output/` |
 | `--output` | JSON output file path | `output/page-analysis.json` |
 | `--input` | JSON input file path | `output/page-analysis.json` |
 | `--markdown-output` | Markdown output file path | `output/page-report.md` |
+| `--exclude-hidden` | Skip hidden elements in analysis | `false` |
 
 ## Use Cases
 
