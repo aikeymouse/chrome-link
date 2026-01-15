@@ -345,7 +345,7 @@ function updateSessionsUI() {
       if (data.expiresAt) {
         const remaining = data.expiresAt - Date.now();
         if (remaining > 0) {
-          console.log(`⏱️ Session ${id} remaining: ${remaining}ms (${formatDuration(remaining)})`);
+          // console.log(`⏱️ Session ${id} remaining: ${remaining}ms (${formatDuration(remaining)})`);
           sessionStatus.textContent = formatDuration(remaining);
           if (remaining < 60000) {
             sessionStatus.classList.add('warning');
