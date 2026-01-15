@@ -75,7 +75,7 @@ class MarkdownReportGenerator {
       // Capture screenshot of the specific element
       const captureResult = await this.client.sendRequest('captureScreenshot', {
         tabId,
-        selector: selector
+        selectors: selector
       });
 
       // Remove highlight
@@ -248,14 +248,14 @@ class MarkdownReportGenerator {
         // Label wraps field - only capture label (which includes field visually)
         captureResult = await this.client.sendRequest('captureScreenshot', {
           tabId,
-          selector: labelSelector
+          selectors: labelSelector
         });
       } else {
         // Label doesn't wrap - capture both in combined screenshot
         const combinedSelector = `${labelSelector}, ${fieldSelector}`;
         captureResult = await this.client.sendRequest('captureScreenshot', {
           tabId,
-          selector: combinedSelector
+          selectors: combinedSelector
         });
       }
 

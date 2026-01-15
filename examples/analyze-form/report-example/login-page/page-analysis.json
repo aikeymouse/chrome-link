@@ -77,12 +77,12 @@
       "textContent": "Forgot password?"
     },
     {
-      "selector": "input[name=\"required_field_4ce4\"]",
+      "selector": "input[name=\"required_field_ef65\"]",
       "tagName": "input",
       "type": "text",
-      "name": "required_field_4ce4",
+      "name": "required_field_ef65",
       "id": "",
-      "label": "required_field_4ce4",
+      "label": "required_field_ef65",
       "placeholder": "",
       "required": false,
       "disabled": false,
@@ -152,7 +152,7 @@
         "isFragile": false
       },
       {
-        "selector": "input[name=\"required_field_4ce4\"]",
+        "selector": "input[name=\"required_field_ef65\"]",
         "matchCount": 1,
         "isValid": true,
         "tagName": "input",
