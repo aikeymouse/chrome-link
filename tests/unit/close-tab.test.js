@@ -64,7 +64,7 @@ describe('closeTab command', function() {
         await client.closeTab(999999);
         expect.fail('Should have thrown error');
       } catch (err) {
-        expect(err.message).to.include('TAB_NOT_FOUND');
+        expect(err).to.have.property('code', 'TAB_NOT_FOUND');
       }
     });
 
@@ -80,7 +80,7 @@ describe('closeTab command', function() {
         await client.closeTab(tabId);
         expect.fail('Should have thrown error');
       } catch (err) {
-        expect(err.message).to.include('TAB_NOT_FOUND');
+        expect(err).to.have.property('code', 'TAB_NOT_FOUND');
       }
     });
   });

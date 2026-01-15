@@ -954,8 +954,7 @@ Capture screenshot of the visible viewport or specific elements.
   "result": null,
   "error": {
     "code": "ELEMENTS_NOT_FOUND",
-    "message": "No elements found matching selectors: h1, button.submit",
-    "selectors": ["h1", "button.submit"]
+    "message": "No elements found matching selectors: h1, button.submit"
   }
 }
 ```

@@ -290,7 +290,7 @@ describe('callHelper command', function() {
         await client.callHelper('getText', ['h1'], 999999);
         expect.fail('Should have thrown error');
       } catch (err) {
-        expect(err.message).to.include('TAB_NOT_FOUND');
+        expect(err).to.have.property('code', 'TAB_NOT_FOUND');
       }
     });
 
@@ -319,9 +319,9 @@ describe('callHelper command', function() {
         await client.callHelper('_internal_enableClickTracking', [], testTabId);
         expect.fail('Should have thrown PERMISSION_DENIED error');
       } catch (err) {
-        expect(err.message).to.include('PERMISSION_DENIED');
-        expect(err.message).to.include('_internal_enableClickTracking');
-        expect(err.message).to.include('restricted to internal use only');
+        expect(err).to.have.property('code', 'PERMISSION_DENIED');
+        expect(err).to.have.property('message').that.includes('_internal_enableClickTracking');
+        expect(err).to.have.property('message').that.includes('restricted to internal use only');
       }
     });
 
@@ -330,8 +330,8 @@ describe('callHelper command', function() {
         await client.callHelper('_internal_disableClickTracking', [], testTabId);
         expect.fail('Should have thrown PERMISSION_DENIED error');
       } catch (err) {
-        expect(err.message).to.include('PERMISSION_DENIED');
-        expect(err.message).to.include('_internal_disableClickTracking');
+        expect(err).to.have.property('code', 'PERMISSION_DENIED');
+        expect(err).to.have.property('message').that.includes('_internal_disableClickTracking');
       }
     });
 
@@ -340,8 +340,8 @@ describe('callHelper command', function() {
         await client.callHelper('_internal_cropScreenshotToElements', ['data:image/png;base64,fake', []], testTabId);
         expect.fail('Should have thrown PERMISSION_DENIED error');
       } catch (err) {
-        expect(err.message).to.include('PERMISSION_DENIED');
-        expect(err.message).to.include('_internal_cropScreenshotToElements');
+        expect(err).to.have.property('code', 'PERMISSION_DENIED');
+        expect(err).to.have.property('message').that.includes('_internal_cropScreenshotToElements');
       }
     });
 
@@ -350,8 +350,8 @@ describe('callHelper command', function() {
         await client.callHelper('_internal_generateSelector', [null], testTabId);
         expect.fail('Should have thrown PERMISSION_DENIED error');
       } catch (err) {
-        expect(err.message).to.include('PERMISSION_DENIED');
-        expect(err.message).to.include('_internal_generateSelector');
+        expect(err).to.have.property('code', 'PERMISSION_DENIED');
+        expect(err).to.have.property('message').that.includes('_internal_generateSelector');
       }
     });
   });

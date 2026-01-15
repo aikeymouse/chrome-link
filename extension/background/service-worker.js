@@ -479,7 +479,7 @@ async function executeJS(params) {
 }
 
 async function captureScreenshot(params) {
-  let { tabId, format = 'png', quality = 90, selectors, selector } = params;
+  let { tabId, format = 'png', quality = 90, selectors } = params;
   
   // If no tabId, use active tab
   if (!tabId) {
@@ -509,16 +509,15 @@ async function captureScreenshot(params) {
     throw { code: 'TAB_NOT_FOUND', message: `Tab with ID ${tabId} not found or was closed` };
   }
   
-  // Support both 'selectors' and 'selector' parameters (backward compatibility)
-  const selectorsParam = selectors || selector;
-  
   // If selectors provided, get bounds and crop to combined area
-  if (selectorsParam) {
+  if (selectors) {
     // Normalize to array
-    const selectorsArray = Array.isArray(selectorsParam) ? selectorsParam : [selectorsParam];
+    const selectorsArray = Array.isArray(selectors) ? selectors : [selectors];
     
     // Get element bounds for all selectors
     const allBounds = [];
+    const notFoundSelectors = [];
+    
     for (const sel of selectorsArray) {
       const boundsResult = await callHelper({
         tabId,
@@ -528,14 +527,16 @@ async function captureScreenshot(params) {
       
       if (boundsResult.value && boundsResult.value.length > 0) {
         allBounds.push(...boundsResult.value);
+      } else {
+        notFoundSelectors.push(sel);
       }
     }
     
-    if (allBounds.length === 0) {
+    // Throw error if ANY selector was not found
+    if (notFoundSelectors.length > 0) {
       throw {
         code: 'ELEMENTS_NOT_FOUND',
-        message: `No elements found matching selectors: ${selectorsArray.join(', ')}`,
-        selectors: selectorsArray
+        message: `No elements found matching selectors: ${notFoundSelectors.join(', ')}`
       };
     }
     

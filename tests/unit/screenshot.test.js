@@ -74,7 +74,7 @@ describe('Screenshot functionality', function() {
     it('should capture single element screenshot', async function() {
       const result = await client.sendRequest('captureScreenshot', {
         tabId: testTabId,
-        selector: 'h1'
+        selectors: 'h1'
       });
       
       expect(result).to.have.property('dataUrl');
@@ -91,7 +91,7 @@ describe('Screenshot functionality', function() {
     it('should capture combined screenshot for multiple elements', async function() {
       const result = await client.sendRequest('captureScreenshot', {
         tabId: testTabId,
-        selector: 'label.form-label'
+        selectors: 'label.form-label'
       });
       
       expect(result).to.have.property('dataUrl');
@@ -106,7 +106,7 @@ describe('Screenshot functionality', function() {
     it('should capture combined screenshot using array of selectors', async function() {
       const result = await client.sendRequest('captureScreenshot', {
         tabId: testTabId,
-        selector: ['h1', 'label.form-label']
+        selectors: ['h1', 'label.form-label']
       });
       
       expect(result).to.have.property('dataUrl');
@@ -122,13 +122,12 @@ describe('Screenshot functionality', function() {
       try {
         await client.sendRequest('captureScreenshot', {
           tabId: testTabId,
-          selector: '#nonexistent-element-12345'
+          selectors: '#nonexistent-element-12345'
         });
         expect.fail('Should have thrown error');
       } catch (error) {
         expect(error).to.have.property('code', 'ELEMENTS_NOT_FOUND');
         expect(error).to.have.property('message').that.includes('#nonexistent-element-12345');
-        expect(error).to.have.property('selectors');
       }
     });
 
@@ -136,14 +135,28 @@ describe('Screenshot functionality', function() {
       try {
         await client.sendRequest('captureScreenshot', {
           tabId: testTabId,
-          selector: ['#nonexistent-1', '#nonexistent-2']
+          selectors: ['#nonexistent-1', '#nonexistent-2']
         });
         expect.fail('Should have thrown error');
       } catch (error) {
         expect(error).to.have.property('code', 'ELEMENTS_NOT_FOUND');
-        expect(error).to.have.property('selectors').that.is.an('array');
-        expect(error.selectors).to.include('#nonexistent-1');
-        expect(error.selectors).to.include('#nonexistent-2');
+        expect(error).to.have.property('message').that.includes('#nonexistent-1');
+        expect(error).to.have.property('message').that.includes('#nonexistent-2');
+      }
+    });
+
+    it('should throw error when some selectors find elements but others do not', async function() {
+      try {
+        await client.sendRequest('captureScreenshot', {
+          tabId: testTabId,
+          selectors: ['h1', '#nonexistent-selector']
+        });
+        expect.fail('Should have thrown error');
+      } catch (error) {
+        expect(error).to.have.property('code', 'ELEMENTS_NOT_FOUND');
+        expect(error).to.have.property('message').that.includes('#nonexistent-selector');
+        // Message should only contain the not-found selector, not the found ones
+        expect(error.message).to.equal('No elements found matching selectors: #nonexistent-selector');
       }
     });
   });
