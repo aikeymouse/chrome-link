@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aikeymouse/chrome-link.git",
+    "url": "git+https://github.com/aikeymouse/chrome-link.git",
     "directory": "clients/node"
   },
   "homepage": "https://github.com/aikeymouse/chrome-link#readme",
