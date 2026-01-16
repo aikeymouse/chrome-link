@@ -12,7 +12,7 @@
 
 **All Platforms (macOS/Linux/Windows):**
 ```bash
-cd chrome-driver-extension/install-scripts
+cd install-scripts
 node install.js
 ```
 
@@ -46,11 +46,7 @@ node install.js update-id abcdefghijklmnopqrstuvwxyzabcdef
 
 This automatically updates the native messaging manifest with your extension ID.
 
-### Step 4: Restart Chrome
-
-Completely quit and restart Chrome.
-
-### Step 5: Test
+### Step 4: Test
 
 1. Click the extension icon in Chrome toolbar
 2. Side panel opens showing "Connected" status
@@ -127,7 +123,7 @@ ws.on('message', (data) => {
 Use the diagnostic command to verify everything is set up correctly:
 
 ```bash
-cd chrome-driver-extension/install-scripts
+cd install-scripts
 node install.js diagnose
 ```
 
@@ -178,7 +174,7 @@ lsof -i :9000
 **Fix:**
 ```bash
 # Run diagnostics
-cd chrome-driver-extension/install-scripts
+cd install-scripts
 node install.js diagnose
 
 # Verify extension ID is set correctly
