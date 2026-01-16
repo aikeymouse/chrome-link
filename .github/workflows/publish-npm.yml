@@ -104,7 +104,7 @@ jobs:
         run: npm install
       
       - name: Dry run (test package)
-        if: ${{ github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '') }}
         working-directory: ./clients/node
         run: |
           echo "🧪 Running dry run..."
@@ -118,7 +118,7 @@ jobs:
           echo "  3. Uncheck 'Dry run' option"
       
       - name: Publish to npm
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./clients/node
         run: npm publish --provenance --access public
         env:
@@ -153,7 +153,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       
       - name: Dry run (test package)
-        if: ${{ github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '') }}
         working-directory: ./clients/chromelink-client
         run: |
           echo "🧪 Running dry run for placeholder package..."
@@ -162,7 +162,7 @@ jobs:
           echo "✅ Placeholder package dry run successful!"
       
       - name: Publish to npm
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./clients/chromelink-client
         run: npm publish --access public
         env:
