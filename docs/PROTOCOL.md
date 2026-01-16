@@ -560,36 +560,372 @@ Call a predefined DOM helper function for CSP-restricted pages. This command is 
 
 **Available Helper Functions:**
 
-1. **clickElement(selector)** - Click and focus an element
-2. **typeText(selector, text, clearFirst)** - Type text into input/textarea/contenteditable
-3. **appendChar(selector, char)** - Append single character to contenteditable element
-4. **clearContentEditable(selector)** - Clear contenteditable element
-5. **getText(selector)** - Get text content of element
-6. **getHTML(selector)** - Get innerHTML of element
-7. **getLastHTML(selector)** - Get innerHTML of last element matching selector
-8. **elementExists(selector)** - Check if element exists
-9. **isVisible(selector)** - Check if element is visible
-10. **waitForElement(selector, timeoutMs)** - Wait for element to appear
-11. **highlightElement(selector)** - Highlight all matching elements with yellow background (returns count)
-12. **removeHighlights()** - Remove all highlights from the page (returns count)
-13. **getElementBounds(selector)** - Get position and size of all matching elements (returns array)
-14. **scrollElementIntoView(selector, index)** - Scroll element into view by index (returns bounds array)
-15. **inspectElement(selector)** - Inspect element and return tree structure with parents, clicked element, and children
-16. **getContainerElements(containerSelector, elementSelector)** - Get all elements within a container matching optional filter (returns array of element data)
+#### Element Interaction
 
-**Note:** Functions prefixed with `_internal_` are restricted to internal UI use only and cannot be called via the `callHelper` API. Use public functions like `inspectElement(selector)` for programmatic access.
-
-**Response:**
+**1. clickElement(selector)**
+- Clicks and focuses an element
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** `true`
+- **Example:**
 ```json
 {
-  "requestId": "req-006",
-  "result": {
-    "value": true,
-    "type": "boolean"
+  "action": "callHelper",
+  "params": {
+    "functionName": "clickElement",
+    "args": ["button.submit"]
   },
-  "error": null
+  "requestId": "req-001"
 }
 ```
+
+**2. typeText(selector, text, clearFirst)**
+- Types text into input/textarea/contenteditable elements
+- **Parameters:** 
+  - `selector` (string) - CSS selector
+  - `text` (string) - Text to type
+  - `clearFirst` (boolean, optional) - Clear existing content first (default: `true`)
+- **Returns:** `true`
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "typeText",
+    "args": ["input[name='username']", "john@example.com", true]
+  },
+  "requestId": "req-002"
+}
+```
+
+**3. appendChar(selector, char)**
+- Appends single character to contenteditable element
+- **Parameters:**
+  - `selector` (string) - CSS selector for contenteditable element
+  - `char` (string) - Single character to append
+- **Returns:** `true`
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "appendChar",
+    "args": ["div[contenteditable='true']", "!"]
+  },
+  "requestId": "req-003"
+}
+```
+
+**4. clearContentEditable(selector)**
+- Clears contenteditable element (sets to `<p><br></p>`)
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** `true`
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "clearContentEditable",
+    "args": ["div.editor"]
+  },
+  "requestId": "req-004"
+}
+```
+
+#### Element Query
+
+**5. getText(selector)**
+- Gets text content of an element
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** Text content as string
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getText",
+    "args": ["h1.title"]
+  },
+  "requestId": "req-005"
+}
+```
+Response: `{ "value": "Welcome to Our Site", "type": "string" }`
+
+**6. getHTML(selector)**
+- Gets innerHTML of an element
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** HTML content as string
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getHTML",
+    "args": ["div.content"]
+  },
+  "requestId": "req-006"
+}
+```
+
+**7. getLastHTML(selector)**
+- Gets innerHTML of the last element matching selector
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** HTML content of last matching element
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getLastHTML",
+    "args": ["li.message"]
+  },
+  "requestId": "req-007"
+}
+```
+
+**8. elementExists(selector)**
+- Checks if element exists in DOM
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** `true` if exists, `false` otherwise
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "elementExists",
+    "args": ["#login-form"]
+  },
+  "requestId": "req-008"
+}
+```
+
+**9. isVisible(selector)**
+- Checks if element is visible (not `display: none`, `visibility: hidden`, or `opacity: 0`)
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** `true` if visible, `false` otherwise
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "isVisible",
+    "args": ["div.modal"]
+  },
+  "requestId": "req-009"
+}
+```
+
+**10. waitForElement(selector, timeoutMs)**
+- Waits for element to appear in DOM
+- **Parameters:**
+  - `selector` (string) - CSS selector
+  - `timeoutMs` (number, optional) - Timeout in milliseconds (default: `30000`)
+- **Returns:** Promise that resolves to `true` when element appears
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "waitForElement",
+    "args": ["div.loading-complete", 5000]
+  },
+  "requestId": "req-010"
+}
+```
+
+#### Element Highlighting
+
+**11. highlightElement(selector)**
+- Highlights all matching elements with semi-transparent yellow background
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** Number of elements highlighted
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "highlightElement",
+    "args": ["button.action"]
+  },
+  "requestId": "req-011"
+}
+```
+Response: `{ "value": 3, "type": "number" }` (3 buttons highlighted)
+
+**12. removeHighlights()**
+- Removes all highlights applied by `highlightElement`
+- **Parameters:** None
+- **Returns:** Number of highlights removed
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "removeHighlights",
+    "args": []
+  },
+  "requestId": "req-012"
+}
+```
+Response: `{ "value": 3, "type": "number" }`
+
+#### Element Positioning
+
+**13. getElementBounds(selector)**
+- Gets position and size of all matching elements
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** Array of bounds objects (empty array if no elements found)
+- **Bounds object:**
+  - `index` - Element index (0-based)
+  - `x`, `y` - Position relative to viewport
+  - `width`, `height` - Element dimensions
+  - `absoluteX`, `absoluteY` - Position relative to page
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getElementBounds",
+    "args": ["button.submit"]
+  },
+  "requestId": "req-013"
+}
+```
+Response:
+```json
+{
+  "value": [
+    {
+      "index": 0,
+      "x": 100,
+      "y": 200,
+      "width": 150,
+      "height": 50,
+      "absoluteX": 100,
+      "absoluteY": 1200
+    }
+  ],
+  "type": "object"
+}
+```
+
+**14. scrollElementIntoView(selector, index)**
+- Scrolls element into view (centered in viewport)
+- **Parameters:**
+  - `selector` (string) - CSS selector
+  - `index` (number, optional) - Element index for multiple matches (default: `0`)
+- **Returns:** Bounds array of all matching elements after scrolling
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "scrollElementIntoView",
+    "args": ["div.section", 2]
+  },
+  "requestId": "req-014"
+}
+```
+
+#### Element Inspection
+
+**15. inspectElement(selector)**
+- Inspects element and returns detailed tree structure
+- **Parameters:** `selector` (string) - CSS selector
+- **Returns:** Object with `clickedElement`, `parents`, `children`, `timestamp`
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "inspectElement",
+    "args": ["button.submit"]
+  },
+  "requestId": "req-015"
+}
+```
+Response:
+```json
+{
+  "value": {
+    "clickedElement": {
+      "tagName": "button",
+      "selector": "button.submit",
+      "attributes": { "class": "submit primary-btn", "type": "submit" },
+      "textContent": "Submit Form",
+      "isClickedElement": true,
+      "siblingCount": 2
+    },
+    "parents": [
+      {
+        "tagName": "form",
+        "selector": "#contact-form",
+        "attributes": { "id": "contact-form" },
+        "textContent": "...",
+        "isClickedElement": false,
+        "siblingCount": 1
+      }
+    ],
+    "children": [],
+    "timestamp": 1736793600000
+  },
+  "type": "object"
+}
+```
+
+**16. getContainerElements(containerSelector, elementSelector)**
+- Extracts all elements within a container with stable selectors
+- **Parameters:**
+  - `containerSelector` (string) - CSS selector for container
+  - `elementSelector` (string, optional) - Filter for descendants (default: `'*'`)
+- **Returns:** Array of element objects
+- **Element object:**
+  - `tagName` - Lowercase tag name
+  - `selector` - Stable CSS selector (optimized for test automation)
+  - `attributes` - All element attributes as object
+  - `textContent` - Trimmed text content
+  - `visible` - Boolean visibility flag
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "getContainerElements",
+    "args": ["form#login", "input, button, label"]
+  },
+  "requestId": "req-016"
+}
+```
+Response:
+```json
+{
+  "value": [
+    {
+      "tagName": "label",
+      "selector": "label[for='username']",
+      "attributes": { "for": "username", "class": "form-label" },
+      "textContent": "Username",
+      "visible": true
+    },
+    {
+      "tagName": "input",
+      "selector": "input[name='username']",
+      "attributes": { "type": "text", "name": "username", "id": "username" },
+      "textContent": "",
+      "visible": true
+    },
+    {
+      "tagName": "button",
+      "selector": "button[type='submit']",
+      "attributes": { "type": "submit", "class": "btn-primary" },
+      "textContent": "Login",
+      "visible": true
+    }
+  ],
+  "type": "object"
+}
+```
+
+**Note:** Functions prefixed with `_internal_` are restricted to internal UI use only and cannot be called via the `callHelper` API. Use public functions like `inspectElement(selector)` for programmatic access.
 
 **Error Cases:**
 
@@ -628,376 +964,6 @@ Element not found:
   }
 }
 ```
-
-**Highlight Examples:**
-
-Highlight single element:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "highlightElement",
-    "args": ["h1"]
-  },
-  "requestId": "req-007"
-}
-```
-
-Response:
-```json
-{
-  "requestId": "req-007",
-  "result": {
-    "value": 1,
-    "type": "number"
-  },
-  "error": null
-}
-```
-
-Highlight multiple elements:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "highlightElement",
-    "args": ["button.action-btn"]
-  },
-  "requestId": "req-008"
-}
-```
-
-Response (3 buttons highlighted):
-```json
-{
-  "requestId": "req-008",
-  "result": {
-    "value": 3,
-    "type": "number"
-  },
-  "error": null
-}
-```
-
-Remove all highlights:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "removeHighlights",
-    "args": []
-  },
-  "requestId": "req-009"
-}
-```
-
-Response:
-```json
-{
-  "requestId": "req-009",
-  "result": {
-    "value": 3,
-    "type": "number"
-  },
-  "error": null
-}
-```
-
-**Notes:**
-- Returns the number of elements highlighted/unhighlighted
-- Multiple elements matching the selector are all highlighted
-- Highlights persist until explicitly removed with `removeHighlights()`
-- Highlights are cleared automatically on page navigation
-- Calling `highlightElement` with the same selector multiple times won't duplicate highlights
-
-**Screenshot Examples:**
-
-Get element bounds:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "getElementBounds",
-    "args": ["button.submit"]
-  },
-  "requestId": "req-010"
-}
-```
-
-Response (array of bounds for all matching elements):
-```json
-{
-  "requestId": "req-010",
-  "result": {
-    "value": [
-      {
-        "index": 0,
-        "x": 100,
-        "y": 200,
-        "width": 150,
-        "height": 50,
-        "absoluteX": 100,
-        "absoluteY": 1200
-      },
-      {
-        "index": 1,
-        "x": 100,
-        "y": 400,
-        "width": 150,
-        "height": 50,
-        "absoluteX": 100,
-        "absoluteY": 1400
-      }
-    ],
-    "type": "object"
-  },
-  "error": null
-}
-```
-
-Returns empty array if no elements found:
-```json
-{
-  "requestId": "req-010",
-  "result": {
-    "value": [],
-    "type": "object"
-  },
-  "error": null
-}
-```
-
-Scroll element into view (with optional index for multiple elements):
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "scrollElementIntoView",
-    "args": ["button.submit", 1]
-  },
-  "requestId": "req-011"
-}
-```
-
-Response (bounds array after scrolling):
-```json
-{
-  "requestId": "req-011",
-  "result": {
-    "value": [
-      {
-        "index": 0,
-        "x": 100,
-        "y": 50,
-        "width": 150,
-        "height": 50,
-        "absoluteX": 100,
-        "absoluteY": 1200
-      },
-      {
-        "index": 1,
-        "x": 100,
-        "y": 250,
-        "width": 150,
-        "height": 50,
-        "absoluteX": 100,
-        "absoluteY": 1400
-      }
-    ],
-    "type": "object"
-  },
-  "error": null
-}
-```
-
-**Inspector Mode Example:**
-
-Inspect element and get tree structure:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "inspectElement",
-    "args": ["button.submit"]
-  },
-  "requestId": "req-012"
-}
-```
-
-Response:
-```json
-{
-  "requestId": "req-012",
-  "result": {
-    "value": {
-      "clickedElement": {
-        "tagName": "button",
-        "selector": "button.submit",
-        "attributes": {
-          "class": "submit primary-btn",
-          "type": "submit"
-        },
-        "textContent": "Submit Form",
-        "isClickedElement": true,
-        "siblingCount": 2
-      },
-      "parents": [
-        {
-          "tagName": "form",
-          "selector": "#contact-form",
-          "attributes": {
-            "id": "contact-form",
-            "class": "form-container"
-          },
-          "textContent": "...",
-          "isClickedElement": false,
-          "siblingCount": 1
-        },
-        {
-          "tagName": "div",
-          "selector": "div.form-wrapper",
-          "attributes": {
-            "class": "form-wrapper"
-          },
-          "textContent": "...",
-          "isClickedElement": false,
-          "siblingCount": 3
-        }
-      ],
-      "children": [
-        {
-          "tagName": "span",
-          "selector": "button.submit > span",
-          "attributes": {
-            "class": "icon"
-          },
-          "textContent": "✓",
-          "isClickedElement": false,
-          "siblingCount": 1
-        }
-      ],
-      "timestamp": 1736793600000
-    },
-    "type": "object"
-  },
-  "error": null
-}
-```
-
-**Notes:**
-- `inspectElement()` does not highlight the element (unlike clicking in inspector mode)
-- Works independently without requiring `enableClickTracking()` to be called first
-- Returns detailed tree structure including:
-  - `clickedElement`: The inspected element with full details
-  - `parents`: Array of parent elements up to `<body>` (ordered from outermost to innermost)
-  - `children`: Array of direct child elements
-  - `timestamp`: When the inspection occurred
-- Each element includes:
-  - `tagName`: Lowercase HTML tag name
-  - `selector`: Unique CSS selector generated by `_internal_generateSelector`
-  - `attributes`: Relevant attributes (id, class, name, type, href, src, data-*, placeholder, value)
-  - `textContent`: Trimmed text content
-  - `isClickedElement`: Boolean indicating if this is the inspected element
-  - `siblingCount`: Count of siblings with same tag and first class
-
-**Container Elements Example:**
-
-Get all form elements from a container:
-```json
-{
-  "action": "callHelper",
-  "params": {
-    "functionName": "getContainerElements",
-    "args": ["form", "input, button, select, textarea, label"]
-  },
-  "requestId": "req-013"
-}
-```
-
-Response:
-```json
-{
-  "requestId": "req-013",
-  "result": {
-    "value": [
-      {
-        "tagName": "input",
-        "selector": "#my-text-id",
-        "attributes": {
-          "id": "my-text-id",
-          "name": "my-text",
-          "type": "text",
-          "class": "form-control"
-        },
-        "textContent": "",
-        "visible": true
-      },
-      {
-        "tagName": "label",
-        "selector": "label:has(#my-text-id)",
-        "attributes": {
-          "class": "form-label"
-        },
-        "textContent": "Text input",
-        "visible": true
-      },
-      {
-        "tagName": "button",
-        "selector": "button[type=\"submit\"]",
-        "attributes": {
-          "type": "submit",
-          "class": "btn btn-primary"
-        },
-        "textContent": "Submit",
-        "visible": true
-      }
-    ],
-    "type": "object"
-  },
-  "error": null
-}
-```
-
-**Parameters:**
-- `containerSelector` (string, required): CSS selector for the container element
-- `elementSelector` (string, optional): CSS selector filter for elements within container. Default: `'*'` (all descendants)
-
-**Returns:**
-Array of element objects, each containing:
-- `tagName` (string): Lowercase HTML tag name
-- `selector` (string): Stable CSS selector generated using priority order:
-  1. ID selector (`#id`)
-  2. Radio/checkbox with name+value (`input[name="..."][value="..."]`)
-  3. Name attribute (`element[name="..."]`)
-  4. Name+type combination (`input[type="..."][name="..."]`)
-  5. Data-* attributes (`[data-testid="..."]`)
-  6. ARIA label (`element[aria-label="..."]`)
-  7. Type+placeholder for inputs (`input[type="..."][placeholder="..."]`)
-  8. Unique class (excluding utility classes)
-  9. Element-specific attributes:
-     - Labels with `for`: `label[for="..."]`
-     - Wrapping labels: `label:has(input[name="..."])`
-     - Buttons with type: `button[type="submit"]`
-     - Links with href: `a[href="..."]`
-     - Images with src: `img[src="..."]`
-  10. nth-child path (last resort)
-- `attributes` (object): All element attributes as key-value pairs
-- `textContent` (string): Trimmed text content of the element
-- `visible` (boolean): Whether element is visible (checks `display`, `visibility`, `opacity`)
-
-**Notes:**
-- Efficiently extracts all elements in a single call (avoids multiple DOM queries)
-- Generates stable, semantic selectors optimized for test automation
-- Works on CSP-restricted pages
-- Filters out generic utility classes (Bootstrap, Tailwind patterns) from class-based selectors
-- Returns empty array if no elements match the filter
-- Throws error if container element not found
-
-**Use Cases:**
-- Form analysis and automation
-- Scraping structured data from containers
-- Generating stable selectors for test scripts
-- Identifying all interactive elements in a section
 
 ### 8. Capture Screenshot
 
