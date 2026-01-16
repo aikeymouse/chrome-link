@@ -154,7 +154,7 @@ jobs:
           if [ -z "$PREV_TAG" ]; then
             echo "## What's New in v$VERSION" > CHANGELOG.md
             echo "" >> CHANGELOG.md
-            echo "Initial release of ChromePilot!" >> CHANGELOG.md
+            echo "Initial release of ChromeLink!" >> CHANGELOG.md
           else
             echo "## What's New in v$VERSION" > CHANGELOG.md
             echo "" >> CHANGELOG.md
@@ -247,7 +247,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: ChromePilot v${{ steps.version.outputs.version }}
+          name: ChromeLink v${{ steps.version.outputs.version }}
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
