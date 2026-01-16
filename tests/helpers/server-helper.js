@@ -46,7 +46,7 @@ class ServerHelper {
       return;
     }
 
-    const serverPath = path.join(__dirname, '../../native-host/browser-pilot-server.js');
+    const serverPath = path.join(__dirname, '../../native-host/browser-link-server.js');
     
     return new Promise((resolve, reject) => {
       this.serverProcess = spawn('node', [serverPath], {

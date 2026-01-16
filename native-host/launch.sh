@@ -19,4 +19,4 @@ export PATH="/opt/homebrew/bin:$PATH"
 cd "$(dirname "$0")"
 
 # Launch the server with error logging
-exec node browser-pilot-server.js 2>> /tmp/chromelink-error.log
+exec node browser-link-server.js 2>> /tmp/chromelink-error.log

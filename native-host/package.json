@@ -1,5 +1,5 @@
 {
-  "name": "chrome-pilot-native-host",
+  "name": "chrome-link-native-host",
   "version": "1.1.2",
   "description": "Native messaging host with WebSocket server for ChromeLink",
   "main": "server.js",

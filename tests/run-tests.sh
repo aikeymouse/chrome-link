@@ -15,7 +15,7 @@ if ! nc -z localhost 9000 2>/dev/null; then
   echo ""
   echo "Please start the server first:"
   echo "  cd native-host"
-  echo "  node browser-pilot-server.js"
+  echo "  node browser-link-server.js"
   echo ""
   exit 1
 fi

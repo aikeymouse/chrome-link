@@ -141,11 +141,11 @@ function stopServerProcesses() {
   
   try {
     if (PLATFORM === 'win32') {
-      // Windows: Find and kill node processes running browser-pilot-server.js
-      execSync('taskkill /F /FI "IMAGENAME eq node.exe" /FI "WINDOWTITLE eq *browser-pilot-server*" 2>nul', { stdio: 'ignore' });
+      // Windows: Find and kill node processes running browser-link-server.js
+      execSync('taskkill /F /FI "IMAGENAME eq node.exe" /FI "WINDOWTITLE eq *browser-link-server*" 2>nul', { stdio: 'ignore' });
     } else {
       // Unix: pkill
-      execSync('pkill -f browser-pilot-server.js', { stdio: 'ignore' });
+      execSync('pkill -f browser-link-server.js', { stdio: 'ignore' });
     }
     
     // Wait a bit
@@ -240,7 +240,7 @@ function installLocal() {
   
   // Make executable on Unix
   if (PLATFORM !== 'win32') {
-    const serverPath = path.join(installNativeHostPath, 'browser-pilot-server.js');
+    const serverPath = path.join(installNativeHostPath, 'browser-link-server.js');
     try {
       fs.chmodSync(serverPath, 0o755);
     } catch {
@@ -332,7 +332,7 @@ function registerNativeHost() {
 function verifyInstallation() {
   printInfo('Verifying installation...');
   
-  const serverScript = path.join(INSTALL_DIR, 'native-host', 'browser-pilot-server.js');
+  const serverScript = path.join(INSTALL_DIR, 'native-host', 'browser-link-server.js');
   if (!exists(serverScript)) {
     printError('Native host server not found');
     throw new Error('Installation verification failed');
@@ -424,7 +424,7 @@ function diagnose() {
     const okTag = process.stdout.isTTY ? `${colors.green}[OK]${colors.reset}` : '[OK]';
     console.log(`  Install Dir: ${INSTALL_DIR} ${okTag}`);
     
-    const serverScript = path.join(INSTALL_DIR, 'native-host', 'browser-pilot-server.js');
+    const serverScript = path.join(INSTALL_DIR, 'native-host', 'browser-link-server.js');
     if (exists(serverScript)) {
       console.log(`  Native Host: Found ${okTag}`);
     } else {

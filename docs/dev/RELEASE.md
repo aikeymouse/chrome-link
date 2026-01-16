@@ -143,7 +143,7 @@ Contains:
 
 Contains:
 - `native-host/` - Server code with Node.js dependencies
-  - `browser-pilot-server.js` - Main WebSocket server
+  - `browser-link-server.js` - Main WebSocket server
   - `launch.sh` - Launch script for macOS/Linux
   - `launch.bat` - Launch script for Windows
   - `package.json` - Dependencies manifest

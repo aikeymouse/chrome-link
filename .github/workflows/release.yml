@@ -235,8 +235,8 @@ jobs:
           echo "node install.js diagnose" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "# Check logs location (shown in diagnostics)" >> CHANGELOG.md
-          echo "# macOS/Linux: ~/.chrome-pilot/native-host/logs/" >> CHANGELOG.md
-          echo "# Windows: %USERPROFILE%\\.chrome-pilot\\native-host\\logs\\" >> CHANGELOG.md
+          echo "# macOS/Linux: ~/.chromelink/native-host/logs/" >> CHANGELOG.md
+          echo "# Windows: %USERPROFILE%\\.chromelink\\native-host\\logs\\" >> CHANGELOG.md
           echo '```' >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "**Windows 11 Note:** Both manifest file AND registry entry are required (install.js handles this automatically)" >> CHANGELOG.md

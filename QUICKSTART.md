@@ -145,7 +145,7 @@ This checks:
 # macOS/Linux
 lsof -i :9000
 
-# Should show: node (browser-pilot-server.js) listening on port 9000
+# Should show: node (browser-link-server.js) listening on port 9000
 ```
 
 ### Check Extension

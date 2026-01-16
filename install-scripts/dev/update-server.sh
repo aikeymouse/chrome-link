@@ -30,12 +30,12 @@ fi
 
 # Stop the running server
 echo -e "${YELLOW}→${NC} Stopping server..."
-pkill -9 -f browser-pilot-server.js 2>/dev/null || true
+pkill -9 -f browser-link-server.js 2>/dev/null || true
 sleep 1
 
 # Copy updated server file
 echo -e "${YELLOW}→${NC} Copying updated server code..."
-cp "$PROJECT_ROOT/native-host/browser-pilot-server.js" "$INSTALL_DIR/native-host/browser-pilot-server.js"
+cp "$PROJECT_ROOT/native-host/browser-link-server.js" "$INSTALL_DIR/native-host/browser-link-server.js"
 
 echo -e "${GREEN}✓${NC} Server code updated successfully"
 echo ""

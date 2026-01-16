@@ -132,7 +132,7 @@ ChromeLink/
 │   └── content/                # Content scripts
 ├── native-host/
 │   ├── package.json            # Server config (version synced)
-│   └── browser-pilot-server.js # WebSocket server
+│   └── browser-link-server.js # WebSocket server
 └── install-scripts/
     ├── install.sh              # macOS/Linux installer
     ├── install.bat             # Windows installer

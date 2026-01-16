@@ -8,4 +8,4 @@ REM Change to the native host directory
 cd /d "%~dp0"
 
 REM Launch the server with error logging
-node browser-pilot-server.js 2>> %TEMP%\chromelink-error.log
+node browser-link-server.js 2>> %TEMP%\chromelink-error.log

@@ -3,7 +3,7 @@
 ## Project Structure
 
 ```
-chrome-pilot/
+chrome-link/
 ├── extension/                  # Chrome extension files
 │   ├── manifest.json          # Extension manifest (Manifest V3)
 │   ├── icons/
@@ -22,7 +22,7 @@ chrome-pilot/
 │       ├── material-symbols.css              # Material Symbols font CSS
 │       └── material-symbols-outlined.woff2   # Material Symbols font file
 ├── native-host/               # Native messaging host
-│   ├── browser-pilot-server.js # WebSocket server + native messaging + session management
+│   ├── browser-link-server.js # WebSocket server + native messaging + session management
 │   ├── package.json           # Node.js dependencies
 │   ├── manifest.json          # Native host manifest
 │   ├── launch.sh              # Launch script for macOS/Linux
@@ -123,7 +123,7 @@ Edit `native-host/manifest.json` and replace `EXTENSION_ID_PLACEHOLDER` with you
 {
   "name": "com.chromelink.extension",
   "description": "ChromeLink Native Messaging Host",
-  "path": "/full/path/to/native-host/browser-pilot-server.js",
+  "path": "/full/path/to/native-host/browser-link-server.js",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://YOUR_ACTUAL_EXTENSION_ID/"
@@ -152,7 +152,7 @@ with default value pointing to manifest.json path.
 **Run Manually:**
 ```bash
 cd native-host
-node browser-pilot-server.js
+node browser-link-server.js
 ```
 
 ### 6. Restart Chrome
@@ -212,7 +212,7 @@ See `tests/README.md` for detailed test documentation.
 
 ```bash
 cd native-host
-node browser-pilot-server.js
+node browser-link-server.js
 ```
 
 You should see:
@@ -312,7 +312,7 @@ tail -f native-host/logs/session-*.log
 **Native host not connecting:**
 - Check manifest.json has correct extension ID
 - Verify manifest is registered in Chrome directory
-- Check browser-pilot-server.js is executable
+- Check browser-link-server.js is executable
 - Look at service worker console for errors
 
 **WebSocket connection fails:**
@@ -327,7 +327,7 @@ tail -f native-host/logs/session-*.log
 
 ## Code Structure
 
-### Native Host (`native-host/browser-pilot-server.js`)
+### Native Host (`native-host/browser-link-server.js`)
 
 - **Session Management:** Handles session creation, timeout, resumption
 - **WebSocket Server:** Accepts connections, routes messages
@@ -364,7 +364,7 @@ tail -f native-host/logs/session-*.log
    - Implement Chrome API calls
    - Add error handling
 
-3. **Handle in Native Host** (`native-host/browser-pilot-server.js`)
+3. **Handle in Native Host** (`native-host/browser-link-server.js`)
    - No changes needed (it forwards all commands)
 
 4. **Update Side Panel** (if UI changes needed)
@@ -372,7 +372,7 @@ tail -f native-host/logs/session-*.log
 
 ### Modifying Session Management
 
-Edit `Session` class in `native-host/browser-pilot-server.js`:
+Edit `Session` class in `native-host/browser-link-server.js`:
 - Timeout logic
 - Log format
 - Activity tracking
@@ -399,19 +399,19 @@ Update version in:
 cd native-host
 npm install --production
 cd ..
-tar -czf chrome-pilot-native-host.tar.gz native-host/
+tar -czf chrome-link-native-host.tar.gz native-host/
 ```
 
 For Windows:
 ```powershell
-Compress-Archive -Path native-host -DestinationPath chrome-pilot-native-host.zip
+Compress-Archive -Path native-host -DestinationPath chrome-link-native-host.zip
 ```
 
 ### 3. Package Extension
 
 ```bash
 cd extension
-zip -r chrome-pilot-extension.zip .
+zip -r chrome-link-extension.zip .
 ```
 
 ### 4. Create GitHub Release
@@ -419,7 +419,7 @@ zip -r chrome-pilot-extension.zip .
 1. Tag version: `git tag v1.0.0`
 2. Push: `git push origin v1.0.0`
 3. Create release on GitHub
-4. Upload `chrome-pilot-native-host.tar.gz` and `chrome-pilot-extension.zip`
+4. Upload `chrome-link-native-host.tar.gz` and `chrome-link-extension.zip`
 
 ## Best Practices
 

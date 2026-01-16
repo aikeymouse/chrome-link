@@ -385,7 +385,7 @@ node install.js uninstall
 ```
 ~/.chromelink/  (or %USERPROFILE%\.chromelink\ on Windows)
 └── native-host/
-    ├── browser-pilot-server.js    # Main server
+    ├── browser-link-server.js    # Main server
     ├── launch.sh                  # Launch script (macOS/Linux)
     ├── launch.bat                 # Launch script (Windows)
     ├── package.json               # Dependencies
