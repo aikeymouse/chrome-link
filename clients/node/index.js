@@ -341,6 +341,30 @@ class ChromeLinkClient {
   }
 
   /**
+   * Send a generic command to the extension
+   * Allows calling any protocol command, including new ones not yet wrapped in the client
+   * @param {string} command - Command name (e.g., 'callHelper', 'openTab', etc.)
+   * @param {Object} params - Command parameters
+   * @returns {Promise<Object>} Command response
+   * @example
+   * // Call a helper function
+   * await client.sendCommand('callHelper', {
+   *   tabId: 123,
+   *   helperName: 'customHelper',
+   *   args: ['arg1', 'arg2']
+   * });
+   * 
+   * // Call any other command
+   * await client.sendCommand('someNewCommand', {
+   *   param1: 'value1',
+   *   param2: 'value2'
+   * });
+   */
+  async sendCommand(command, params = {}) {
+    return this.sendRequest(command, params);
+  }
+
+  /**
    * Close WebSocket connection
    */
   close() {

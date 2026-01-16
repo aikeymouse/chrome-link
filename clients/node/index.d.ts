@@ -199,6 +199,22 @@ declare module '@aikeymouse/chromelink-client' {
     wait(ms: number): Promise<void>;
 
     /**
+     * Send a generic command to the extension
+     * Allows calling any protocol command, including new ones not yet wrapped in the client
+     * @param command - Command name (e.g., 'callHelper', 'openTab', etc.)
+     * @param params - Command parameters
+     * @returns Command response
+     * @example
+     * // Call a helper function
+     * await client.sendCommand('callHelper', {
+     *   tabId: 123,
+     *   helperName: 'customHelper',
+     *   args: ['arg1', 'arg2']
+     * });
+     */
+    sendCommand(command: string, params?: Record<string, any>): Promise<any>;
+
+    /**
      * Close the WebSocket connection
      */
     close(): void;
