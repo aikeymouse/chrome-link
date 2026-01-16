@@ -6,27 +6,47 @@ This document defines the JSON protocol for communication between WebSocket clie
 
 ## Connection Establishment
 
-### REST API - Create/Resume Session
+### WebSocket Connection - Create/Resume Session
 
-**Endpoint:** `POST /session`
+**Endpoint:** `ws://localhost:9000/session`
 
 **Query Parameters:**
 - `timeout` (number, optional): Session timeout in milliseconds. Default: 300000 (5 minutes)
-- `sessionId` (string, optional): Existing session ID to resume. If not provided or expired, creates new session
+- `sessionId` (string, optional): Existing session ID to resume. If not provided, creates new session
 
-**Example:**
-```bash
-curl -X POST "http://localhost:9000/session?timeout=600000&sessionId=abc-123" \
-  -H "Connection: Upgrade" \
-  -H "Upgrade: websocket" \
-  -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
-  -H "Sec-WebSocket-Version: 13"
+**Example (Create New Session):**
+```javascript
+const WebSocket = require('ws');
+const ws = new WebSocket('ws://localhost:9000/session?timeout=600000');
+
+ws.on('open', () => {
+  console.log('Connected');
+});
+
+ws.on('message', (data) => {
+  const msg = JSON.parse(data);
+  if (msg.type === 'sessionCreated') {
+    console.log('Session ID:', msg.sessionId);
+    // Save sessionId for resuming later
+  }
+});
 ```
 
-**Response:**
-- HTTP 101 Switching Protocols → WebSocket connection established
-- HTTP 400 Bad Request → Invalid parameters
-- HTTP 404 Not Found → Session ID not found or expired
+**Example (Resume Existing Session):**
+```javascript
+const sessionId = 'abc-123-def-456'; // Previously saved session ID
+const ws = new WebSocket(`ws://localhost:9000/session?sessionId=${sessionId}`);
+
+ws.on('message', (data) => {
+  const msg = JSON.parse(data);
+  if (msg.type === 'sessionResumed') {
+    console.log('Session resumed:', msg.sessionId);
+  } else if (msg.type === 'error') {
+    console.error('Failed to resume:', msg.message);
+    // Session expired or not found, create new session
+  }
+});
+```
 
 **Session Created Event:**
 ```json
@@ -37,6 +57,31 @@ curl -X POST "http://localhost:9000/session?timeout=600000&sessionId=abc-123" \
   "expiresAt": 1704988800000
 }
 ```
+
+**Session Resumed Event:**
+```json
+{
+  "type": "sessionResumed",
+  "sessionId": "abc-123-def-456",
+  "timeout": 600000,
+  "expiresAt": 1736988800000
+}
+```
+
+**Error Response (Invalid/Expired Session):**
+```json
+{
+  "type": "error",
+  "message": "Session not found or expired"
+}
+```
+
+**Notes:**
+- WebSocket connection is established immediately upon successful handshake
+- New sessions receive a unique UUID as `sessionId`
+- Session timeout resets on any activity (command execution)
+- Expired sessions cannot be resumed and will return an error
+- Connection is automatically closed if session creation/resumption fails
 
 ## Message Format
 
