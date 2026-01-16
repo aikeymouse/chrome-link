@@ -243,7 +243,7 @@ class Session {
  * HTTP Server for WebSocket upgrade
  */
 const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url.startsWith('/session')) {
+  if (req.method === 'GET' && req.url.startsWith('/session')) {
     // Parse query parameters
     const url = new URL(req.url, `http://localhost:${WS_PORT}`);
     const timeout = parseInt(url.searchParams.get('timeout')) || DEFAULT_TIMEOUT;

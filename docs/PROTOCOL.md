@@ -48,6 +48,55 @@ ws.on('message', (data) => {
 });
 ```
 
+### HTTP Endpoint - Check Server/Session Status
+
+**Optional:** Before establishing WebSocket connection, you can check server readiness or query session info.
+
+**Endpoint:** `GET http://localhost:9000/session`
+
+**Query Parameters:**
+- `sessionId` (string, optional): Check if a session exists and is valid
+
+**Check Server Readiness:**
+```bash
+curl "http://localhost:9000/session"
+```
+
+Response:
+```json
+{
+  "status": "ready",
+  "message": "Upgrade to WebSocket"
+}
+```
+
+**Check Session Status:**
+```bash
+curl "http://localhost:9000/session?sessionId=abc-123-def-456"
+```
+
+Response (Session Valid):
+```json
+{
+  "type": "sessionResumed",
+  "sessionId": "abc-123-def-456",
+  "timeout": 600000,
+  "expiresAt": 1736988800000
+}
+```
+
+Response (Session Expired/Not Found):
+```json
+{
+  "status": "ready",
+  "message": "Upgrade to WebSocket"
+}
+```
+
+**Note:** This HTTP endpoint does **not** create sessions or establish WebSocket connections. It only checks status. Actual session creation happens when you connect via WebSocket.
+
+### WebSocket Events
+
 **Session Created Event:**
 ```json
 {
