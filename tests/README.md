@@ -1,10 +1,10 @@
-# ChromePilot Test Suite
+# ChromeLink Test Suite
 
-Complete test suite for ChromePilot extension with unit, integration, and UI tests.
+Complete test suite for ChromeLink extension with unit, integration, and UI tests.
 
 ## Prerequisites
 
-1. **ChromePilot Server Running** (for unit and integration tests)
+1. **ChromeLink Server Running** (for unit and integration tests)
    ```bash
    # Server must be running on ws://localhost:9000
    # Check DEVELOPMENT.md for installation instructions
@@ -104,7 +104,7 @@ tests/
 │   └── ui-fixtures.js        # Playwright custom fixtures
 ├── helpers/                   # Test utilities
 │   ├── hooks.js              # Global hooks and client factory
-│   ├── chromepilot-client.js # Enhanced WebSocket client with test helpers
+│   ├── chromelink-client.js # Enhanced WebSocket client with test helpers
 │   ├── test-data.js          # Test URLs and selectors
 │   ├── server-helper.js      # Server lifecycle management
 │   └── session-helper.js     # Session utilities
@@ -149,8 +149,8 @@ tests/
 **Duration:** ~15-25 seconds
 
 ### Test Helpers
-- `ChromePilotClient` - Enhanced WebSocket client with test helper methods
-- `createClient()` - Factory for test clients (returns ChromePilotClient instance)
+- `ChromeLinkClient` - Enhanced WebSocket client with test helper methods
+- `createClient()` - Factory for test clients (returns ChromeLinkClient instance)
 - `test-data.js` - Test URLs and selectors
 - `ui-fixtures.js` - Playwright custom fixtures
 - Automatic tab cleanup
@@ -159,7 +159,7 @@ tests/
 
 ### Response Validation
 
-The `ChromePilotClient` provides validation helpers to ensure responses match protocol specifications:
+The `ChromeLinkClient` provides validation helpers to ensure responses match protocol specifications:
 
 #### `assertValidResponse(response, options)`
 Comprehensive validation with configurable options:
@@ -339,7 +339,7 @@ Test URLs defined in `helpers/test-data.js`:
 ## Troubleshooting
 
 ### Tests Hang or Timeout
-- Verify ChromePilot server is running on ws://localhost:9000
+- Verify ChromeLink server is running on ws://localhost:9000
 - Check Chrome extension is loaded and connected
 - Increase timeout in `.mocharc.json` or `playwright.config.js` if needed
 

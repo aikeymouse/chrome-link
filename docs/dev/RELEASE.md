@@ -1,10 +1,10 @@
-# ChromePilot Release Guide
+# ChromeLink Release Guide
 
-This guide covers the complete release process for ChromePilot.
+This guide covers the complete release process for ChromeLink.
 
 ## Version Management
 
-ChromePilot uses semantic versioning (MAJOR.MINOR.PATCH) synchronized across:
+ChromeLink uses semantic versioning (MAJOR.MINOR.PATCH) synchronized across:
 - `VERSION` file (source of truth)
 - `extension/manifest.json`
 - `native-host/package.json`
@@ -94,8 +94,8 @@ Once you push a tag, GitHub Actions automatically:
 1. Validates version consistency
 2. Runs tests
 3. Creates release artifacts:
-   - `chromepilot-extension-vX.Y.Z.zip`
-   - `chromepilot-native-host-vX.Y.Z.zip`
+   - `chromelink-extension-vX.Y.Z.zip`
+   - `chromelink-native-host-vX.Y.Z.zip`
 4. Generates changelog from git commits
 5. Creates GitHub release with artifacts
 
@@ -108,7 +108,7 @@ VERSION=$(cat VERSION)
 
 # Create extension zip
 cd extension
-zip -r "../chromepilot-extension-v${VERSION}.zip" . \
+zip -r "../chromelink-extension-v${VERSION}.zip" . \
   -x "*.DS_Store" -x "node_modules/*" -x ".git/*"
 cd ..
 
@@ -122,7 +122,7 @@ cd release-tmp/native-host
 npm ci --production
 cd ..
 
-zip -r "../chromepilot-native-host-v${VERSION}.zip" . \
+zip -r "../chromelink-native-host-v${VERSION}.zip" . \
   -x "*.DS_Store" -x "*/.git/*"
 cd ..
 rm -rf release-tmp
@@ -133,13 +133,13 @@ rm -rf release-tmp
 
 ## Release Artifacts
 
-### chromepilot-extension-vX.Y.Z.zip
+### chromelink-extension-vX.Y.Z.zip
 
 Contains:
 - Extension code (`manifest.json`, popup, sidepanel, background, content scripts)
 - No dependencies (pure browser extension)
 
-### chromepilot-native-host-vX.Y.Z.zip
+### chromelink-native-host-vX.Y.Z.zip
 
 Contains:
 - `native-host/` - Server code with Node.js dependencies
@@ -159,7 +159,7 @@ Contains:
 The unified Node.js installer provides several commands:
 
 ### install (default)
-Install or upgrade ChromePilot native host:
+Install or upgrade ChromeLink native host:
 ```bash
 node install.js
 # or explicitly
@@ -184,7 +184,7 @@ Checks:
 
 Example output:
 ```
-[INFO] ChromePilot - Diagnostics
+[INFO] ChromeLink - Diagnostics
 ==========================
 
 System Information:
@@ -193,28 +193,28 @@ System Information:
   npm: 10.9.2
 
 Installation Status:
-  Install Dir: /Users/user/.chrome-pilot [OK]
+  Install Dir: /Users/user/.chromelink [OK]
   Native Host: Found [OK]
   Dependencies: Installed [OK]
 
 Native Messaging Manifest:
-  Location: .../com.chromepilot.extension.json [OK]
+  Location: .../com.chromelink.extension.json [OK]
   Extension ID: abcdefghijklmnopqrstuvwxyzabcdef [OK]
   Launch Script: launch.sh
-    Path: /Users/user/.chrome-pilot/native-host/launch.sh
+    Path: /Users/user/.chromelink/native-host/launch.sh
     Exists: [OK]
 
 Windows Registry:  (Windows only)
   Registry Key: [OK]
-    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
-    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromepilot.extension.json
+    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension
+    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromelink.extension.json
 
 Server Status:
   Server Process: Running (PID: 12345) [OK]
   Port 9000: Listening [OK]
 
 Recent Logs:
-  Location: /Users/user/.chrome-pilot/native-host/logs [OK]
+  Location: /Users/user/.chromelink/native-host/logs [OK]
   Files: 2 log file(s)
     - session-abc123-1768108888180.log (94905 bytes)
     - session-xyz789-1768109999999.log (12340 bytes)
@@ -233,7 +233,7 @@ node install.js update-id <32-char-extension-id>
 ```
 
 ### uninstall
-Remove ChromePilot installation:
+Remove ChromeLink installation:
 ```bash
 node install.js uninstall
 ```
@@ -260,8 +260,8 @@ node install.js version
 
 ```bash
 # macOS/Linux/Windows - All platforms use the same installer
-unzip chromepilot-native-host-v1.0.0.zip -d chromepilot
-cd chromepilot/install-scripts
+unzip chromelink-native-host-v1.0.0.zip -d chromelink
+cd chromelink/install-scripts
 node install.js
 
 # Verify installation
@@ -361,7 +361,7 @@ git push --tags
    ```
 
 2. **Manual Workflow**:
-   - Go to Actions → Release ChromePilot → Run workflow
+   - Go to Actions → Release ChromeLink → Run workflow
    - Enter version (without 'v' prefix)
 
 ### Pipeline Steps
@@ -404,7 +404,7 @@ node install.js diagnose
 # Verify:
 # - Launch script: launch.sh exists and is executable
 # - Manifest location: ~/Library/Application Support/Google/Chrome/NativeMessagingHosts/
-# - Install dir: ~/.chrome-pilot/
+# - Install dir: ~/.chromelink/
 ```
 
 ### Linux
@@ -414,7 +414,7 @@ node install.js diagnose
 # Verify:
 # - Launch script: launch.sh exists and is executable
 # - Manifest location: ~/.config/google-chrome/NativeMessagingHosts/
-# - Install dir: ~/.chrome-pilot/
+# - Install dir: ~/.chromelink/
 ```
 
 ### Windows
@@ -424,8 +424,8 @@ node install.js diagnose
 # Verify:
 # - Launch script: launch.bat exists
 # - Manifest location: %LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\
-# - Registry: HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
-# - Install dir: %USERPROFILE%\.chrome-pilot\
+# - Registry: HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension
+# - Install dir: %USERPROFILE%\.chromelink\
 ```
 
 **Critical Windows Requirements:**

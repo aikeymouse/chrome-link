@@ -3,15 +3,15 @@
  * Demonstrates how to take screenshots of specific elements
  */
 
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 const fs = require('fs');
 const path = require('path');
 
 async function main() {
-  const client = new ChromePilotClient();
+  const client = new ChromeLinkClient();
   
   try {
-    console.log('🔌 Connecting to ChromePilot...');
+    console.log('🔌 Connecting to ChromeLink...');
     await client.connect();
     
     // Wait for connection

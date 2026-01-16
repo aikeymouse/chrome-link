@@ -17,7 +17,7 @@ node install.js
 ```
 
 This will:
-- Create installation directory (`~/.chrome-pilot/` on macOS/Linux or `%USERPROFILE%\.chrome-pilot\` on Windows)
+- Create installation directory (`~/.chromelink/` on macOS/Linux or `%USERPROFILE%\.chromelink\` on Windows)
 - Copy native host files
 - Install Node.js dependencies
 - Register native messaging host with Chrome
@@ -67,7 +67,7 @@ const WebSocket = require('ws');
 const ws = new WebSocket('ws://localhost:9000/session?timeout=300000');
 
 ws.on('open', () => {
-  console.log('Connected to ChromePilot');
+  console.log('Connected to ChromeLink');
   
   // List all tabs in current window
   ws.send(JSON.stringify({
@@ -151,7 +151,7 @@ lsof -i :9000
 ### Check Extension
 
 1. Go to `chrome://extensions/`
-2. Find "ChromePilot"
+2. Find "ChromeLink"
 3. Click "service worker" to open console
 4. Should see: "Connected to native host"
 
@@ -213,7 +213,7 @@ node install.js clear-logs
 
 ### Uninstall
 
-Remove ChromePilot completely:
+Remove ChromeLink completely:
 ```bash
 node install.js uninstall
 ```

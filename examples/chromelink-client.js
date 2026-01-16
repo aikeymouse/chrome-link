@@ -1,10 +1,10 @@
 /**
- * WebSocket Client Helper for ChromePilot
+ * WebSocket Client Helper for ChromeLink
  */
 
 const WebSocket = require('ws');
 
-class ChromePilotClient {
+class ChromeLinkClient {
   constructor() {
     this.ws = null;
     this.sessionId = null;
@@ -284,4 +284,4 @@ class ChromePilotClient {
   }
 }
 
-module.exports = ChromePilotClient;
+module.exports = ChromeLinkClient;

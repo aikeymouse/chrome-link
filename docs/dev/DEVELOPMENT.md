@@ -1,4 +1,4 @@
-# ChromePilot - Development Guide
+# ChromeLink - Development Guide
 
 ## Project Structure
 
@@ -38,7 +38,7 @@ chrome-pilot/
 │   ├── integration/           # Integration tests for workflows
 │   ├── ui/                    # UI tests (Playwright)
 │   ├── helpers/               # Test utilities and shared client
-│   │   ├── chromepilot-client.js  # Enhanced WebSocket client with test helpers
+│   │   ├── chromelink-client.js  # Enhanced WebSocket client with test helpers
 │   │   ├── hooks.js               # Global hooks and client factory
 │   │   ├── test-data.js           # Test URLs and selectors
 │   │   ├── server-helper.js       # Server lifecycle management
@@ -49,7 +49,7 @@ chrome-pilot/
 │   ├── playwright.config.js  # Playwright configuration
 │   └── README.md              # Test documentation
 ├── examples/                  # Example client scripts
-│   ├── chromepilot-client.js  # WebSocket client (copied from tests/helpers)
+│   ├── chromelink-client.js  # WebSocket client (copied from tests/helpers)
 │   ├── google-search-client.js # Google search automation example
 │   └── analyze-form-client.js  # Form analyzer tool
 ├── docs/
@@ -79,7 +79,7 @@ npm install
 4. Select the `extension/` directory
 5. Note the extension ID (e.g., `abcdefghijklmnopqrstuvwxyz123456`)
 
-### 3. Install ChromePilot
+### 3. Install ChromeLink
 
 Run the installation script to set up the native host:
 
@@ -89,7 +89,7 @@ node install.js
 ```
 
 This will:
-- Install the native host to `~/.chrome-pilot/`
+- Install the native host to `~/.chromelink/`
 - Register it with Chrome (including Windows Registry on Windows)
 - Create platform-specific launch scripts
 - Start the WebSocket server automatically when extension connects
@@ -121,8 +121,8 @@ Edit `native-host/manifest.json` and replace `EXTENSION_ID_PLACEHOLDER` with you
 
 ```json
 {
-  "name": "com.chromepilot.extension",
-  "description": "ChromePilot Native Messaging Host",
+  "name": "com.chromelink.extension",
+  "description": "ChromeLink Native Messaging Host",
   "path": "/full/path/to/native-host/browser-pilot-server.js",
   "type": "stdio",
   "allowed_origins": [
@@ -136,17 +136,17 @@ Edit `native-host/manifest.json` and replace `EXTENSION_ID_PLACEHOLDER` with you
 **macOS:**
 ```bash
 mkdir -p ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
-cp native-host/manifest.json ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chromepilot.extension.json
+cp native-host/manifest.json ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.chromelink.extension.json
 ```
 
 **Linux:**
 ```bash
 mkdir -p ~/.config/google-chrome/NativeMessagingHosts/
-cp native-host/manifest.json ~/.config/google-chrome/NativeMessagingHosts/com.chromepilot.extension.json
+cp native-host/manifest.json ~/.config/google-chrome/NativeMessagingHosts/com.chromelink.extension.json
 ```
 
 **Windows:**
-Create registry key at `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension`
+Create registry key at `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension`
 with default value pointing to manifest.json path.
 
 **Run Manually:**
@@ -163,10 +163,10 @@ After registering the native host, restart Chrome completely.
 
 ### Automated Test Suite
 
-ChromePilot includes a comprehensive Mocha test suite covering all WebSocket protocol commands.
+ChromeLink includes a comprehensive Mocha test suite covering all WebSocket protocol commands.
 
 **Prerequisites:**
-- ChromePilot server running on ws://localhost:9000
+- ChromeLink server running on ws://localhost:9000
 - Chrome extension loaded and active
 
 **Quick Start:**

@@ -1,4 +1,4 @@
-# ChromePilot
+# ChromeLink
 
 Remote Chrome tab control via WebSocket API with session management and side panel UI.
 
@@ -21,7 +21,7 @@ Remote Chrome tab control via WebSocket API with session management and side pan
 
 | Session Logs | Inspector Mode |
 |:------------:|:--------------:|
-| ![Session Logs](docs/chromepilot_session_logs.png) | ![Inspector Mode](docs/chromepilot_inspector_mode.png) |
+| ![Session Logs](docs/chromelink_session_logs.png) | ![Inspector Mode](docs/chromelink_inspector_mode.png) |
 
 ## Architecture
 

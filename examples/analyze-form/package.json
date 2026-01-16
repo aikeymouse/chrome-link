@@ -1,7 +1,7 @@
 {
-  "name": "chromepilot-form-analyzer",
+  "name": "chromelink-form-analyzer",
   "version": "1.1.0",
-  "description": "ChromePilot Form Analyzer - Extract form elements with stable CSS selectors",
+  "description": "ChromeLink Form Analyzer - Extract form elements with stable CSS selectors",
   "main": "analyze-page-client.js",
   "bin": {
     "analyze-page": "./analyze-page-client.js"
@@ -12,7 +12,7 @@
     "full-analysis": "node full-analysis-client.js"
   },
   "keywords": [
-    "chromepilot",
+    "chromelink",
     "form",
     "analyzer",
     "css-selector",

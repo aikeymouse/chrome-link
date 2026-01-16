@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ChromePilot Form Analyzer
+ * ChromeLink Form Analyzer
  * Analyzes DOM tree to find form containers and extract all form elements with stable selectors
  * 
  * Usage:
@@ -16,12 +16,12 @@
  *   - Uses inspectElement API which works in CSP environments
  */
 
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 const c = require('./console-utils');
 
 class FormAnalyzer {
   constructor() {
-    this.client = new ChromePilotClient();
+    this.client = new ChromeLinkClient();
     this.sessionId = null;
   }
 
@@ -397,7 +397,7 @@ async function main() {
   
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
     console.log('');
-    console.log(c.bold(c.info('ChromePilot Form Analyzer')));
+    console.log(c.bold(c.info('ChromeLink Form Analyzer')));
     console.log(c.dim('═'.repeat(80)));
     console.log('');
     console.log('Analyzes web page forms and generates stable CSS selectors for automation.');
@@ -455,11 +455,11 @@ async function main() {
   
   try {
     console.log('');
-    console.log(c.bold(c.info('🚀 ChromePilot Form Analyzer')));
+    console.log(c.bold(c.info('🚀 ChromeLink Form Analyzer')));
     console.log(c.dim('═'.repeat(80)));
     
-    // Connect to ChromePilot
-    console.log(`\n${c.info('📡 Connecting to ChromePilot...')}`);
+    // Connect to ChromeLink
+    console.log(`\n${c.info('📡 Connecting to ChromeLink...')}`);
     await analyzer.connect();
     console.log(c.success('✓ Connected\n'));
     

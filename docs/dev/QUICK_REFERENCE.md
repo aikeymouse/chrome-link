@@ -1,15 +1,15 @@
-# ChromePilot Quick Reference
+# ChromeLink Quick Reference
 
 ## For Users
 
 ### Installation (First Time)
 
 ```bash
-# Download chromepilot-native-host-vX.Y.Z.zip from GitHub releases
+# Download chromelink-native-host-vX.Y.Z.zip from GitHub releases
 # Extract and run:
 
 # All platforms (macOS/Linux/Windows)
-cd chromepilot/install-scripts
+cd chromelink/install-scripts
 node install.js
 ```
 
@@ -118,7 +118,7 @@ npm run test:all
 ## Key Files
 
 ```
-ChromePilot/
+ChromeLink/
 ├── VERSION                      # Source of truth for version
 ├── docs/
 │   └── dev/
@@ -143,11 +143,11 @@ ChromePilot/
 ## Installation Locations
 
 **macOS/Linux:**
-- Installation: `~/.chromepilot/`
+- Installation: `~/.chromelink/`
 - Manifest: `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
 
 **Windows:**
-- Installation: `%LOCALAPPDATA%\ChromePilot\`
+- Installation: `%LOCALAPPDATA%\ChromeLink\`
 - Manifest: `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\`
 
 ## Common Issues
@@ -157,7 +157,7 @@ ChromePilot/
 | "Node.js not found" | Install from https://nodejs.org/ |
 | "Port 9000 in use" | Run `install.sh diagnose` and choose auto-fix |
 | "Extension not connecting" | Check extension ID: `install.sh update-id <id>` |
-| "Installation failed" | Check logs: `tail ~/.chromepilot/native-host/logs/*.log` |
+| "Installation failed" | Check logs: `tail ~/.chromelink/native-host/logs/*.log` |
 | "Version mismatch" | Run `./install-scripts/dev/version.sh sync` |
 
 ## Quick Commands Reference
@@ -175,7 +175,7 @@ ChromePilot/
 ## Extension Setup Steps
 
 1. Install native host (see Installation above)
-2. Download `chromepilot-extension-vX.Y.Z.zip`
+2. Download `chromelink-extension-vX.Y.Z.zip`
 3. Extract zip file
 4. Open `chrome://extensions/`
 5. Enable "Developer mode"
@@ -189,14 +189,14 @@ ChromePilot/
 
 **Triggers:**
 - Push tag: `git push origin v1.0.0`
-- Manual: Actions → Release ChromePilot → Run workflow
+- Manual: Actions → Release ChromeLink → Run workflow
 
 **Artifacts:**
-- `chromepilot-extension-vX.Y.Z.zip` - Extension only
-- `chromepilot-native-host-vX.Y.Z.zip` - Server + installers
+- `chromelink-extension-vX.Y.Z.zip` - Extension only
+- `chromelink-native-host-vX.Y.Z.zip` - Server + installers
 
 ## Support
 
 - **Issues**: GitHub Issues
-- **Logs**: `~/.chromepilot/native-host/logs/`
+- **Logs**: `~/.chromelink/native-host/logs/`
 - **Diagnostics**: `./install-scripts/install.sh diagnose`

@@ -1,6 +1,6 @@
 {
-  "name": "com.chromepilot.extension",
-  "description": "ChromePilot Native Messaging Host",
+  "name": "com.chromelink.extension",
+  "description": "ChromeLink Native Messaging Host",
   "path": "server.js",
   "type": "stdio",
   "allowed_origins": [

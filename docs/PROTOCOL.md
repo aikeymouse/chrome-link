@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the JSON protocol for communication between WebSocket clients and ChromePilot via the Native Messaging Host.
+This document defines the JSON protocol for communication between WebSocket clients and ChromeLink via the Native Messaging Host.
 
 ## Connection Establishment
 
@@ -478,7 +478,7 @@ Helper not loaded:
   "result": null,
   "error": {
     "code": "EXECUTION_ERROR",
-    "message": "ChromePilot helper not loaded"
+    "message": "ChromeLink helper not loaded"
   }
 }
 ```

@@ -1,10 +1,10 @@
-# ChromePilot Installer
+# ChromeLink Installer
 
-Cross-platform installation tool for ChromePilot native host.
+Cross-platform installation tool for ChromeLink native host.
 
 ## Extension Panel
 
-![ChromePilot Extension Panel](../docs/chromepilot_extensions.png)
+![ChromeLink Extension Panel](../docs/chromelink_extensions.png)
 
 ## Requirements
 
@@ -20,7 +20,7 @@ node install.js
 
 This will:
 1. Check Node.js and npm versions
-2. Copy native host files to `~/.chrome-pilot/` (macOS/Linux) or `%LOCALAPPDATA%\ChromePilot\` (Windows)
+2. Copy native host files to `~/.chromelink/` (macOS/Linux) or `%LOCALAPPDATA%\ChromeLink\` (Windows)
 3. Install Node.js dependencies
 4. Register native messaging host with Chrome
 5. Preserve existing logs during upgrade
@@ -28,7 +28,7 @@ This will:
 ## Commands
 
 ### install
-Install or upgrade ChromePilot native host (default command)
+Install or upgrade ChromeLink native host (default command)
 
 ```bash
 node install.js
@@ -46,9 +46,9 @@ node install.js install
 - Verifies installation
 
 **Installation paths:**
-- **macOS**: `~/.chrome-pilot/native-host/`
-- **Linux**: `~/.chrome-pilot/native-host/`
-- **Windows**: `%USERPROFILE%\.chrome-pilot\native-host\`
+- **macOS**: `~/.chromelink/native-host/`
+- **Linux**: `~/.chromelink/native-host/`
+- **Windows**: `%USERPROFILE%\.chromelink\native-host\`
 
 **Native messaging manifest:**
 - **macOS**: `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
@@ -56,7 +56,7 @@ node install.js install
 - **Windows**: `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\`
 
 **Windows Registry:**
-- **Key**: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension`
+- **Key**: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension`
 - **Value**: Path to manifest JSON file
 - **Note**: Registry entry is required on Windows in addition to the manifest file
 
@@ -80,7 +80,7 @@ node install.js diagnose
 
 **Output example:**
 ```
-[INFO] ChromePilot - Diagnostics
+[INFO] ChromeLink - Diagnostics
 ==========================
 
 System Information:
@@ -89,28 +89,28 @@ System Information:
   npm: 10.9.2
 
 Installation Status:
-  Install Dir: /Users/user/.chrome-pilot [OK]
+  Install Dir: /Users/user/.chromelink [OK]
   Native Host: Found [OK]
   Dependencies: Installed [OK]
 
 Native Messaging Manifest:
-  Location: .../com.chromepilot.extension.json [OK]
+  Location: .../com.chromelink.extension.json [OK]
   Extension ID: abcdefghijklmnopqrstuvwxyzabcdef [OK]
   Launch Script: launch.sh
-    Path: /Users/user/.chrome-pilot/native-host/launch.sh
+    Path: /Users/user/.chromelink/native-host/launch.sh
     Exists: [OK]
 
 Windows Registry:  (Windows only)
   Registry Key: [OK]
-    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension
-    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromepilot.extension.json
+    HKCU\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension
+    Path: C:\Users\user\AppData\Local\Google\Chrome\...\com.chromelink.extension.json
 
 Server Status:
   Server Process: Running (PID: 12345) [OK]
   Port 9000: Listening [OK]
 
 Recent Logs:
-  Location: /Users/user/.chrome-pilot/native-host/logs [OK]
+  Location: /Users/user/.chromelink/native-host/logs [OK]
   Files: 2 log file(s)
     - session-abc123-1768108888180.log (94905 bytes)
     - session-xyz789-1768109999999.log (12340 bytes)
@@ -157,18 +157,18 @@ node install.js update-id abcdefghijklmnopqrstuvwxyzabcdef
 **How to get your extension ID:**
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable "Developer mode" (toggle in top right)
-3. Find ChromePilot extension
+3. Find ChromeLink extension
 4. Copy the ID shown below the extension name
 
 ### uninstall
-Remove ChromePilot installation completely
+Remove ChromeLink installation completely
 
 ```bash
 node install.js uninstall
 ```
 
 **What it removes:**
-- Installation directory (`~/.chrome-pilot/` or `%USERPROFILE%\.chrome-pilot\`)
+- Installation directory (`~/.chromelink/` or `%USERPROFILE%\.chromelink\`)
 - Native messaging manifest
 - Windows Registry entry (Windows only)
 - All logs and data
@@ -176,7 +176,7 @@ node install.js uninstall
 
 **Note:** You must manually remove the Chrome extension:
 1. Open `chrome://extensions/`
-2. Find ChromePilot
+2. Find ChromeLink
 3. Click "Remove"
 
 ### version
@@ -204,13 +204,13 @@ node install.js -h
 ### Step 1: Install Native Host
 
 ```bash
-cd chromepilot-native-host-v*/install-scripts
+cd chromelink-native-host-v*/install-scripts
 node install.js
 ```
 
 You should see:
 ```
-[INFO] ChromePilot - Installer
+[INFO] ChromeLink - Installer
 ==========================
 
 [INFO] Checking dependencies...
@@ -230,7 +230,7 @@ You should see:
 
 ### Step 2: Load Chrome Extension
 
-1. Download `chromepilot-extension-v*.zip` (separate download)
+1. Download `chromelink-extension-v*.zip` (separate download)
 2. Extract the zip file
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable "Developer mode" (toggle in top right)
@@ -255,7 +255,7 @@ Close and reopen Chrome completely for changes to take effect.
 
 ### Step 5: Verify Connection
 
-1. Click the ChromePilot extension icon
+1. Click the ChromeLink extension icon
 2. Side panel should open
 3. Check connection status (should show "Connected")
 
@@ -311,16 +311,16 @@ taskkill /PID <PID> /F
 ### Logs show errors
 
 **Solution:** Check log files
-- **macOS/Linux**: `~/.chrome-pilot/native-host/logs/`
-- **Windows**: `%USERPROFILE%\.chrome-pilot\native-host\logs\`
+- **macOS/Linux**: `~/.chromelink/native-host/logs/`
+- **Windows**: `%USERPROFILE%\.chromelink\native-host\logs\`
 
 View recent logs:
 ```bash
 # macOS/Linux
-tail -f ~/.chrome-pilot/native-host/logs/*.log
+tail -f ~/.chromelink/native-host/logs/*.log
 
 # Windows (PowerShell)
-Get-Content $env:USERPROFILE\.chrome-pilot\native-host\logs\*.log -Tail 50
+Get-Content $env:USERPROFILE\.chromelink\native-host\logs\*.log -Tail 50
 ```
 
 Clear logs:
@@ -346,7 +346,7 @@ The installer will:
 
 ## Uninstalling
 
-To completely remove ChromePilot:
+To completely remove ChromeLink:
 
 ```bash
 # Remove native host
@@ -359,21 +359,21 @@ node install.js uninstall
 
 ### macOS
 
-- Installation directory: `~/.chrome-pilot/`
+- Installation directory: `~/.chromelink/`
 - Manifest location: `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
 - Server runs via Node.js executable from system PATH
 
 ### Linux
 
-- Installation directory: `~/.chrome-pilot/`
+- Installation directory: `~/.chromelink/`
 - Manifest location: `~/.config/google-chrome/NativeMessagingHosts/`
 - Requires Chrome or Chromium browser
 
 ### Windows
 
-- Installation directory: `%USERPROFILE%\.chrome-pilot\`
+- Installation directory: `%USERPROFILE%\.chromelink\`
 - Manifest location: `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\`
-- Registry entry: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromepilot.extension`
+- Registry entry: `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.chromelink.extension`
 - Server runs via `launch.bat` script (not direct node.exe command)
 - **Important**: Windows 11 requires both manifest file AND registry entry
 - Uninstall waits for processes to terminate before removing files
@@ -383,7 +383,7 @@ node install.js uninstall
 ### Installation Directory Structure
 
 ```
-~/.chrome-pilot/  (or %USERPROFILE%\.chrome-pilot\ on Windows)
+~/.chromelink/  (or %USERPROFILE%\.chromelink\ on Windows)
 └── native-host/
     ├── browser-pilot-server.js    # Main server
     ├── launch.sh                  # Launch script (macOS/Linux)
@@ -396,14 +396,14 @@ node install.js uninstall
 
 ### Native Messaging Manifest
 
-**File:** `com.chromepilot.extension.json`
+**File:** `com.chromelink.extension.json`
 
 **Contents (macOS/Linux):**
 ```json
 {
-  "name": "com.chromepilot.extension",
-  "description": "ChromePilot Native Messaging Host",
-  "path": "/Users/user/.chrome-pilot/native-host/launch.sh",
+  "name": "com.chromelink.extension",
+  "description": "ChromeLink Native Messaging Host",
+  "path": "/Users/user/.chromelink/native-host/launch.sh",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://<your-extension-id>/"
@@ -414,9 +414,9 @@ node install.js uninstall
 **Contents (Windows):**
 ```json
 {
-  "name": "com.chromepilot.extension",
-  "description": "ChromePilot Native Messaging Host",
-  "path": "C:/Users/user/.chrome-pilot/native-host/launch.bat",
+  "name": "com.chromelink.extension",
+  "description": "ChromeLink Native Messaging Host",
+  "path": "C:/Users/user/.chromelink/native-host/launch.bat",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://<your-extension-id>/"
@@ -475,10 +475,10 @@ Logs are automatically backed up and restored. To manually preserve:
 
 ```bash
 # Before installation
-cp -r ~/.chrome-pilot/native-host/logs ~/backup-logs
+cp -r ~/.chromelink/native-host/logs ~/backup-logs
 
 # After installation
-cp -r ~/backup-logs/* ~/.chrome-pilot/native-host/logs/
+cp -r ~/backup-logs/* ~/.chromelink/native-host/logs/
 ```
 
 ## Development

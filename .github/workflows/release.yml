@@ -1,4 +1,4 @@
-name: Release ChromePilot
+name: Release ChromeLink
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
       - name: Create extension zip
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          ZIP_NAME="chromepilot-extension-v${VERSION}.zip"
+          ZIP_NAME="chromelink-extension-v${VERSION}.zip"
           
           cd extension
           zip -r "../$ZIP_NAME" . \
@@ -91,7 +91,7 @@ jobs:
       - name: Create native-host zip
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          ZIP_NAME="chromepilot-native-host-v${VERSION}.zip"
+          ZIP_NAME="chromelink-native-host-v${VERSION}.zip"
           
           # Create a clean directory for packaging
           mkdir -p release-tmp/native-host
@@ -127,7 +127,7 @@ jobs:
       - name: Create examples zip
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          ZIP_NAME="chromepilot-examples-v${VERSION}.zip"
+          ZIP_NAME="chromelink-examples-v${VERSION}.zip"
           
           cd examples
           zip -r "../$ZIP_NAME" . \
@@ -170,8 +170,8 @@ jobs:
           echo "## Installation" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "⚠️ **You need to download BOTH files below:**" >> CHANGELOG.md
-          echo "- \`chromepilot-native-host-v${VERSION}.zip\` - Backend server + installer" >> CHANGELOG.md
-          echo "- \`chromepilot-extension-v${VERSION}.zip\` - Chrome extension" >> CHANGELOG.md
+          echo "- \`chromelink-native-host-v${VERSION}.zip\` - Backend server + installer" >> CHANGELOG.md
+          echo "- \`chromelink-extension-v${VERSION}.zip\` - Chrome extension" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "### Step 1: Install Native Host" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
@@ -179,9 +179,9 @@ jobs:
           echo "" >> CHANGELOG.md
           echo "**All Platforms (macOS/Linux/Windows):**" >> CHANGELOG.md
           echo '```bash' >> CHANGELOG.md
-          echo "# Download and extract chromepilot-native-host-v${VERSION}.zip" >> CHANGELOG.md
-          echo "unzip chromepilot-native-host-v${VERSION}.zip -d chromepilot" >> CHANGELOG.md
-          echo "cd chromepilot/install-scripts" >> CHANGELOG.md
+          echo "# Download and extract chromelink-native-host-v${VERSION}.zip" >> CHANGELOG.md
+          echo "unzip chromelink-native-host-v${VERSION}.zip -d chromelink" >> CHANGELOG.md
+          echo "cd chromelink/install-scripts" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "# Run installer (same command on all platforms)" >> CHANGELOG.md
           echo "node install.js" >> CHANGELOG.md
@@ -189,7 +189,7 @@ jobs:
           echo "" >> CHANGELOG.md
           echo "### Step 2: Install Extension" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "1. Download \`chromepilot-extension-v${VERSION}.zip\`" >> CHANGELOG.md
+          echo "1. Download \`chromelink-extension-v${VERSION}.zip\`" >> CHANGELOG.md
           echo "2. Extract the zip file" >> CHANGELOG.md
           echo "3. Open Chrome and go to \`chrome://extensions/\`" >> CHANGELOG.md
           echo "4. Enable **Developer mode** (top right)" >> CHANGELOG.md
@@ -252,18 +252,18 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            chromepilot-extension-v${{ steps.version.outputs.version }}.zip
-            chromepilot-native-host-v${{ steps.version.outputs.version }}.zip
-            chromepilot-examples-v${{ steps.version.outputs.version }}.zip
+            chromelink-extension-v${{ steps.version.outputs.version }}.zip
+            chromelink-native-host-v${{ steps.version.outputs.version }}.zip
+            chromelink-examples-v${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: chromepilot-v${{ steps.version.outputs.version }}
+          name: chromelink-v${{ steps.version.outputs.version }}
           path: |
-            chromepilot-extension-v${{ steps.version.outputs.version }}.zip
-            chromepilot-native-host-v${{ steps.version.outputs.version }}.zip
-            chromepilot-examples-v${{ steps.version.outputs.version }}.zip
+            chromelink-extension-v${{ steps.version.outputs.version }}.zip
+            chromelink-native-host-v${{ steps.version.outputs.version }}.zip
+            chromelink-examples-v${{ steps.version.outputs.version }}.zip
           retention-days: 30

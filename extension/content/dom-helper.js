@@ -5,7 +5,7 @@
  */
 
 // Make functions available globally
-window.__chromePilotHelper = {
+window.__chromeLinkHelper = {
   /**
    * Click an element by selector
    */
@@ -152,8 +152,8 @@ window.__chromePilotHelper = {
     }
 
     // Store original styles if not already stored
-    if (!window.__chromePilotHighlights) {
-      window.__chromePilotHighlights = new Map();
+    if (!window.__chromeLinkHighlights) {
+      window.__chromeLinkHighlights = new Map();
     }
 
     let highlightedCount = 0;
@@ -161,8 +161,8 @@ window.__chromePilotHelper = {
       const key = `${selector}[${index}]`;
       
       // Store original background and transition
-      if (!window.__chromePilotHighlights.has(key)) {
-        window.__chromePilotHighlights.set(key, {
+      if (!window.__chromeLinkHighlights.has(key)) {
+        window.__chromeLinkHighlights.set(key, {
           element: el,
           originalBackground: el.style.background,
           originalTransition: el.style.transition
@@ -182,12 +182,12 @@ window.__chromePilotHelper = {
    * Remove all highlights applied by highlightElement
    */
   removeHighlights() {
-    if (!window.__chromePilotHighlights) {
+    if (!window.__chromeLinkHighlights) {
       return 0;
     }
 
     let removedCount = 0;
-    window.__chromePilotHighlights.forEach((data) => {
+    window.__chromeLinkHighlights.forEach((data) => {
       const { element, originalBackground, originalTransition } = data;
       
       // Restore original styles
@@ -197,7 +197,7 @@ window.__chromePilotHelper = {
     });
 
     // Clear the highlights map
-    window.__chromePilotHighlights.clear();
+    window.__chromeLinkHighlights.clear();
     
     return removedCount;
   },
@@ -255,7 +255,7 @@ window.__chromePilotHelper = {
     });
     
     // Return bounds for all matching elements after scrolling
-    return window.__chromePilotHelper.getElementBounds(selector);
+    return window.__chromeLinkHelper.getElementBounds(selector);
   },
 
   /**
@@ -586,7 +586,7 @@ window.__chromePilotHelper = {
     const element = document.querySelector(selector);
     if (!element) throw new Error(`Element not found: ${selector}`);
     
-    return window.__chromePilotBuildElementTree(element, false);
+    return window.__chromeLinkBuildElementTree(element, false);
   },
 
   /**
@@ -622,7 +622,7 @@ window.__chromePilotHelper = {
       
       return {
         tagName: el.tagName.toLowerCase(),
-        selector: window.__chromePilotHelper._internal_generateSelector(el),
+        selector: window.__chromeLinkHelper._internal_generateSelector(el),
         attributes: attributes,
         textContent: el.textContent ? el.textContent.trim() : '',
         visible: visible
@@ -635,10 +635,10 @@ window.__chromePilotHelper = {
    */
   _internal_enableClickTracking() {
     // Click handler uses the globally stored buildElementTree
-    const buildElementTree = window.__chromePilotBuildElementTree;
+    const buildElementTree = window.__chromeLinkBuildElementTree;
     
     // Store click handler so we can remove it later
-    window.__chromePilotClickHandler = (event) => {
+    window.__chromeLinkClickHandler = (event) => {
 
       // Don't prevent default to avoid breaking page functionality
       event.stopPropagation();
@@ -648,17 +648,17 @@ window.__chromePilotHelper = {
       
       // Send message via custom event (since we're in MAIN world, chrome.runtime is not available)
       console.log('Dispatching element clicked event:', elementData);
-      window.dispatchEvent(new CustomEvent('__chromepilot_element_clicked', {
+      window.dispatchEvent(new CustomEvent('__chromelink_element_clicked', {
         detail: elementData
       }));
     };
     
     // Add click listener to document
-    document.addEventListener('click', window.__chromePilotClickHandler, true);
+    document.addEventListener('click', window.__chromeLinkClickHandler, true);
     
     // Add visual indicator that inspector is active
     const inspectorIndicator = document.createElement('div');
-    inspectorIndicator.id = '__chromepilot-inspector-indicator';
+    inspectorIndicator.id = '__chromelink-inspector-indicator';
     inspectorIndicator.style.cssText = `
       position: fixed;
       top: 10px;
@@ -684,13 +684,13 @@ window.__chromePilotHelper = {
    */
   _internal_disableClickTracking() {
     // Remove click handler
-    if (window.__chromePilotClickHandler) {
-      document.removeEventListener('click', window.__chromePilotClickHandler, true);
-      window.__chromePilotClickHandler = null;
+    if (window.__chromeLinkClickHandler) {
+      document.removeEventListener('click', window.__chromeLinkClickHandler, true);
+      window.__chromeLinkClickHandler = null;
     }
     
     // Remove visual indicator
-    const indicator = document.getElementById('__chromepilot-inspector-indicator');
+    const indicator = document.getElementById('__chromelink-inspector-indicator');
     if (indicator) {
       indicator.remove();
     }
@@ -706,7 +706,7 @@ window.__chromePilotHelper = {
   const buildElementInfo = (el, clickedElement = null, includeText = true) => {
     const info = {
       tagName: el.tagName.toLowerCase(),
-      selector: window.__chromePilotHelper._internal_generateSelector(el),
+      selector: window.__chromeLinkHelper._internal_generateSelector(el),
       attributes: {},
       isClickedElement: el === clickedElement
     };
@@ -737,7 +737,7 @@ window.__chromePilotHelper = {
     
     // Count siblings with same tag and first class (exclude inspector indicator)
     return siblings.filter(sibling => {
-      if (sibling.id === '__chromepilot-inspector-indicator') return false;
+      if (sibling.id === '__chromelink-inspector-indicator') return false;
       if (sibling.tagName.toLowerCase() !== tagName) return false;
       if (firstClass) {
         return sibling.classList.contains(firstClass);
@@ -752,7 +752,7 @@ window.__chromePilotHelper = {
     const parents = [];
     let currentParent = element.parentElement;
     while (currentParent && currentParent !== document.body) {
-      if (currentParent.id !== '__chromepilot-inspector-indicator') {
+      if (currentParent.id !== '__chromelink-inspector-indicator') {
         const parentInfo = buildElementInfo(currentParent, element);
         parentInfo.siblingCount = calculateSiblingCount(currentParent);
         parents.unshift(parentInfo);
@@ -764,7 +764,7 @@ window.__chromePilotHelper = {
     clickedInfo.siblingCount = calculateSiblingCount(element);
     
     const children = Array.from(element.children)
-      .filter(child => child.id !== '__chromepilot-inspector-indicator')
+      .filter(child => child.id !== '__chromelink-inspector-indicator')
       .map(child => {
         const childInfo = buildElementInfo(child, element);
         childInfo.siblingCount = calculateSiblingCount(child);
@@ -774,13 +774,13 @@ window.__chromePilotHelper = {
     // Highlight element if requested
     if (shouldHighlight) {
       // Clear any existing highlight timeout for this element
-      if (window.__chromePilotHighlightTimeout) {
-        clearTimeout(window.__chromePilotHighlightTimeout);
+      if (window.__chromeLinkHighlightTimeout) {
+        clearTimeout(window.__chromeLinkHighlightTimeout);
       }
       
       // Clear any previously highlighted element
-      if (window.__chromePilotHighlightedElement) {
-        const prev = window.__chromePilotHighlightedElement;
+      if (window.__chromeLinkHighlightedElement) {
+        const prev = window.__chromeLinkHighlightedElement;
         prev.element.style.outline = prev.originalOutline;
         prev.element.style.outlineOffset = prev.originalOutlineOffset;
         if (!prev.originalOutline) {
@@ -797,14 +797,14 @@ window.__chromePilotHelper = {
         originalOutline: element.style.outline,
         originalOutlineOffset: element.style.outlineOffset
       };
-      window.__chromePilotHighlightedElement = originalStyles;
+      window.__chromeLinkHighlightedElement = originalStyles;
       
       // Apply highlight
       element.style.setProperty('outline', '2px solid #1a73e8', 'important');
       element.style.setProperty('outline-offset', '2px', 'important');
       
       // Set timeout to remove highlight
-      window.__chromePilotHighlightTimeout = setTimeout(() => {
+      window.__chromeLinkHighlightTimeout = setTimeout(() => {
         element.style.outline = originalStyles.originalOutline;
         element.style.outlineOffset = originalStyles.originalOutlineOffset;
         if (!originalStyles.originalOutline) {
@@ -813,8 +813,8 @@ window.__chromePilotHelper = {
         if (!originalStyles.originalOutlineOffset) {
           element.style.removeProperty('outline-offset');
         }
-        window.__chromePilotHighlightedElement = null;
-        window.__chromePilotHighlightTimeout = null;
+        window.__chromeLinkHighlightedElement = null;
+        window.__chromeLinkHighlightTimeout = null;
       }, 3000);
     }
     
@@ -827,22 +827,22 @@ window.__chromePilotHelper = {
   };
   
   // Store helpers globally
-  window.__chromePilotBuildElementInfo = buildElementInfo;
-  window.__chromePilotCalculateSiblingCount = calculateSiblingCount;
-  window.__chromePilotBuildElementTree = buildElementTree;
+  window.__chromeLinkBuildElementInfo = buildElementInfo;
+  window.__chromeLinkCalculateSiblingCount = calculateSiblingCount;
+  window.__chromeLinkBuildElementTree = buildElementTree;
 })();
 
 // Listen for simulate click events from inspector bridge
-window.addEventListener('__chromepilot_simulate_click', (event) => {
+window.addEventListener('__chromelink_simulate_click', (event) => {
   const { selector } = event.detail;
-  if (selector && window.__chromePilotBuildElementTree) {
+  if (selector && window.__chromeLinkBuildElementTree) {
     try {
       const element = document.querySelector(selector);
       if (element) {
-        const elementData = window.__chromePilotBuildElementTree(element, true);
+        const elementData = window.__chromeLinkBuildElementTree(element, true);
         
         // Dispatch the element data
-        window.dispatchEvent(new CustomEvent('__chromepilot_element_clicked', {
+        window.dispatchEvent(new CustomEvent('__chromelink_element_clicked', {
           detail: elementData
         }));
       }
@@ -852,5 +852,5 @@ window.addEventListener('__chromepilot_simulate_click', (event) => {
   }
 });
 
-console.log('ChromePilot DOM Helper loaded');
+console.log('ChromeLink DOM Helper loaded');
 

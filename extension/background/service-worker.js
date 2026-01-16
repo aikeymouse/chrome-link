@@ -1,10 +1,10 @@
 /**
- * ChromePilot - Background Service Worker
+ * ChromeLink - Background Service Worker
  * Bridges native messaging host with Chrome APIs
  */
 
 // Native messaging host name
-const NATIVE_HOST_NAME = 'com.chromepilot.extension';
+const NATIVE_HOST_NAME = 'com.chromelink.extension';
 
 // State
 let nativePort = null;
@@ -650,11 +650,11 @@ async function callHelperWithTimeout(tabId, functionName, args, timeout) {
       const results = await chrome.scripting.executeScript({
         target: { tabId },
         func: async (fnName, fnArgs) => {
-          if (!window.__chromePilotHelper) {
-            throw new Error('ChromePilot helper not loaded');
+          if (!window.__chromeLinkHelper) {
+            throw new Error('ChromeLink helper not loaded');
           }
           
-          const fn = window.__chromePilotHelper[fnName];
+          const fn = window.__chromeLinkHelper[fnName];
           if (!fn) {
             throw new Error(`Helper function not found: ${fnName}`);
           }
@@ -839,7 +839,7 @@ async function enableInspector(params) {
     // Enable click tracking
     const results = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => window.__chromePilotHelper._internal_enableClickTracking(),
+      func: () => window.__chromeLinkHelper._internal_enableClickTracking(),
       world: 'MAIN'
     });
     
@@ -870,7 +870,7 @@ async function disableInspector(params) {
     // Disable click tracking
     await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => window.__chromePilotHelper._internal_disableClickTracking(),
+      func: () => window.__chromeLinkHelper._internal_disableClickTracking(),
       world: 'MAIN'
     });
     

@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 
 async function main() {
-  console.log('🚀 ChromePilot Test Client\n');
+  console.log('🚀 ChromeLink Test Client\n');
   
   console.log('Connecting to ws://localhost:9000/session...');
   const ws = new WebSocket('ws://localhost:9000/session?timeout=60000');

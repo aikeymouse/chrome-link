@@ -1,4 +1,4 @@
-# ChromePilot Form Analyzer
+# ChromeLink Form Analyzer
 
 Analyze web pages to extract form elements with stable CSS selectors and generate comprehensive reports.
 
@@ -105,9 +105,9 @@ npm run full-analysis        # Run full-analysis-client.js
 
 ## Requirements
 
-- ChromePilot extension installed and running
+- ChromeLink extension installed and running
 - Node.js 14+
-- WebSocket connection to ChromePilot (default: ws://localhost:8080)
+- WebSocket connection to ChromeLink (default: ws://localhost:8080)
 
 ## Architecture
 
@@ -115,7 +115,7 @@ npm run full-analysis        # Run full-analysis-client.js
 - **generate-md-client.js** - Markdown report generator with screenshots
 - **full-analysis-client.js** - Orchestrator running both tools sequentially
 - **console-utils.js** - Shared ANSI color utilities for consistent output
-- **chromepilot-client.js** - WebSocket client for ChromePilot API
+- **chromelink-client.js** - WebSocket client for ChromeLink API
 
 ## License
 

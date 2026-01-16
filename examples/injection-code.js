@@ -1,8 +1,8 @@
 // Create a badge to show injection is active
 (function() {
   const badge = document.createElement('div');
-  badge.id = 'chromepilot-injection-badge';
-  badge.textContent = '🚀 ChromePilot Injected';
+  badge.id = 'chromelink-injection-badge';
+  badge.textContent = '🚀 ChromeLink Injected';
   badge.style.cssText = `
     position: fixed;
     top: 10px;
@@ -29,9 +29,9 @@
   };
   
   badge.onclick = () => {
-    badge.textContent = badge.textContent === '🚀 ChromePilot Injected' 
+    badge.textContent = badge.textContent === '🚀 ChromeLink Injected' 
       ? '✓ Injection Active' 
-      : '🚀 ChromePilot Injected';
+      : '🚀 ChromeLink Injected';
   };
   
   // Wait for DOM to be ready
@@ -43,5 +43,5 @@
     document.body.appendChild(badge);
   }
   
-  console.log('%c[ChromePilot] Script injection active', 'color: #667eea; font-weight: bold;');
+  console.log('%c[ChromeLink] Script injection active', 'color: #667eea; font-weight: bold;');
 })();

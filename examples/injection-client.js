@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ChromePilot Script Injection Example
+ * ChromeLink Script Injection Example
  * Demonstrates registerInjection API for WebView2 testing
  * 
  * This example injects a badge on Google pages to show the injection is working.
@@ -8,14 +8,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 
 async function main() {
-  const client = new ChromePilotClient();
+  const client = new ChromeLinkClient();
   
   try {
-    // Connect to ChromePilot
-    console.log('Connecting to ChromePilot...');
+    // Connect to ChromeLink
+    console.log('Connecting to ChromeLink...');
     await client.connect('ws://localhost:9000', 120000); // 2 minutes timeout
     
     // Register injection for Selenium pages
@@ -35,7 +35,7 @@ async function main() {
     console.log('✓ Injection registered:', result);
     console.log('\n📌 Instructions:');
     console.log('   1. Navigate to https://www.selenium.dev in Chrome');
-    console.log('   2. You should see a "🚀 ChromePilot Injected" badge in the top-right');
+    console.log('   2. You should see a "🚀 ChromeLink Injected" badge in the top-right');
     console.log('   3. Click the badge to toggle the text');
     console.log('   4. The badge will appear on all Selenium pages automatically');
     console.log('\n⏸  Press Ctrl+C to unregister injection and exit\n');

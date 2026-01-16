@@ -6,7 +6,7 @@ const crypto = require('crypto');
 
 /**
  * Create a test session with default timeout
- * @param {object} client - ChromePilot client instance
+ * @param {object} client - ChromeLink client instance
  * @param {number} timeout - Session timeout in milliseconds (default: 60000)
  * @returns {Promise<string>} Session ID
  */
@@ -34,7 +34,7 @@ function generateSessionId() {
 
 /**
  * Cleanup session and disconnect client
- * @param {object} client - ChromePilot client instance
+ * @param {object} client - ChromeLink client instance
  * @returns {Promise<void>}
  */
 async function cleanupSession(client) {

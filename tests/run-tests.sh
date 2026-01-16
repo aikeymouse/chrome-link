@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# ChromePilot Test Suite Runner
+# ChromeLink Test Suite Runner
 # Validates prerequisites and runs tests
 
 set -e
 
-echo "=== ChromePilot Test Suite Runner ==="
+echo "=== ChromeLink Test Suite Runner ==="
 echo ""
 
 # Check if server is running
-echo "Checking if ChromePilot server is running..."
+echo "Checking if ChromeLink server is running..."
 if ! nc -z localhost 9000 2>/dev/null; then
-  echo "❌ ERROR: ChromePilot server is not running on port 9000"
+  echo "❌ ERROR: ChromeLink server is not running on port 9000"
   echo ""
   echo "Please start the server first:"
   echo "  cd native-host"
@@ -26,7 +26,7 @@ echo ""
 echo "Checking if Chrome is running..."
 if ! pgrep -x "Google Chrome" > /dev/null; then
   echo "⚠️  WARNING: Chrome does not appear to be running"
-  echo "Please ensure Chrome is running with the ChromePilot extension loaded"
+  echo "Please ensure Chrome is running with the ChromeLink extension loaded"
   echo ""
   read -p "Continue anyway? (y/n) " -n 1 -r
   echo

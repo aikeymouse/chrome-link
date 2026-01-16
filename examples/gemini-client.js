@@ -4,11 +4,11 @@
  * Supports multi-turn conversations in the same session
  */
 
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 
 class GeminiClient {
   constructor() {
-    this.client = new ChromePilotClient();
+    this.client = new ChromeLinkClient();
     this.geminiTabId = null;
   }
 

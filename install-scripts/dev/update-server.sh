@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##############################################################################
-# ChromePilot - Update Server Script
+# ChromeLink - Update Server Script
 # Copies updated server code to installed location and restarts the server
 ##############################################################################
 
@@ -13,17 +13,17 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}ChromePilot Server Update${NC}"
+echo -e "${GREEN}ChromeLink Server Update${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Configuration
-INSTALL_DIR="$HOME/.chrome-pilot"
+INSTALL_DIR="$HOME/.chromelink"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 # Check if installed directory exists
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo -e "${RED}Error: ChromePilot is not installed at $INSTALL_DIR${NC}"
+    echo -e "${RED}Error: ChromeLink is not installed at $INSTALL_DIR${NC}"
     echo "Please run the installation script first."
     exit 1
 fi

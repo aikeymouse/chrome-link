@@ -1,5 +1,5 @@
 /**
- * ChromePilot - Inspector Mode Module
+ * ChromeLink - Inspector Mode Module
  */
 
 // Inspector state

@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * ChromePilot - Cross-Platform Installer
+ * ChromeLink - Cross-Platform Installer
  * Supports: install, upgrade, diagnose, update-id, uninstall
- */
-
-const fs = require('fs');
+ */const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawn } = require('child_process');
 
 // Configuration
-const NATIVE_HOST_NAME = 'com.chromepilot.extension';
-const INSTALL_DIR = path.join(os.homedir(), '.chrome-pilot');
+const NATIVE_HOST_NAME = 'com.chromelink.extension';
+const INSTALL_DIR = path.join(os.homedir(), '.chromelink');
 const PLATFORM = os.platform();
 
 // Platform-specific paths
@@ -174,7 +172,7 @@ function installLocal() {
     console.log('Expected:', nativeHostPath);
     console.log('');
     console.log('Make sure you:');
-    console.log('  1. Downloaded chromepilot-native-host-v*.zip');
+    console.log('  1. Downloaded chromelink-native-host-v*.zip');
     console.log('  2. Extracted it completely');
     console.log('  3. Running install.js from the install-scripts folder');
     process.exit(1);
@@ -269,7 +267,7 @@ function registerNativeHost() {
     
     manifest = {
       name: NATIVE_HOST_NAME,
-      description: 'ChromePilot Native Messaging Host',
+      description: 'ChromeLink Native Messaging Host',
       path: launchPathJson,
       type: 'stdio',
       allowed_origins: [
@@ -283,7 +281,7 @@ function registerNativeHost() {
     
     manifest = {
       name: NATIVE_HOST_NAME,
-      description: 'ChromePilot Native Messaging Host',
+      description: 'ChromeLink Native Messaging Host',
       path: launchPathJson,
       type: 'stdio',
       allowed_origins: [
@@ -404,7 +402,7 @@ function updateExtensionId(extensionId) {
 // Diagnose
 function diagnose() {
   console.log('');
-  printInfo('ChromePilot - Diagnostics');
+  printInfo('ChromeLink - Diagnostics');
   console.log('==========================');
   console.log('');
   
@@ -589,7 +587,7 @@ function diagnose() {
 // Clear logs
 function clearLogs() {
   console.log('');
-  printInfo('ChromePilot - Clear Logs');
+  printInfo('ChromeLink - Clear Logs');
   console.log('==========================');
   console.log('');
   
@@ -635,7 +633,7 @@ function clearLogs() {
 // Uninstall
 function uninstall() {
   console.log('');
-  printInfo('ChromePilot - Uninstaller');
+  printInfo('ChromeLink - Uninstaller');
   console.log('==========================');
   console.log('');
   console.log('This will remove:');
@@ -647,7 +645,7 @@ function uninstall() {
   // Note: In a real implementation, you'd want to use readline for confirmation
   // For now, just proceed
   
-  printInfo('Uninstalling ChromePilot...');
+  printInfo('Uninstalling ChromeLink...');
   
   // Kill running server
   stopServerProcesses();
@@ -703,33 +701,33 @@ function uninstall() {
   }
   
   console.log('');
-  printSuccess('ChromePilot uninstalled successfully');
+  printSuccess('ChromeLink uninstalled successfully');
   console.log('');
   console.log('Note: Chrome extension must be removed manually:');
   console.log('1. Open chrome://extensions/');
-  console.log("2. Find ChromePilot and click 'Remove'");
+  console.log("2. Find ChromeLink and click 'Remove'");
   console.log('');
 }
 
 // Show usage
 function showUsage() {
   console.log('');
-  console.log('ChromePilot - Installation and Management Tool');
+  console.log('ChromeLink - Installation and Management Tool');
   console.log('');
   console.log('Usage:');
   console.log('  node install.js [command] [options]');
   console.log('');
   console.log('Commands:');
-  console.log('  install           Install ChromePilot (default)');
+  console.log('  install           Install ChromeLink (default)');
   console.log('  diagnose          Run diagnostic checks');
   console.log('  clear-logs        Clear session log files');
   console.log('  update-id <ID>    Update extension ID in manifest');
-  console.log('  uninstall         Remove ChromePilot installation');
+  console.log('  uninstall         Remove ChromeLink installation');
   console.log('  help              Show this help message');
   console.log('  version           Show installed version');
   console.log('');
   console.log('Examples:');
-  console.log('  node install.js                           # Install ChromePilot');
+  console.log('  node install.js                           # Install ChromeLink');
   console.log('  node install.js diagnose                  # Run diagnostics');
   console.log('  node install.js update-id abcd...xyz      # Set extension ID');
   console.log('  node install.js uninstall                 # Remove installation');
@@ -739,7 +737,7 @@ function showUsage() {
 // Main install function
 function doInstall() {
   console.log('');
-  printInfo('ChromePilot - Installer');
+  printInfo('ChromeLink - Installer');
   console.log('==========================');
   console.log('');
   
@@ -754,7 +752,7 @@ function doInstall() {
     printSuccess('Installation complete!');
     console.log('');
     console.log('Next steps:');
-    console.log('  1. Download chromepilot-extension-v*.zip');
+    console.log('  1. Download chromelink-extension-v*.zip');
     console.log('  2. Load the extension in Chrome:');
     console.log('     - Open chrome://extensions/');
     console.log("     - Enable 'Developer mode'");
@@ -801,10 +799,10 @@ function main() {
     case '-v':
       const version = getCurrentVersion();
       if (!version) {
-        console.log('ChromePilot is not installed');
+        console.log('ChromeLink is not installed');
         process.exit(1);
       }
-      console.log(`ChromePilot version: ${version}`);
+      console.log(`ChromeLink version: ${version}`);
       break;
       
     case 'diagnose':

@@ -1,5 +1,5 @@
 /**
- * ChromePilot - Side Panel UI
+ * ChromeLink - Side Panel UI
  */
 
 // State

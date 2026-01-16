@@ -4,7 +4,7 @@
  */
 
 // Listen for custom events from MAIN world
-window.addEventListener('__chromepilot_element_clicked', (event) => {
+window.addEventListener('__chromelink_element_clicked', (event) => {
   console.log('Inspector bridge: Element clicked event received', event.detail);
   
   // Forward to background script
@@ -18,7 +18,7 @@ window.addEventListener('__chromepilot_element_clicked', (event) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'simulateInspectorClick' && message.selector) {
     // Dispatch event to MAIN world to trigger inspector click
-    window.dispatchEvent(new CustomEvent('__chromepilot_simulate_click', {
+    window.dispatchEvent(new CustomEvent('__chromelink_simulate_click', {
       detail: { selector: message.selector }
     }));
     sendResponse({ success: true });
@@ -26,4 +26,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-console.log('ChromePilot Inspector Bridge loaded');
+console.log('ChromeLink Inspector Bridge loaded');

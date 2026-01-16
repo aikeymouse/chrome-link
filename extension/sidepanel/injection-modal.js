@@ -1,5 +1,5 @@
 /**
- * ChromePilot - Injection Modal
+ * ChromeLink - Injection Modal
  */
 
 // State: Map of sessionId -> array of injections

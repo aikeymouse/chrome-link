@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * ChromePilot - Native Messaging Host
+ * ChromeLink - Native Messaging Host
  * WebSocket server with native messaging bridge to Chrome extension
  */
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ChromePilot Native Host Launcher
+# ChromeLink Native Host Launcher
 # This wrapper ensures the correct node version is used
 
 # Don't kill existing process - let the new one handle port conflict
@@ -19,4 +19,4 @@ export PATH="/opt/homebrew/bin:$PATH"
 cd "$(dirname "$0")"
 
 # Launch the server with error logging
-exec node browser-pilot-server.js 2>> /tmp/chromepilot-error.log
+exec node browser-pilot-server.js 2>> /tmp/chromelink-error.log

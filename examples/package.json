@@ -1,8 +1,8 @@
 {
-  "name": "chromepilot-examples",
+  "name": "chromelink-examples",
   "version": "1.1.0",
-  "description": "ChromePilot WebSocket client examples",
-  "main": "chromepilot-client.js",
+  "description": "ChromeLink WebSocket client examples",
+  "main": "chromelink-client.js",
   "scripts": {
     "test": "node test-client.js",
     "google": "node google-search-client.js",
@@ -12,7 +12,7 @@
     "full-analysis": "node analyze-form/full-analysis-client.js"
   },
   "keywords": [
-    "chromepilot",
+    "chromelink",
     "websocket",
     "chrome",
     "automation"

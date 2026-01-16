@@ -1,5 +1,5 @@
 /**
- * ChromePilot Sidepanel UI Tests
+ * ChromeLink Sidepanel UI Tests
  * Tests the sidepanel user interface with the extension loaded
  */
 
@@ -13,7 +13,7 @@ const manifestPath = path.join(__dirname, '../../extension/manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const EXPECTED_VERSION = manifest.version;
 
-test.describe('ChromePilot Sidepanel UI', () => {
+test.describe('ChromeLink Sidepanel UI', () => {
   
   test('should load sidepanel HTML correctly', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/sidepanel/panel.html`);
@@ -22,7 +22,7 @@ test.describe('ChromePilot Sidepanel UI', () => {
     await page.waitForLoadState('networkidle');
     
     // Check title
-    await expect(page).toHaveTitle('ChromePilot Panel');
+    await expect(page).toHaveTitle('ChromeLink Panel');
     
     // Check main container exists
     const container = page.locator('.container');
@@ -31,7 +31,7 @@ test.describe('ChromePilot Sidepanel UI', () => {
     // Check header elements
     const header = page.locator('header.header');
     await expect(header).toBeVisible();
-    await expect(header.locator('h1')).toHaveText(`ChromePilot v${EXPECTED_VERSION}`);
+    await expect(header.locator('h1')).toHaveText(`ChromeLink v${EXPECTED_VERSION}`);
     
     // Check status badge
     const statusBadge = page.locator('#status-badge');
@@ -148,7 +148,7 @@ test.describe('ChromePilot Sidepanel UI', () => {
     
     // Verify tab title matches panel title
     await expect(tabHeader.locator('.tab-title')).toBeVisible();
-    expect(tabTitleText).toBe('ChromePilot Panel');
+    expect(tabTitleText).toBe('ChromeLink Panel');
     
     // Verify tab URL contains extension ID
     await expect(firstTab.locator('.tab-url')).toBeVisible();
@@ -223,6 +223,6 @@ test.describe('ChromePilot Sidepanel UI', () => {
     // Verify remaining tab is the extension tab
     const remainingTab = tabItems.first();
     const remainingTabTitle = await remainingTab.locator('.tab-header .tab-title').textContent();
-    expect(remainingTabTitle).toBe('ChromePilot Panel');
+    expect(remainingTabTitle).toBe('ChromeLink Panel');
   });
 });

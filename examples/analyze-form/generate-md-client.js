@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ChromePilot Markdown Report Generator
+ * ChromeLink Markdown Report Generator
  * Generates a markdown report with screenshots from page-analysis.json
  * 
  * Usage:
@@ -12,14 +12,14 @@
  *   node generate-md-client.js https://example.com --output custom-report.md
  */
 
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 const c = require('./console-utils');
 const fs = require('fs');
 const path = require('path');
 
 class MarkdownReportGenerator {
   constructor(outputFile = null) {
-    this.client = new ChromePilotClient();
+    this.client = new ChromeLinkClient();
     this.sessionId = null;
     // Set screenshot dir and base dir based on output file location, or use default
     if (outputFile) {
@@ -563,7 +563,7 @@ function parseArgs() {
   
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
     console.log(`
-ChromePilot Markdown Report Generator
+ChromeLink Markdown Report Generator
 
 Usage:
   node generate-md-client.js <url> [--input <json-file>] [--output <md-file>]

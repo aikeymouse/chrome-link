@@ -1,13 +1,13 @@
 /**
- * ChromePilot Test Client - Updated to use websocket-client helper
+ * ChromeLink Test Client - Updated to use websocket-client helper
  */
 
-const ChromePilotClient = require('./chromepilot-client');
+const ChromeLinkClient = require('./chromelink-client');
 
 async function main() {
-  console.log('🚀 ChromePilot Test Client\n');
+  console.log('🚀 ChromeLink Test Client\n');
   
-  const client = new ChromePilotClient();
+  const client = new ChromeLinkClient();
   const openedTabs = []; // Track tabs opened during tests
   
   try {

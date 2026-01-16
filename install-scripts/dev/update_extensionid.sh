@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Update ChromePilot Extension ID in Native Host Manifest
+# Update ChromeLink Extension ID in Native Host Manifest
 # Usage: ./update_extensionid.sh <extension_id>
 
 set -e
 
 EXTENSION_ID="$1"
-NATIVE_HOST_NAME="com.chromepilot.extension"
+NATIVE_HOST_NAME="com.chromelink.extension"
 
 # Validate extension ID
 if [ -z "$EXTENSION_ID" ]; then
@@ -31,7 +31,7 @@ if ! [[ "$EXTENSION_ID" =~ ^[a-z]{32}$ ]]; then
     exit 1
 fi
 
-echo "🔧 Updating ChromePilot Extension ID"
+echo "🔧 Updating ChromeLink Extension ID"
 echo ""
 
 # Determine OS and manifest path
@@ -103,7 +103,7 @@ if grep -q "$EXTENSION_ID" "$MANIFEST_PATH"; then
     echo ""
     echo "Next steps:"
     echo "1. Restart Chrome completely (Quit and reopen)"
-    echo "2. Click the ChromePilot extension icon to open side panel"
+    echo "2. Click the ChromeLink extension icon to open side panel"
     echo "3. Verify 'Connected' status appears"
     echo ""
     echo "If you see 'Disconnected', check:"

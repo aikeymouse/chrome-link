@@ -1,6 +1,6 @@
-# ChromePilot Examples
+# ChromeLink Examples
 
-WebSocket client examples for ChromePilot browser automation.
+WebSocket client examples for ChromeLink browser automation.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ npm test
 
 ## Available Examples
 
-- **test-client.js** - Comprehensive test suite for all ChromePilot features
+- **test-client.js** - Comprehensive test suite for all ChromeLink features
 - **google-search-client.js** - Google search automation example
 - **screenshot-client.js** - Screenshot capture example
 
@@ -36,7 +36,7 @@ npm run screenshot
 
 ## Prerequisites
 
-- ChromePilot extension loaded in Chrome
+- ChromeLink extension loaded in Chrome
 - Extension side panel open (click extension icon)
 - Native host running (automatically starts when side panel opens)
 
@@ -53,7 +53,7 @@ The test client verifies:
 ### Expected Output
 
 ```
-🚀 ChromePilot Test Client
+🚀 ChromeLink Test Client
 
 Connecting to ws://localhost:9000/session...
 ✓ Connected

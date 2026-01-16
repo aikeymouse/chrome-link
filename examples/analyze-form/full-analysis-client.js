@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ChromePilot Full Analysis Tool
+ * ChromeLink Full Analysis Tool
  * Runs page analysis and generates markdown report in a single command
  * 
  * Usage:
@@ -58,7 +58,7 @@ function parseArgs() {
  */
 function showHelp() {
   console.log(`
-${c.bold('ChromePilot Full Analysis Tool')}
+${c.bold('ChromeLink Full Analysis Tool')}
 
 ${c.cyan('Usage:')}
   node full-analysis-client.js --url <url> [options]
@@ -130,7 +130,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(c.bold('\n🚀 ChromePilot Full Analysis'));
+  console.log(c.bold('\n🚀 ChromeLink Full Analysis'));
   console.log(c.dim('═'.repeat(50)));
   console.log(`${c.cyan('URL:')}        ${params.url}`);
   console.log(`${c.cyan('Output Dir:')} ${params.outputDir}`);
