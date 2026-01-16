@@ -26,3 +26,4 @@ clients/*/.npmrc
 clients/*/package-lock.json
 clients/*/*.tgz
 docs/dev/NPM_PUBLISH.md
+docs/dev/WEBVIEW2_SCRIPT_INJECTION.md
