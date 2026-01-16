@@ -12,7 +12,7 @@
  *   node generate-md-client.js https://example.com --output custom-report.md
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 const c = require('./console-utils');
 const fs = require('fs');
 const path = require('path');

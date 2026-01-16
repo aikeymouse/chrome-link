@@ -3,7 +3,7 @@
  * Opens Google, searches for text, then closes the session
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 
 /**
  * Run the test

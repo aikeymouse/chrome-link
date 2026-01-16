@@ -16,7 +16,7 @@
  *   - Uses inspectElement API which works in CSP environments
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 const c = require('./console-utils');
 
 class FormAnalyzer {

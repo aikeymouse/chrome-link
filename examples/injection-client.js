@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 
 async function main() {
   const client = new ChromeLinkClient();

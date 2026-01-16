@@ -2,7 +2,7 @@
  * ChromeLink Test Client - Updated to use websocket-client helper
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 
 async function main() {
   console.log('🚀 ChromeLink Test Client\n');

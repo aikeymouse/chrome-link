@@ -4,7 +4,7 @@
  * Supports multi-turn conversations in the same session
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 
 class GeminiClient {
   constructor() {

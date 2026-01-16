@@ -3,7 +3,7 @@
  * Demonstrates how to take screenshots of specific elements
  */
 
-const ChromeLinkClient = require('./chromelink-client');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 const fs = require('fs');
 const path = require('path');
 
