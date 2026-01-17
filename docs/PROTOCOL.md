@@ -1476,12 +1476,12 @@ Sent when tabs change in the active window:
 
 ## Session Lifecycle
 
-1. **Create Session**: Client sends POST request to `/session`
-2. **Active Session**: WebSocket connection established, commands can be sent
-3. **Activity**: Each command resets the session timeout
+1. **Create Session**: Client connects via WebSocket to `ws://localhost:9000/session?timeout=<ms>`
+2. **Session Created**: Server automatically creates session and sends `sessionCreated` event with unique `sessionId`
+3. **Active Session**: Commands can be sent, each command resets the session timeout
 4. **Warning**: 60 seconds before timeout, `sessionTimeout` event sent
 5. **Expiration**: Session expires, `sessionExpired` event sent, connection closed
-6. **Resumption**: Client can resume by reconnecting with same `sessionId` if not expired
+6. **Resumption**: Client can resume by reconnecting with `?sessionId=<id>` if session hasn't expired
 
 ## Best Practices
 
