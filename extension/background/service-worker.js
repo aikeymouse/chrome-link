@@ -216,6 +216,12 @@ async function handleCommand(sessionId, command) {
       case 'closeTab':
         result = await closeTab(params);
         break;
+      case 'goBack':
+        result = await goBack(params);
+        break;
+      case 'goForward':
+        result = await goForward(params);
+        break;
       case 'callHelper':
         result = await callHelper(params);
         break;
@@ -389,6 +395,76 @@ async function closeTab(params) {
   }
   
   await chrome.tabs.remove(tabId);
+  
+  return {
+    success: true,
+    tabId
+  };
+}
+
+/**
+ * Navigate back in tab history
+ */
+async function goBack(params) {
+  const { tabId } = params;
+  
+  if (!tabId) {
+    throw { code: 'MISSING_PARAMS', message: 'Missing required parameter: tabId' };
+  }
+  
+  // Validate tab exists
+  try {
+    await chrome.tabs.get(tabId);
+  } catch (err) {
+    throw { code: 'TAB_NOT_FOUND', message: `Tab with ID ${tabId} not found or was closed` };
+  }
+  
+  try {
+    await chrome.tabs.goBack(tabId);
+  } catch (err) {
+    // Chrome throws error if no history to go back to
+    // Return success: false instead of throwing
+    return {
+      success: false,
+      tabId,
+      message: 'No previous page in history'
+    };
+  }
+  
+  return {
+    success: true,
+    tabId
+  };
+}
+
+/**
+ * Navigate forward in tab history
+ */
+async function goForward(params) {
+  const { tabId } = params;
+  
+  if (!tabId) {
+    throw { code: 'MISSING_PARAMS', message: 'Missing required parameter: tabId' };
+  }
+  
+  // Validate tab exists
+  try {
+    await chrome.tabs.get(tabId);
+  } catch (err) {
+    throw { code: 'TAB_NOT_FOUND', message: `Tab with ID ${tabId} not found or was closed` };
+  }
+  
+  try {
+    await chrome.tabs.goForward(tabId);
+  } catch (err) {
+    // Chrome throws error if no history to go forward to
+    // Return success: false instead of throwing
+    return {
+      success: false,
+      tabId,
+      message: 'No next page in history'
+    };
+  }
   
   return {
     success: true,

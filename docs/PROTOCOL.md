@@ -16,8 +16,10 @@
   - [3. Navigate Tab](#3-navigate-tab)
   - [4. Switch Tab](#4-switch-tab)
   - [5. Close Tab](#5-close-tab)
-  - [6. Execute JavaScript](#6-execute-javascript)
-  - [7. Call DOM Helper Function](#7-call-dom-helper-function)
+  - [6. Go Back](#6-go-back)
+  - [7. Go Forward](#7-go-forward)
+  - [8. Execute JavaScript](#8-execute-javascript)
+  - [9. Call DOM Helper Function](#9-call-dom-helper-function)
     - [Element Interaction](#element-interaction)
       - [clickElement](#clickelement)
       - [typeText](#typetext)
@@ -39,9 +41,9 @@
     - [Element Inspection](#element-inspection)
       - [inspectElement](#inspectelement)
       - [getContainerElements](#getcontainerelements)
-  - [8. Capture Screenshot](#8-capture-screenshot)
-  - [9. Register Script Injection](#9-register-script-injection)
-  - [10. Unregister Script Injection](#10-unregister-script-injection)
+  - [10. Capture Screenshot](#10-capture-screenshot)
+  - [11. Register Script Injection](#11-register-script-injection)
+  - [12. Unregister Script Injection](#12-unregister-script-injection)
 - [Event Messages](#event-messages)
 - [Error Codes](#error-codes)
 - [Session Lifecycle](#session-lifecycle)
@@ -444,7 +446,99 @@ Close (remove) a specific tab.
 }
 ```
 
-### 6. Execute JavaScript
+### 6. Go Back
+
+Navigate back in tab's browsing history (equivalent to browser's back button).
+
+**Request:**
+```json
+{
+  "action": "goBack",
+  "params": {
+    "tabId": 123
+  },
+  "requestId": "req-006"
+}
+```
+
+**Parameters:**
+- `tabId` (number, required): Chrome tab ID to navigate back
+
+**Response:**
+```json
+{
+  "requestId": "req-006",
+  "result": {
+    "success": true,
+    "tabId": 123
+  },
+  "error": null
+}
+```
+
+**Error Cases:**
+```json
+{
+  "requestId": "req-006",
+  "result": null,
+  "error": {
+    "code": "TAB_NOT_FOUND",
+    "message": "Tab with ID 123 not found or was closed"
+  }
+}
+```
+
+**Notes:**
+- No effect if tab has no history to go back to
+- Uses native `chrome.tabs.goBack()` API
+
+### 7. Go Forward
+
+Navigate forward in tab's browsing history (equivalent to browser's forward button).
+
+**Request:**
+```json
+{
+  "action": "goForward",
+  "params": {
+    "tabId": 123
+  },
+  "requestId": "req-007"
+}
+```
+
+**Parameters:**
+- `tabId` (number, required): Chrome tab ID to navigate forward
+
+**Response:**
+```json
+{
+  "requestId": "req-007",
+  "result": {
+    "success": true,
+    "tabId": 123
+  },
+  "error": null
+}
+```
+
+**Error Cases:**
+```json
+{
+  "requestId": "req-007",
+  "result": null,
+  "error": {
+    "code": "TAB_NOT_FOUND",
+    "message": "Tab with ID 123 not found or was closed"
+  }
+}
+```
+
+**Notes:**
+- No effect if tab has no history to go forward to
+- Uses native `chrome.tabs.goForward()` API
+
+### 8. Execute JavaScript
 
 Execute JavaScript code in a tab and return the result.
 
@@ -458,7 +552,7 @@ Execute JavaScript code in a tab and return the result.
     "timeout": 30000,
     "focus": false
   },
-  "requestId": "req-005"
+  "requestId": "req-008"
 }
 ```
 
@@ -471,7 +565,7 @@ Execute JavaScript code in a tab and return the result.
 **Response:**
 ```json
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "result": {
     "value": "Example Heading",
     "type": "string"
@@ -491,7 +585,7 @@ The `type` field indicates the JavaScript type:
 Tab not found:
 ```json
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "result": null,
   "error": {
     "code": "TAB_NOT_FOUND",
@@ -503,7 +597,7 @@ Tab not found:
 Execution timeout:
 ```json
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "result": null,
   "error": {
     "code": "EXECUTION_TIMEOUT",
@@ -515,7 +609,7 @@ Execution timeout:
 JavaScript error:
 ```json
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "result": null,
   "error": {
     "code": "SCRIPT_ERROR",
@@ -530,7 +624,7 @@ If the result exceeds 1MB, it will be chunked:
 ```json
 // Chunk 1
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "chunk": "eyJ2YWx1ZSI6IlZlcnkgbG9uZyByZXN1bHQuLi4i...",
   "chunkIndex": 0,
   "totalChunks": 3
@@ -538,7 +632,7 @@ If the result exceeds 1MB, it will be chunked:
 
 // Chunk 2
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "chunk": "Li4uY29udGludWVkIGRhdGEuLi4=",
   "chunkIndex": 1,
   "totalChunks": 3
@@ -546,14 +640,14 @@ If the result exceeds 1MB, it will be chunked:
 
 // Chunk 3
 {
-  "requestId": "req-005",
+  "requestId": "req-008",
   "chunk": "Li4uZmluYWwgY2h1bmsgZGF0YX0=",
   "chunkIndex": 2,
   "totalChunks": 3
 }
 ```
 
-### 7. Call DOM Helper Function
+### 9. Call DOM Helper Function
 
 Call a predefined DOM helper function for CSP-restricted pages. This command is designed for pages with strict Content Security Policies that block dynamic JavaScript evaluation.
 
@@ -568,7 +662,7 @@ Call a predefined DOM helper function for CSP-restricted pages. This command is 
     "timeout": 30000,
     "focus": false
   },
-  "requestId": "req-006"
+  "requestId": "req-009"
 }
 ```
 
@@ -953,7 +1047,7 @@ Response:
 Helper not loaded:
 ```json
 {
-  "requestId": "req-006",
+  "requestId": "req-009",
   "result": null,
   "error": {
     "code": "EXECUTION_ERROR",
@@ -965,7 +1059,7 @@ Helper not loaded:
 Function not found:
 ```json
 {
-  "requestId": "req-006",
+  "requestId": "req-009",
   "result": null,
   "error": {
     "code": "EXECUTION_ERROR",
@@ -977,7 +1071,7 @@ Function not found:
 Element not found:
 ```json
 {
-  "requestId": "req-006",
+  "requestId": "req-009",
   "result": null,
   "error": {
     "code": "EXECUTION_ERROR",
@@ -986,7 +1080,7 @@ Element not found:
 }
 ```
 
-### 8. Capture Screenshot
+### 10. Capture Screenshott
 
 Capture screenshot of the visible viewport or specific elements.
 
@@ -999,7 +1093,7 @@ Capture screenshot of the visible viewport or specific elements.
     "format": "png",
     "quality": 90
   },
-  "requestId": "req-014"
+  "requestId": "req-010"
 }
 ```
 
@@ -1015,7 +1109,7 @@ Capture screenshot of the visible viewport or specific elements.
 **Response (Full Viewport):**
 ```json
 {
-  "requestId": "req-013",
+  "requestId": "req-010",
   "result": {
     "dataUrl": "data:image/png;base64,iVBORw0KGgo..."
   },
@@ -1031,14 +1125,14 @@ Capture screenshot of the visible viewport or specific elements.
     "tabId": 123,
     "selectors": ["h1", "button.submit"]
   },
-  "requestId": "req-014"
+  "requestId": "req-011"
 }
 ```
 
 **Response (Element Screenshot - Combined):**
 ```json
 {
-  "requestId": "req-014",
+  "requestId": "req-011",
   "result": {
     "dataUrl": "data:image/png;base64,iVBORw0KGgo...",
     "bounds": {
@@ -1059,7 +1153,7 @@ Capture screenshot of the visible viewport or specific elements.
 **Response (No Elements Found):**
 ```json
 {
-  "requestId": "req-014",
+  "requestId": "req-011",
   "result": null,
   "error": {
     "code": "ELEMENTS_NOT_FOUND",
@@ -1071,7 +1165,7 @@ Capture screenshot of the visible viewport or specific elements.
 **Response (Rate Limit Exceeded):**
 ```json
 {
-  "requestId": "req-015",
+  "requestId": "req-012",
   "result": null,
   "error": {
     "code": "EXECUTION_ERROR",
@@ -1135,7 +1229,7 @@ const result = await client.sendRequest('captureScreenshot', {
 ```
 
 
-### 9. Register Script Injection
+### 11. Register Script Injection
 
 Register early script injection for WebView2 testing and page mocking. Scripts are injected before page load into the main world, allowing you to mock browser APIs, inject test data, or modify page behavior.
 
@@ -1149,7 +1243,7 @@ Register early script injection for WebView2 testing and page mocking. Scripts a
     "matches": ["https://your-app.com/*"],
     "runAt": "document_start"
   },
-  "requestId": "req-016"
+  "requestId": "req-013"
 }
 ```
 
@@ -1166,7 +1260,7 @@ Register early script injection for WebView2 testing and page mocking. Scripts a
 **Response:**
 ```json
 {
-  "requestId": "req-016",
+  "requestId": "req-013",
   "result": {
     "registered": true,
     "id": "webview2-mock"
@@ -1180,7 +1274,7 @@ Register early script injection for WebView2 testing and page mocking. Scripts a
 Missing parameters:
 ```json
 {
-  "requestId": "req-016",
+  "requestId": "req-013",
   "result": null,
   "error": {
     "code": "MISSING_PARAMS",
@@ -1192,7 +1286,7 @@ Missing parameters:
 Registration failed:
 ```json
 {
-  "requestId": "req-016",
+  "requestId": "req-013",
   "result": null,
   "error": {
     "code": "INJECTION_ERROR",
@@ -1218,7 +1312,7 @@ Mock WebView2 API:
     "code": "window.chrome = window.chrome || {}; window.chrome.webview = { postMessage: (msg) => console.log('Mock:', msg), addEventListener: (evt, handler) => { setTimeout(() => handler({ data: JSON.stringify({ token: 'test-token-123' }) }), 100); } };",
     "matches": ["https://my-webview-app.com/*"]
   },
-  "requestId": "req-017"
+  "requestId": "req-014"
 }
 ```
 
@@ -1231,7 +1325,7 @@ Inject test configuration:
     "code": "window.__TEST_MODE__ = true; window.__API_URL__ = 'https://staging-api.example.com';",
     "matches": ["https://app.example.com/*", "https://staging.example.com/*"]
   },
-  "requestId": "req-018"
+  "requestId": "req-015"
 }
 ```
 
@@ -1245,7 +1339,7 @@ Override fetch for testing:
     "matches": ["<all_urls>"],
     "runAt": "document_start"
   },
-  "requestId": "req-019"
+  "requestId": "req-016"
 }
 ```
 
@@ -1257,7 +1351,7 @@ Override fetch for testing:
 - Code is injected as-is, ensure it's valid JavaScript
 - Use `runAt: "document_start"` for API mocking to ensure code runs before page scripts
 
-### 10. Unregister Script Injection
+### 12. Unregister Script Injection
 
 Remove a previously registered script injection.
 
@@ -1268,7 +1362,7 @@ Remove a previously registered script injection.
   "params": {
     "id": "webview2-mock"
   },
-  "requestId": "req-020"
+  "requestId": "req-017"
 }
 ```
 
@@ -1278,7 +1372,7 @@ Remove a previously registered script injection.
 **Response:**
 ```json
 {
-  "requestId": "req-020",
+  "requestId": "req-017",
   "result": {
     "unregistered": true,
     "id": "webview2-mock"
@@ -1292,7 +1386,7 @@ Remove a previously registered script injection.
 Missing parameter:
 ```json
 {
-  "requestId": "req-020",
+  "requestId": "req-017",
   "result": null,
   "error": {
     "code": "MISSING_PARAMS",
@@ -1304,7 +1398,7 @@ Missing parameter:
 Unregistration failed:
 ```json
 {
-  "requestId": "req-020",
+  "requestId": "req-017",
   "result": null,
   "error": {
     "code": "INJECTION_ERROR",
@@ -1564,6 +1658,18 @@ class ChromeDriverClient {
     return this.send('switchTab', { tabId });
   }
   
+  async closeTab(tabId) {
+    return this.send('closeTab', { tabId });
+  }
+  
+  async goBack(tabId) {
+    return this.send('goBack', { tabId });
+  }
+  
+  async goForward(tabId) {
+    return this.send('goForward', { tabId });
+  }
+  
   async executeJS(code, tabId = null, timeout = 30000, focus = false) {
     return this.send('executeJS', { 
       ...(tabId && { tabId }),
@@ -1588,6 +1694,17 @@ class ChromeDriverClient {
   // Open new tab
   const newTab = await client.openTab('https://example.com', true);
   console.log('Opened tab:', newTab);
+  
+  // Navigate to another URL
+  await client.navigateTab(newTab.tab.id, 'https://github.com');
+  
+  // Go back
+  await client.goBack(newTab.tab.id);
+  console.log('Navigated back');
+  
+  // Go forward
+  await client.goForward(newTab.tab.id);
+  console.log('Navigated forward');
   
   // Execute JS
   const title = await client.executeJS('document.title', newTab.tab.id);
