@@ -305,21 +305,16 @@ class ChromeLinkClient {
    * Get element text
    * @param {string} selector - CSS selector
    * @param {number} tabId - Tab ID to execute in
-   * @returns {Promise<{value: string}>}
+   * @returns {Promise<string>} The text content of the element
    * @example
    * const text = await client.getText('h1.title', tabId);
+   * console.log(text); // "Example Domain"
    */
   async getText(selector, tabId) {
     this.log(`→ Getting text from: ${selector}`);
-    const escapedSelector = selector.replace(/'/g, "\\'");
-    const code = `(function() {
-      const el = document.querySelector('${escapedSelector}');
-      if (!el) throw new Error('Element not found: ${escapedSelector}');
-      return el.textContent;
-    })()`;
-    const result = await this.executeJS(code, tabId);
+    const result = await this.callHelper('getText', [selector], tabId);
     this.log(`✓ Text: "${result.value}"`);
-    return { text: result.value };
+    return result.value;
   }
 
   /**
