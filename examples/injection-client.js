@@ -18,37 +18,71 @@ async function main() {
     console.log('Connecting to ChromeLink...');
     await client.connect('ws://localhost:9000', 120000); // 2 minutes timeout
     
-    // Register injection for Selenium pages
-    console.log('\nRegistering script injection for Selenium...');
+    // Test 1: Register WebView2 bridge mock
+    console.log('\n📋 Test 1: Registering WebView2 bridge mock...');
+    const bridgeCode = `
+      console.log('[INJECTION] Script running at:', Date.now(), 'readyState:', document.readyState);
+      window.__INJECTION_TIME__ = Date.now();
+      window.CommonBrowserControlBridge = function(param) {
+        console.log('[BRIDGE] Called with:', param, 'at:', Date.now());
+        switch(param) {
+          case 'GetAuthToken':
+            return 'test-token-12345';
+          default:
+            return null;
+        }
+      };
+      console.log('[INJECTION] Bridge installed, available immediately');
+    `;
     
-    // Load injection code from external file
-    const injectionCodePath = path.join(__dirname, 'injection-code.js');
-    const injectionCode = fs.readFileSync(injectionCodePath, 'utf8');
-    
-    const result = await client.sendRequest('registerInjection', {
-      id: 'selenium-badge',
-      code: injectionCode,
+    const bridgeResult = await client.sendRequest('registerInjection', {
+      id: 'webview2-bridge',
+      code: bridgeCode,
       matches: ['https://www.selenium.dev/*'],
       runAt: 'document_start'
     });
+    console.log('✓ Bridge registered:', bridgeResult);
     
-    console.log('✓ Injection registered:', result);
+    // Test 2: Register visible badge
+    console.log('\n📋 Test 2: Registering visible badge...');
+    const badgeCodePath = path.join(__dirname, 'injection-code.js');
+    const badgeCode = fs.readFileSync(badgeCodePath, 'utf8');
+    
+    const badgeResult = await client.sendRequest('registerInjection', {
+      id: 'selenium-badge',
+      code: badgeCode,
+      matches: ['https://www.selenium.dev/*'],
+      runAt: 'document_start'
+    });
+    console.log('✓ Badge registered:', badgeResult);
+    
     console.log('\n📌 Instructions:');
     console.log('   1. Navigate to https://www.selenium.dev in Chrome');
-    console.log('   2. You should see a "🚀 ChromeLink Injected" badge in the top-right');
-    console.log('   3. Click the badge to toggle the text');
-    console.log('   4. The badge will appear on all Selenium pages automatically');
-    console.log('\n⏸  Press Ctrl+C to unregister injection and exit\n');
+    console.log('   2. Open DevTools Console (F12)');
+    console.log('   3. You should see:');
+    console.log('      - [INJECTION] logs showing script ran at document_start');
+    console.log('      - "🚀 ChromeLink Injected" badge in top-right corner');
+    console.log('   4. Test the bridge:');
+    console.log('      - In console, run: CommonBrowserControlBridge("GetAuthToken")');
+    console.log('      - Should return: "test-token-12345"');
+    console.log('   5. Refresh the page - injections should run again at document_start');
+    console.log('\n⏸  Press Ctrl+C to unregister injections and exit\n');
     
     // Handle graceful shutdown
     const cleanup = async () => {
       console.log('\n\nCleaning up...');
       try {
-        const unregisterResult = await client.sendRequest('unregisterInjection', {
+        // Unregister both injections
+        const bridgeUnreg = await client.sendRequest('unregisterInjection', {
+          id: 'webview2-bridge'
+        });
+        console.log('✓ Bridge unregistered:', bridgeUnreg);
+        
+        const badgeUnreg = await client.sendRequest('unregisterInjection', {
           id: 'selenium-badge'
         });
-        console.log('✓ Injection unregistered:', unregisterResult);
-        console.log('   Note: Already loaded pages will keep the badge until refreshed');
+        console.log('✓ Badge unregistered:', badgeUnreg);
+        console.log('   Note: Already loaded pages will keep injections until refreshed');
       } catch (err) {
         console.error('Failed to unregister:', err.message);
       }

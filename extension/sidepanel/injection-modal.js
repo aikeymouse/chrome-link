@@ -52,8 +52,7 @@ function handleInjectionRegistered(message) {
       id: injection.id,
       code: injection.code,
       matches: injection.matches,
-      runAt: injection.runAt,
-      triggerCount: injection.triggerCount || 0
+      runAt: injection.runAt
     });
     
     // Sort by ID alphabetically
@@ -66,27 +65,6 @@ function handleInjectionRegistered(message) {
   // Update modal if open for this session
   if (currentModalSessionId === sessionId) {
     updateModalContent(sessionId);
-  }
-}
-
-/**
- * Handle injection triggered event
- */
-function handleInjectionTriggered(message) {
-  const { sessionId, id, triggerCount } = message;
-  
-  if (!sessionId || !sessionInjections.has(sessionId)) return;
-  
-  const injections = sessionInjections.get(sessionId);
-  const injection = injections.find(inj => inj.id === id);
-  
-  if (injection) {
-    injection.triggerCount = triggerCount;
-    
-    // Update modal if open for this session
-    if (currentModalSessionId === sessionId) {
-      updateModalContent(sessionId);
-    }
   }
 }
 
@@ -178,7 +156,7 @@ function updateModalContent(sessionId) {
     <div class="injection-item">
       <div class="injection-item-header">
         <span class="injection-item-id">${escapeHtml(injection.id)}</span>
-        <span class="injection-item-count">${injection.triggerCount} trigger${injection.triggerCount !== 1 ? 's' : ''}</span>
+        <span class="injection-item-status">Registered</span>
       </div>
       <div class="injection-item-meta">
         <span class="injection-item-meta-label">URL Pattern:</span>

@@ -887,6 +887,14 @@ const registeredInjections = new Map();
 
 /**
  * Register early script injection for WebView2 testing and page mocking
+ * 
+ * IMPORTANT: Due to Chrome Manifest V3 limitations, registerContentScripts only
+ * accepts file paths, not inline code. We use executeScript with injectImmediately
+ * which provides "best effort" early injection but cannot guarantee execution
+ * before inline <script> tags in the page HTML.
+ * 
+ * For WebView2 auth scenarios requiring guaranteed timing, use chrome.webRequest
+ * API to inject auth headers instead of mocking the bridge function.
  */
 async function registerInjection(params) {
   const { id, code, matches = ['<all_urls>'], runAt = 'document_start', sessionId } = params;
@@ -896,17 +904,16 @@ async function registerInjection(params) {
   }
   
   try {
-    // Store the code for later injection
+    // Store injection metadata
     registeredInjections.set(id, {
       code,
       matches,
       runAt,
       active: true,
-      sessionId: sessionId || null,
-      triggerCount: 0
+      sessionId: sessionId || null
     });
     
-    // Listen for tab updates to inject the script
+    // Listen for tab updates to inject at earliest possible moment
     const listener = async (tabId, changeInfo, tab) => {
       const injection = registeredInjections.get(id);
       if (!injection || !injection.active) return;
@@ -917,32 +924,26 @@ async function registerInjection(params) {
         return regex.test(tab.url || '');
       });
       
-      // Inject on both 'loading' status and when URL changes (for SPAs and client-side navigation)
-      if (urlMatches && tab.url && (changeInfo.status === 'loading' || changeInfo.url)) {
+      // Inject on URL change (earlier than status='loading') or at appropriate runAt timing
+      const shouldInject = urlMatches && (
+        (changeInfo.url && injection.runAt === 'document_start') ||
+        (changeInfo.status === 'loading' && injection.runAt === 'document_end') ||
+        (changeInfo.status === 'complete' && injection.runAt === 'document_idle')
+      );
+      
+      if (shouldInject) {
         try {
           await chrome.scripting.executeScript({
             target: { tabId, allFrames: true },
             world: 'MAIN',
             injectImmediately: true,
-            func: (injectedCode) => {
-              eval(injectedCode);
+            func: (codeToRun) => {
+              // Use indirect eval to run in global scope
+              (1, eval)(codeToRun);
             },
             args: [injection.code]
           });
-          console.log('Injected script into tab', tabId, tab.url);
-          
-          // Increment trigger count
-          injection.triggerCount = (injection.triggerCount || 0) + 1;
-          
-          // Broadcast to side panel
-          if (injection.sessionId) {
-            broadcastToSidePanel({
-              type: 'injectionTriggered',
-              sessionId: injection.sessionId,
-              id: id,
-              triggerCount: injection.triggerCount
-            });
-          }
+          console.log('Injected script into tab', tabId, tab.url, 'at', injection.runAt);
         } catch (err) {
           console.warn('Injection failed for tab', tabId, err.message);
         }
@@ -953,7 +954,7 @@ async function registerInjection(params) {
     registeredInjections.get(id).listener = listener;
     chrome.tabs.onUpdated.addListener(listener);
     
-    console.log('Registered script injection:', id, 'for', matches);
+    console.log('Registered script injection:', id, 'matches:', matches, 'runAt:', runAt);
     
     // Broadcast to side panel
     if (sessionId) {
@@ -964,8 +965,7 @@ async function registerInjection(params) {
           id,
           code,
           matches,
-          runAt,
-          triggerCount: 0
+          runAt
         }
       });
     }
@@ -1021,23 +1021,15 @@ async function unregisterInjection(params) {
  * Clean up all injections associated with a session
  */
 function cleanupSessionInjections(sessionId) {
-  let cleanedCount = 0;
-  
   for (const [id, injection] of registeredInjections.entries()) {
     if (injection.sessionId === sessionId) {
-      // Mark as inactive and remove listener
       injection.active = false;
       if (injection.listener) {
         chrome.tabs.onUpdated.removeListener(injection.listener);
       }
       registeredInjections.delete(id);
-      cleanedCount++;
       console.log('Cleaned up injection:', id, 'for expired session:', sessionId);
     }
-  }
-  
-  if (cleanedCount > 0) {
-    console.log(`Cleaned up ${cleanedCount} injection(s) for session ${sessionId}`);
   }
 }
 /**

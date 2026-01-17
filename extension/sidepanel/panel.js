@@ -169,10 +169,6 @@ function handleBackgroundMessage(message) {
       handleInjectionRegistered(message);
       break;
       
-    case 'injectionTriggered':
-      handleInjectionTriggered(message);
-      break;
-      
     case 'injectionUnregistered':
       handleInjectionUnregistered(message);
       break;
