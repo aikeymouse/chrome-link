@@ -467,41 +467,30 @@ describe('Client Methods Integration Tests', function() {
       // Open tab with form
       const result = await client.openTab(TEST_URLS.SELENIUM_FORM);
       testTabId = result.tab.id;
-      await client.wait(2000);
       
       // Wait for form to load
       await client.waitForElement('form', 10000, testTabId);
       
       // Fill in text input
-      await client.type('#my-text-id', 'John Doe', testTabId);
-      await client.wait(300);
-      
+      await client.type('#my-text-id', 'John Doe', testTabId);    
       // Fill in password
-      await client.type('input[type="password"]', 'SecurePass123', testTabId);
-      await client.wait(300);
-      
+      await client.type('input[type="password"]', 'SecurePass123', testTabId);     
       // Fill in textarea
       await client.type('textarea.form-control', 'This is a test message', testTabId);
-      await client.wait(300);
       
       // Verify form values were set before submission
       const textValue = await client.executeJS('document.querySelector("#my-text-id").value', testTabId);
-      expect(textValue.value).to.equal('John Doe');
-      
+      expect(textValue.value).to.equal('John Doe');    
       const passwordValue = await client.executeJS('document.querySelector("input[type=\\"password\\"]").value', testTabId);
-      expect(passwordValue.value).to.equal('SecurePass123');
-      
+      expect(passwordValue.value).to.equal('SecurePass123');     
       const textareaValue = await client.executeJS('document.querySelector("textarea.form-control").value', testTabId);
       expect(textareaValue.value).to.equal('This is a test message');
       
       // Click submit button
       await client.click('button[type="submit"]', testTabId);
       
-      // Wait for navigation to confirmation page
-      await client.wait(2000);
-      
       // Verify we navigated to the submitted page
-      await client.waitForElement('h1.display-6', 10000, testTabId);
+      await client.waitForElement('#message', 10000, testTabId);
       const heading = await client.getText('h1.display-6', testTabId);
       expect(heading).to.equal('Form submitted');
       
