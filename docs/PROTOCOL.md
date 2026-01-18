@@ -110,7 +110,7 @@ ws.on('message', (data) => {
 
 **Check Server Readiness:**
 ```bash
-curl "http://localhost:9000/session"
+curl http://localhost:9000/session
 ```
 
 Response:

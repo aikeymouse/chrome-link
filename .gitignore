@@ -27,3 +27,4 @@ clients/*/package-lock.json
 clients/*/*.tgz
 docs/dev/NPM_PUBLISH.md
 docs/dev/WEBVIEW2_SCRIPT_INJECTION.md
+docs/dev/MCP_SERVER_ARCHITECTURE.md
