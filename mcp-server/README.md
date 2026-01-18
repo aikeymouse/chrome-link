@@ -272,7 +272,6 @@ Recommendations:
 
 ## Documentation
 
-- [MCP Server Architecture](../docs/dev/MCP_SERVER_ARCHITECTURE.md) - Detailed design docs
 - [MCP Server Configuration](../docs/dev/MCP_SERVER_CONFIGURATION.md) - Setup guide for various clients
 - [ChromeLink Protocol](../docs/PROTOCOL.md) - WebSocket protocol specification
 - [Node.js Client](../clients/node/README.md) - Client library used by MCP server
