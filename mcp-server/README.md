@@ -110,7 +110,7 @@ The MCP server will:
   - **Element Query**: getText, getHTML, getLastHTML, elementExists, isVisible, waitForElement
   - **Element Highlighting**: highlightElement, removeHighlights
   - **Element Positioning**: getElementBounds, scrollElementIntoView
-  - **Element Inspection**: inspectElement, getContainerElements
+  - **Element Inspection**: inspectElement, getContainerElements, extractPageElements
 
 ### Screenshots
 - `chrome_capture_screenshot` - Capture tab screenshot (PNG/JPEG)
@@ -118,6 +118,90 @@ The MCP server will:
 ### Script Injection
 - `chrome_register_injection` - Register content script
 - `chrome_unregister_injection` - Unregister content script
+
+## Element Extraction
+
+The `extractPageElements` helper provides intelligent extraction of page elements with rich metadata for test automation and page object generation:
+
+```javascript
+// Extract all interactive elements from a form
+const result = await callHelper('extractPageElements', {
+  containerSelector: '#login-form'
+});
+
+// Result structure:
+{
+  container: {
+    tagName: 'form',
+    cssSelector: '#login-form',
+    xpathSelector: '//form[@id="login-form"]',
+    attributes: { id: 'login-form', method: 'POST', action: '/login' },
+    textContent: 'Login to your account',
+    visible: true,
+    type: 'form'
+  },
+  elements: [
+    {
+      tagName: 'input',
+      selector: '#username',
+      xpathSelector: '//input[@id="username"]',
+      attributes: { id: 'username', name: 'username', type: 'text', placeholder: 'Email' },
+      textContent: '',
+      visible: true,
+      type: 'text-input'
+    },
+    {
+      tagName: 'input',
+      selector: '#password',
+      xpathSelector: '//input[@id="password"]',
+      attributes: { id: 'password', name: 'password', type: 'password' },
+      textContent: '',
+      visible: true,
+      type: 'password-input'
+    },
+    {
+      tagName: 'button',
+      selector: '#login-form > button[type="submit"]',
+      xpathSelector: '//button[@type="submit"]',
+      attributes: { type: 'submit', class: 'btn-primary' },
+      textContent: 'Sign In',
+      visible: true,
+      type: 'submit-button',
+      baseType: 'button'
+    }
+  ],
+  url: 'https://example.com/login',
+  title: 'Login - Example Site',
+  timestamp: '2024-01-15T10:30:00.000Z'
+}
+
+// Include hidden elements
+const allElements = await callHelper('extractPageElements', {
+  containerSelector: 'body',
+  includeHidden: true
+});
+```
+
+**Key Features:**
+- **Dual Selectors**: Both CSS and XPath selectors for maximum flexibility
+- **Semantic Types**: Automatic classification (text-input, button, link, checkbox, etc.)
+- **ARIA Support**: Recognizes ARIA roles with baseType hierarchy (searchbox→textbox, switch→checkbox)
+- **Direct Text**: Extracts only direct child text nodes (excludes nested elements)
+- **Visibility Filtering**: Optional `includeHidden` parameter (default: false)
+- **Rich Metadata**: All attributes, computed visibility, container context
+
+**Element Types:**
+- Form controls: `text-input`, `password-input`, `checkbox`, `radio`, `select`, `textarea`, `submit-button`, `reset-button`, `button`
+- Navigation: `link`
+- Media: `image`, `video`, `audio`
+- Content: `heading`, `label`, `text`
+- Semantic: ARIA roles (searchbox, switch, tab, menuitem, etc.)
+
+**Use Cases:**
+- Page object model generation for test automation
+- Form analysis and data extraction
+- Accessibility auditing (ARIA role verification)
+- UI component discovery
 
 ## Configuration for AI Agents
 

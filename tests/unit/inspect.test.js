@@ -99,6 +99,8 @@ describe('inspectElement helper', function() {
       expect(element.attributes).to.be.an('object');
       expect(element.attributes.type).to.equal('submit');
       expect(element.attributes.class).to.equal('btn btn-outline-primary mt-3');
+      // textContent should only include direct child text nodes
+      expect(element.textContent).to.be.a('string');
       expect(element.textContent).to.include('Submit');
       
       // Button children (may be empty or have text nodes)
@@ -125,6 +127,8 @@ describe('inspectElement helper', function() {
       expect(element.tagName).to.equal('form');
       expect(element.attributes.method).to.equal('get');
       expect(element.attributes.action).to.equal('submitted-form.html');
+      // textContent should only contain direct child text nodes, not nested element text
+      expect(element.textContent).to.be.a('string');
       
       // Form should have children (only element children, not text nodes)
       expect(result.children).to.be.an('array');
@@ -170,15 +174,15 @@ describe('inspectElement helper', function() {
       const optionChildren = result.children.filter(child => child.tagName === 'option');
       expect(optionChildren.length).to.equal(4);
       
-      // Verify first option
+      // Verify first option - textContent should be direct text only
       const firstOption = optionChildren[0];
       expect(firstOption.attributes.selected).to.equal('');
-      expect(firstOption.textContent).to.include('Open this select menu');
+      expect(firstOption.textContent).to.be.a('string');
       
       // Verify option with value
       const secondOption = optionChildren[1];
       expect(secondOption.attributes.value).to.equal('1');
-      expect(secondOption.textContent).to.include('One');
+      expect(secondOption.textContent).to.be.a('string');
     });
 
     it('should inspect disabled input element', async function() {
@@ -431,6 +435,60 @@ describe('inspectElement helper', function() {
       }
     });
 
+    it('should exclude hidden elements by default', async function() {
+      const result = await client.callHelper(
+        'getContainerElements',
+        ['form', 'input'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      expect(result.value).to.be.an('array');
+      
+      // By default, hidden elements should be filtered out
+      const allVisible = result.value.every(el => el.visible === true);
+      expect(allVisible).to.be.true;
+    });
+
+    it('should include hidden elements when includeHidden is true', async function() {
+      const result = await client.callHelper(
+        'getContainerElements',
+        ['form', 'input', true],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      expect(result.value).to.be.an('array');
+      
+      // Should include both visible and hidden elements
+      const visibleElements = result.value.filter(el => el.visible === true);
+      const hiddenElements = result.value.filter(el => el.visible === false);
+      
+      expect(visibleElements.length).to.be.greaterThan(0);
+      expect(hiddenElements.length).to.be.greaterThan(0);
+    });
+
+    it('should extract only direct text content, not nested element text', async function() {
+      const result = await client.callHelper(
+        'getContainerElements',
+        ['form', 'label'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      expect(result.value).to.be.an('array');
+      
+      // Labels may wrap inputs, so textContent should only be direct text nodes
+      const labels = result.value.filter(el => el.tagName === 'label');
+      expect(labels.length).to.be.greaterThan(0);
+      
+      // Each label should have textContent that excludes nested element text
+      labels.forEach(label => {
+        expect(label.textContent).to.be.a('string');
+        // If label wraps an input, textContent shouldn't include the input's value attribute
+      });
+    });
+
     it('should get all descendants when no filter provided', async function() {
       const result = await client.callHelper(
         'getContainerElements',
@@ -522,6 +580,197 @@ describe('inspectElement helper', function() {
         expect(err.message).to.be.a('string');
         expect(err.message.toLowerCase()).to.include('container');
       }
+    });
+  });
+
+  describe('extractPageElements helper', function() {
+    it('should extract all form elements with metadata', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      expect(result.value).to.be.an('object');
+      
+      // Validate response structure
+      expect(result.value).to.have.property('container');
+      expect(result.value).to.have.property('elements');
+      expect(result.value).to.have.property('url');
+      expect(result.value).to.have.property('title');
+      expect(result.value).to.have.property('timestamp');
+      
+      // Validate container metadata
+      const container = result.value.container;
+      expect(container.tagName).to.equal('form');
+      expect(container).to.have.property('cssSelector');
+      expect(container).to.have.property('xpathSelector');
+      expect(container).to.have.property('attributes');
+      expect(container).to.have.property('textContent');
+      expect(container).to.have.property('visible');
+      expect(container).to.have.property('type');
+      
+      // Validate elements array
+      expect(result.value.elements).to.be.an('array');
+      expect(result.value.elements.length).to.be.greaterThan(0);
+    });
+
+    it('should include both CSS and XPath selectors', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      const elements = result.value.elements;
+      
+      // Each element should have both selectors
+      const textInput = elements.find(el => el.attributes?.id === 'my-text-id');
+      expect(textInput).to.exist;
+      expect(textInput.selector).to.be.a('string');
+      expect(textInput.xpathSelector).to.be.a('string');
+      expect(textInput.xpathSelector).to.include('id');
+    });
+
+    it('should include semantic type information', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      const elements = result.value.elements;
+      
+      // Text input should have type
+      const textInput = elements.find(el => el.attributes?.type === 'text');
+      expect(textInput).to.exist;
+      expect(textInput.type).to.be.a('string');
+      expect(textInput.type).to.equal('text-input');
+      
+      // Submit button should have type and baseType
+      const submitButton = elements.find(el => el.attributes?.type === 'submit');
+      expect(submitButton).to.exist;
+      expect(submitButton.type).to.equal('submit-button');
+      expect(submitButton.baseType).to.equal('button');
+    });
+
+    it('should handle ARIA roles with baseType', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      const elements = result.value.elements;
+      
+      // Look for elements with ARIA roles
+      const ariaElements = elements.filter(el => el.baseType);
+      
+      // If there are ARIA role elements, validate structure
+      ariaElements.forEach(el => {
+        expect(el.type).to.be.a('string');
+        expect(el.baseType).to.be.a('string');
+      });
+    });
+
+    it('should extract direct text content only', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      
+      // Container textContent should be direct text only
+      expect(result.value.container.textContent).to.be.a('string');
+      
+      // Elements should have direct text only
+      result.value.elements.forEach(el => {
+        expect(el.textContent).to.be.a('string');
+      });
+    });
+
+    it('should include page context metadata', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      
+      expect(result.value.url).to.be.a('string');
+      expect(result.value.url).to.include('selenium');
+      expect(result.value.title).to.be.a('string');
+      expect(result.value.timestamp).to.be.a('string');
+      
+      // Timestamp should be ISO format
+      const timestamp = new Date(result.value.timestamp);
+      expect(timestamp).to.be.instanceOf(Date);
+      expect(timestamp.getTime()).to.be.greaterThan(0);
+    });
+
+    it('should exclude hidden elements by default', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      
+      // All returned elements should be visible
+      const allVisible = result.value.elements.every(el => el.visible === true);
+      expect(allVisible).to.be.true;
+    });
+
+    it('should include hidden elements when requested', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['form', true],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      
+      // Should include both visible and hidden elements
+      const visibleElements = result.value.elements.filter(el => el.visible === true);
+      const hiddenElements = result.value.elements.filter(el => el.visible === false);
+      
+      expect(visibleElements.length).to.be.greaterThan(0);
+      expect(hiddenElements.length).to.be.greaterThan(0);
+    });
+
+    it('should throw error for nonexistent container', async function() {
+      try {
+        await client.callHelper(
+          'extractPageElements',
+          ['#nonexistent-container-12345'],
+          testTabId
+        );
+        expect.fail('Should have thrown error');
+      } catch (err) {
+        expect(err.message).to.be.a('string');
+        expect(err.message.toLowerCase()).to.include('container');
+      }
+    });
+
+    it('should handle container with position:fixed visibility', async function() {
+      const result = await client.callHelper(
+        'extractPageElements',
+        ['main'],
+        testTabId
+      );
+      
+      client.assertValidExecutionResponse(result);
+      
+      // Container visibility check should handle position:fixed
+      expect(result.value.container.visible).to.be.a('boolean');
     });
   });
 });

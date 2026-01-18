@@ -296,7 +296,7 @@ function buildElementTree() {
 function buildElementDetails(element) {
   if (!element) return '<div class="empty-state">No element selected</div>';
   
-  const { tagName, selector, textContent, attributes } = element;
+  const { tagName, selector, xpathSelector, textContent, attributes } = element;
   
   return `
     <div class="element-detail">
@@ -305,9 +305,15 @@ function buildElementDetails(element) {
         <span class="element-tag">${escapeHtml(tagName)}</span>
       </div>
       <div class="element-row">
-        <label>Selector:</label>
+        <label>CSS Selector:</label>
         <code class="element-selector">${escapeHtml(selector)}</code>
       </div>
+      ${xpathSelector ? `
+        <div class="element-row">
+          <label>XPath:</label>
+          <code class="element-selector">${escapeHtml(xpathSelector)}</code>
+        </div>
+      ` : ''}
       ${textContent ? `
         <div class="element-row">
           <label>Text:</label>

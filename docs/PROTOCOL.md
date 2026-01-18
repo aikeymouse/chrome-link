@@ -41,6 +41,7 @@
     - [Element Inspection](#element-inspection)
       - [inspectElement](#inspectelement)
       - [getContainerElements](#getcontainerelements)
+      - [extractPageElements](#extractpageelements)
   - [10. Capture Screenshot](#10-capture-screenshot)
   - [11. Register Script Injection](#11-register-script-injection)
   - [12. Unregister Script Injection](#12-unregister-script-injection)
@@ -987,18 +988,19 @@ Response:
 }
 ```
 
-**16. getContainerElements(containerSelector, elementSelector)**
+**16. getContainerElements(containerSelector, elementSelector, includeHidden)**
 - Extracts all elements within a container with stable selectors
 - **Parameters:**
   - `containerSelector` (string) - CSS selector for container
   - `elementSelector` (string, optional) - Filter for descendants (default: `'*'`)
+  - `includeHidden` (boolean, optional) - Include hidden elements (default: `false`)
 - **Returns:** Array of element objects
 - **Element object:**
   - `tagName` - Lowercase tag name
   - `selector` - Stable CSS selector (optimized for test automation)
   - `attributes` - All element attributes as object
-  - `textContent` - Trimmed text content
-  - `visible` - Boolean visibility flag
+  - `textContent` - Direct child text nodes only (excludes nested elements)
+  - `visible` - Boolean visibility flag (checks display, visibility, opacity, offsetParent, position:fixed)
 - **Example:**
 ```json
 {
@@ -1039,6 +1041,104 @@ Response:
   "type": "object"
 }
 ```
+
+**17. extractPageElements(containerSelector, includeHidden)**
+- Intelligently extracts all interactive elements with rich metadata for test automation
+- **Parameters:**
+  - `containerSelector` (string) - CSS selector for container
+  - `includeHidden` (boolean, optional) - Include hidden elements (default: `false`)
+- **Returns:** Object with container metadata, element array, and page context
+- **Container object:**
+  - `tagName` - Lowercase tag name
+  - `cssSelector` - Stable CSS selector
+  - `xpathSelector` - Validated XPath selector
+  - `attributes` - All element attributes
+  - `textContent` - Direct child text nodes only
+  - `visible` - Boolean visibility flag
+  - `type` - Semantic element type
+  - `baseType` - (optional) Base ARIA type if role hierarchy applies
+- **Element object:** Same structure as container object
+- **Semantic Types:**
+  - Form controls: `text-input`, `password-input`, `email-input`, `number-input`, `checkbox`, `radio`, `select`, `textarea`, `submit-button`, `reset-button`, `button`
+  - Navigation: `link`
+  - Media: `image`, `video`, `audio`
+  - Content: `heading`, `label`, `text`
+  - ARIA roles: `searchbox`, `switch`, `tab`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `spinbutton`, `combobox`, etc.
+- **ARIA Role Hierarchy:** When an ARIA role maps to a base type, `baseType` field is included:
+  - `searchbox` → baseType: `textbox`
+  - `switch` → baseType: `checkbox`
+  - `menuitemcheckbox` → baseType: `checkbox`
+  - `menuitemradio` → baseType: `radio`
+  - `tab`, `menuitem` → baseType: `button`
+  - `spinbutton`, `combobox` → baseType: `textbox`
+- **Example:**
+```json
+{
+  "action": "callHelper",
+  "params": {
+    "functionName": "extractPageElements",
+    "args": ["#login-form"]
+  },
+  "requestId": "req-017"
+}
+```
+Response:
+```json
+{
+  "value": {
+    "container": {
+      "tagName": "form",
+      "cssSelector": "#login-form",
+      "xpathSelector": "//form[@id='login-form']",
+      "attributes": { "id": "login-form", "method": "POST", "action": "/login" },
+      "textContent": "Login to your account",
+      "visible": true,
+      "type": "form"
+    },
+    "elements": [
+      {
+        "tagName": "input",
+        "selector": "#username",
+        "xpathSelector": "//input[@id='username']",
+        "attributes": { "id": "username", "name": "username", "type": "text", "placeholder": "Email", "role": "searchbox" },
+        "textContent": "",
+        "visible": true,
+        "type": "searchbox",
+        "baseType": "textbox"
+      },
+      {
+        "tagName": "input",
+        "selector": "#password",
+        "xpathSelector": "//input[@id='password']",
+        "attributes": { "id": "password", "name": "password", "type": "password" },
+        "textContent": "",
+        "visible": true,
+        "type": "password-input"
+      },
+      {
+        "tagName": "button",
+        "selector": "#login-form > button[type='submit']",
+        "xpathSelector": "//button[@type='submit']",
+        "attributes": { "type": "submit", "class": "btn-primary" },
+        "textContent": "Sign In",
+        "visible": true,
+        "type": "submit-button",
+        "baseType": "button"
+      }
+    ],
+    "url": "https://example.com/login",
+    "title": "Login - Example Site",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  },
+  "type": "object"
+}
+```
+
+**Use Cases:**
+- Page object model generation for test automation frameworks (Selenium, Playwright, Reqnroll)
+- Form analysis and structured data extraction
+- Accessibility auditing (ARIA role verification)
+- UI component discovery and cataloging
 
 **Note:** Functions prefixed with `_internal_` are restricted to internal UI use only and cannot be called via the `callHelper` API. Use public functions like `inspectElement(selector)` for programmatic access.
 

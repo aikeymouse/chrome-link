@@ -137,7 +137,8 @@ const bounds = await client.callHelper('getElementBounds', ['div.container'], ta
 - `getElementBounds(selector)`
 - `scrollElementIntoView(selector, index)`
 - `inspectElement(selector)`
-- `getContainerElements(containerSelector, elementSelector)`
+- `getContainerElements(containerSelector, elementSelector, includeHidden)`
+- `extractPageElements(containerSelector, includeHidden)` - Extract elements with CSS/XPath selectors and semantic types
 - And more... (see [PROTOCOL.md](https://github.com/aikeymouse/chrome-link/blob/main/docs/PROTOCOL.md#7-call-dom-helper-function))
 
 ---

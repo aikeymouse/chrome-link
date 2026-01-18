@@ -314,7 +314,7 @@ class MCPServer {
         },
         {
           name: 'chrome_call_helper',
-          description: 'Call a predefined DOM helper function for CSP-restricted pages. Available helpers: Element Interaction (clickElement, typeText, appendChar, clearContentEditable), Element Query (getText, getHTML, getLastHTML, elementExists, isVisible, waitForElement), Element Highlighting (highlightElement, removeHighlights), Element Positioning (getElementBounds, scrollElementIntoView), Element Inspection (inspectElement, getContainerElements)',
+          description: 'Call a predefined DOM helper functions that works for CSP-restricted pages too. Available helpers: Element Interaction (clickElement, typeText, appendChar, clearContentEditable), Element Query (getText, getHTML, getLastHTML, elementExists, isVisible, waitForElement), Element Highlighting (highlightElement, removeHighlights), Element Positioning (getElementBounds, scrollElementIntoView), Element Inspection (inspectElement, getContainerElements, extractPageElements)',
           inputSchema: {
             type: 'object',
             properties: {
@@ -337,7 +337,8 @@ class MCPServer {
                   'getElementBounds', 
                   'scrollElementIntoView',
                   'inspectElement', 
-                  'getContainerElements'
+                  'getContainerElements',
+                  'extractPageElements'
                 ]
               },
               args: {

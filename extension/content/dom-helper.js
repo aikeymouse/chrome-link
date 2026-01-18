@@ -579,6 +579,267 @@ window.__chromeLinkHelper = {
   },
 
   /**
+   * Generate XPath for an element with validation
+   * Uses priority: id → name+value → name → data-* → aria-label → type+placeholder → ancestor-relative positional
+   * @param {Element} element - DOM element to generate XPath for
+   * @returns {string} XPath expression
+   */
+  _internal_generateXPath(element) {
+    // Helper to escape attribute values for XPath
+    const escapeXPath = (value) => {
+      if (!value.includes("'")) {
+        return `'${value}'`;
+      } else if (!value.includes('"')) {
+        return `"${value}"`;
+      } else {
+        // Contains both single and double quotes - use concat
+        return `concat('${value.replace(/'/g, "', \"'\", '")}')`;
+      }
+    };
+
+    let xpath = '';
+    const tag = element.tagName.toLowerCase();
+
+    // 1. Try id attribute (most specific)
+    if (element.id) {
+      xpath = `//*[@id=${escapeXPath(element.id)}]`;
+    }
+    // 2. For radio/checkbox, try name + value combination
+    else if ((element.tagName === 'INPUT' && (element.type === 'radio' || element.type === 'checkbox')) && element.name && element.value) {
+      xpath = `//input[@name=${escapeXPath(element.name)}][@value=${escapeXPath(element.value)}]`;
+    }
+    // 3. Try name attribute alone
+    else if (element.name) {
+      xpath = `//${tag}[@name=${escapeXPath(element.name)}]`;
+    }
+    // 4. Try data-* attributes
+    else {
+      for (const attr of element.attributes) {
+        if (attr.name.startsWith('data-')) {
+          xpath = `//*[@${attr.name}=${escapeXPath(attr.value)}]`;
+          break;
+        }
+      }
+    }
+    // 5. Try aria-label
+    if (!xpath && element.hasAttribute('aria-label')) {
+      xpath = `//${tag}[@aria-label=${escapeXPath(element.getAttribute('aria-label'))}]`;
+    }
+    // 6. Try type + placeholder for inputs
+    if (!xpath && element.tagName === 'INPUT' && element.type && element.placeholder) {
+      xpath = `//input[@type=${escapeXPath(element.type)}][@placeholder=${escapeXPath(element.placeholder)}]`;
+    }
+
+    // 7. Positional fallback - find nearest ancestor with id
+    if (!xpath) {
+      let ancestor = element.parentElement;
+      while (ancestor && ancestor !== document.body) {
+        if (ancestor.id) {
+          // Build relative XPath from id ancestor
+          const path = [];
+          let current = element;
+          while (current && current !== ancestor) {
+            const parent = current.parentElement;
+            if (parent) {
+              const siblings = Array.from(parent.children).filter(el => el.tagName === current.tagName);
+              const index = siblings.indexOf(current) + 1;
+              path.unshift(`${current.tagName.toLowerCase()}[${index}]`);
+            }
+            current = parent;
+          }
+          xpath = `//*[@id=${escapeXPath(ancestor.id)}]//${path.join('/')}`;
+          break;
+        }
+        ancestor = ancestor.parentElement;
+      }
+    }
+
+    // 8. Absolute positional path from body as last resort
+    if (!xpath) {
+      const path = [];
+      let current = element;
+      while (current && current !== document.body && current.parentElement) {
+        const parent = current.parentElement;
+        const siblings = Array.from(parent.children).filter(el => el.tagName === current.tagName);
+        const index = siblings.indexOf(current) + 1;
+        path.unshift(`${current.tagName.toLowerCase()}[${index}]`);
+        current = parent;
+      }
+      
+      // Handle body element specially
+      if (current === document.body) {
+        xpath = '//body';
+      } else if (path.length > 0) {
+        xpath = `//${path.join('/')}`;
+      } else {
+        // Fallback for edge cases (like document.body itself)
+        xpath = `//${tag}`;
+      }
+    }
+
+    // Validate XPath resolves to the same element
+    const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (result !== element) {
+      throw new Error(`XPath validation failed for element: ${element.tagName}`);
+    }
+
+    return xpath;
+  },
+
+  /**
+   * Infer semantic element type with ARIA role hierarchy
+   * @param {Element} element - DOM element to classify
+   * @returns {{type: string, baseType: string|null}} Type information with optional base type
+   */
+  _internal_inferElementType(element) {
+    const tag = element.tagName.toLowerCase();
+    const role = element.getAttribute('role');
+    const type = element.getAttribute('type');
+
+    // 1. ARIA role with hierarchy mapping
+    if (role) {
+      const roleMap = {
+        // Roles with textbox base
+        'searchbox': { type: 'searchbox', baseType: 'textbox' },
+        'spinbutton': { type: 'spinbutton', baseType: 'textbox' },
+        'combobox': { type: 'combobox', baseType: 'textbox' },
+        // Roles with checkbox base
+        'menuitemcheckbox': { type: 'menuitemcheckbox', baseType: 'checkbox' },
+        'switch': { type: 'switch', baseType: 'checkbox' },
+        // Roles with radio base
+        'menuitemradio': { type: 'menuitemradio', baseType: 'radio' },
+        // Roles with button base
+        'tab': { type: 'tab', baseType: 'button' },
+        'treeitem': { type: 'treeitem', baseType: 'button' },
+        'menuitem': { type: 'menuitem', baseType: 'button' },
+        // Standalone roles
+        'navigation': { type: 'navigation', baseType: null },
+        'dialog': { type: 'dialog', baseType: null },
+        'alert': { type: 'alert', baseType: null },
+        'banner': { type: 'banner', baseType: null },
+        'complementary': { type: 'complementary', baseType: null },
+        'contentinfo': { type: 'contentinfo', baseType: null },
+        'main': { type: 'main', baseType: null },
+        'region': { type: 'region', baseType: null },
+        'article': { type: 'article', baseType: null },
+        'progressbar': { type: 'progressbar', baseType: null },
+        'slider': { type: 'slider', baseType: null },
+        'button': { type: 'button', baseType: null },
+        'checkbox': { type: 'checkbox', baseType: null },
+        'radio': { type: 'radio', baseType: null },
+        'textbox': { type: 'textbox', baseType: null },
+        'link': { type: 'link', baseType: null }
+      };
+      if (roleMap[role]) {
+        return roleMap[role];
+      }
+      // Unknown role - return as-is
+      return { type: role, baseType: null };
+    }
+
+    // 2. HTML5 semantic tags
+    const semanticMap = {
+      'nav': { type: 'navigation', baseType: null },
+      'aside': { type: 'complementary', baseType: null },
+      'header': { type: 'banner', baseType: null },
+      'footer': { type: 'contentinfo', baseType: null },
+      'main': { type: 'main', baseType: null },
+      'article': { type: 'article', baseType: null },
+      'section': { type: 'region', baseType: null }
+    };
+    if (semanticMap[tag]) {
+      return semanticMap[tag];
+    }
+
+    // 3. Input element type classification
+    if (tag === 'input') {
+      const inputTypeMap = {
+        'text': { type: 'text-input', baseType: 'input' },
+        'email': { type: 'text-input', baseType: 'input' },
+        'url': { type: 'text-input', baseType: 'input' },
+        'tel': { type: 'text-input', baseType: 'input' },
+        'number': { type: 'text-input', baseType: 'input' },
+        'search': { type: 'text-input', baseType: 'input' },
+        'password': { type: 'password-input', baseType: 'input' },
+        'checkbox': { type: 'checkbox', baseType: 'input' },
+        'radio': { type: 'radio', baseType: 'input' },
+        'submit': { type: 'submit-button', baseType: 'button' },
+        'image': { type: 'submit-button', baseType: 'button' },
+        'button': { type: 'button', baseType: 'button' },
+        'file': { type: 'file-input', baseType: 'input' },
+        'date': { type: 'date-input', baseType: 'input' },
+        'time': { type: 'time-input', baseType: 'input' },
+        'datetime-local': { type: 'datetime-input', baseType: 'input' },
+        'month': { type: 'month-input', baseType: 'input' },
+        'week': { type: 'week-input', baseType: 'input' },
+        'color': { type: 'color-input', baseType: 'input' },
+        'range': { type: 'range-input', baseType: 'input' }
+      };
+      return inputTypeMap[type] || { type: 'text-input', baseType: 'input' };
+    }
+
+    // 4. Button element
+    if (tag === 'button') {
+      if (type === 'submit') {
+        return { type: 'submit-button', baseType: 'button' };
+      }
+      return { type: 'button', baseType: null };
+    }
+
+    // 5. Other interactive elements
+    const interactiveMap = {
+      'a': { type: 'link', baseType: null },
+      'select': { type: 'select', baseType: null },
+      'textarea': { type: 'textarea', baseType: null }
+    };
+    if (interactiveMap[tag]) {
+      return interactiveMap[tag];
+    }
+
+    // 6. Media elements
+    const mediaMap = {
+      'img': { type: 'image', baseType: null },
+      'video': { type: 'video', baseType: null },
+      'audio': { type: 'audio', baseType: null }
+    };
+    if (mediaMap[tag]) {
+      return mediaMap[tag];
+    }
+
+    // 7. Heading elements
+    if (/^h[1-6]$/.test(tag)) {
+      return { type: 'heading', baseType: null };
+    }
+
+    // 8. Content elements
+    const contentMap = {
+      'label': { type: 'label', baseType: null },
+      'span': { type: 'text', baseType: null },
+      'div': { type: 'text', baseType: null },
+      'p': { type: 'text', baseType: null }
+    };
+    if (contentMap[tag]) {
+      return contentMap[tag];
+    }
+
+    // 9. Fallback to tag name
+    return { type: tag, baseType: null };
+  },
+
+  /**
+   * Extract only direct child text nodes from an element (excludes nested element text)
+   * @param {Element} el - DOM element to extract text from
+   * @returns {string} Combined text from direct child text nodes only
+   */
+  _internal_getDirectText(el) {
+    return Array.from(el.childNodes)
+      .filter(n => n.nodeType === Node.TEXT_NODE)
+      .map(n => n.textContent.trim())
+      .filter(t => t.length > 0)
+      .join(' ');
+  },
+
+  /**
    * Inspect an element by selector and return its tree data
    * Returns element information including parents, clicked element, and children
    */
@@ -594,9 +855,10 @@ window.__chromeLinkHelper = {
    * Returns array of element data with attributes and visibility flag
    * @param {string} containerSelector - CSS selector for container element
    * @param {string} elementSelector - Optional CSS selector filter for elements (default: '*' for all descendants)
+   * @param {boolean} includeHidden - Whether to include hidden elements (default: false)
    * @returns {Array} Array of {tagName, selector, attributes, textContent, visible}
    */
-  getContainerElements(containerSelector, elementSelector = '*') {
+  getContainerElements(containerSelector, elementSelector = '*', includeHidden = false) {
     const container = document.querySelector(containerSelector);
     if (!container) throw new Error(`Container not found: ${containerSelector}`);
     
@@ -604,7 +866,7 @@ window.__chromeLinkHelper = {
     const elements = Array.from(container.querySelectorAll(elementSelector));
     
     // Map each element to structured data
-    return elements.map(el => {
+    let results = elements.map(el => {
       // Collect all attributes
       const attributes = {};
       if (el.attributes) {
@@ -614,20 +876,102 @@ window.__chromeLinkHelper = {
         }
       }
       
-      // Check visibility
+      // Check visibility (enhanced check including position:fixed)
       const style = window.getComputedStyle(el);
       const visible = style.display !== 'none' && 
                      style.visibility !== 'hidden' && 
-                     style.opacity !== '0';
+                     style.opacity !== '0' &&
+                     (el.offsetParent !== null || style.position === 'fixed');
       
       return {
         tagName: el.tagName.toLowerCase(),
         selector: window.__chromeLinkHelper._internal_generateSelector(el),
         attributes: attributes,
-        textContent: el.textContent ? el.textContent.trim() : '',
+        textContent: window.__chromeLinkHelper._internal_getDirectText(el),
         visible: visible
       };
     });
+
+    // Filter hidden elements if requested
+    if (!includeHidden) {
+      results = results.filter(e => e.visible);
+    }
+
+    return results;
+  },
+
+  /**
+   * Extract all interactive elements from a container with rich metadata
+   * Returns container info and array of elements with CSS/XPath selectors and semantic types
+   * @param {string} containerSelector - CSS selector for container element
+   * @param {boolean} includeHidden - Whether to include hidden elements (default: false)
+   * @returns {Object} {container, elements, url, title, timestamp}
+   */
+  extractPageElements(containerSelector, includeHidden = false) {
+    // Validate container exists
+    const containerEl = document.querySelector(containerSelector);
+    if (!containerEl) throw new Error(`Container not found: ${containerSelector}`);
+
+    // Build container metadata
+    const containerStyle = window.getComputedStyle(containerEl);
+    const containerVisible = containerStyle.display !== 'none' && 
+                            containerStyle.visibility !== 'hidden' && 
+                            containerStyle.opacity !== '0' &&
+                            (containerEl.offsetParent !== null || containerStyle.position === 'fixed');
+    
+    const containerAttributes = {};
+    if (containerEl.attributes) {
+      for (let i = 0; i < containerEl.attributes.length; i++) {
+        const attr = containerEl.attributes[i];
+        containerAttributes[attr.name] = attr.value;
+      }
+    }
+
+    // Get container type classification
+    const containerTypeInfo = window.__chromeLinkHelper._internal_inferElementType(containerEl);
+
+    const containerMetadata = {
+      tagName: containerEl.tagName.toLowerCase(),
+      cssSelector: window.__chromeLinkHelper._internal_generateSelector(containerEl),
+      xpathSelector: window.__chromeLinkHelper._internal_generateXPath(containerEl),
+      attributes: containerAttributes,
+      textContent: window.__chromeLinkHelper._internal_getDirectText(containerEl),
+      visible: containerVisible,
+      type: containerTypeInfo.type,
+      ...(containerTypeInfo.baseType && { baseType: containerTypeInfo.baseType })
+    };
+
+    // Get all descendant elements using modified getContainerElements
+    const rawElements = window.__chromeLinkHelper.getContainerElements(
+      containerSelector, 
+      '*', 
+      includeHidden
+    );
+
+    // Enrich each element with XPath and type information
+    const enrichedElements = rawElements.map(elData => {
+      // Re-query the element to generate XPath (need element reference)
+      const el = document.querySelector(elData.selector);
+      if (!el) return null; // Skip if element can't be re-queried
+      
+      // Get type classification
+      const typeInfo = window.__chromeLinkHelper._internal_inferElementType(el);
+      
+      return {
+        ...elData,
+        xpathSelector: window.__chromeLinkHelper._internal_generateXPath(el),
+        type: typeInfo.type,
+        ...(typeInfo.baseType && { baseType: typeInfo.baseType })
+      };
+    }).filter(el => el !== null); // Remove any elements that failed re-query
+
+    return {
+      container: containerMetadata,
+      elements: enrichedElements,
+      url: window.location.href,
+      title: document.title,
+      timestamp: new Date().toISOString()
+    };
   },
 
   /**
@@ -711,9 +1055,17 @@ window.__chromeLinkHelper = {
       isClickedElement: el === clickedElement
     };
     
+    // Try to generate XPath (may fail for some edge cases)
+    try {
+      info.xpathSelector = window.__chromeLinkHelper._internal_generateXPath(el);
+    } catch (err) {
+      console.warn('Failed to generate XPath for element:', el, err);
+      info.xpathSelector = null;
+    }
+    
     // Only include text for parents, clicked element, and children
     if (includeText) {
-      info.textContent = el.textContent ? el.textContent.trim() : '';
+      info.textContent = window.__chromeLinkHelper._internal_getDirectText(el);
     }
     
     // Collect all attributes
