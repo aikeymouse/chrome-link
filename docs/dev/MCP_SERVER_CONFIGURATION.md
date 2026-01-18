@@ -271,4 +271,3 @@ This allows you to:
 - [MCP Protocol Specification](https://spec.modelcontextprotocol.io/)
 - [Claude Desktop MCP Documentation](https://docs.anthropic.com/claude/docs/model-context-protocol)
 - [ChromeLink Protocol Documentation](../PROTOCOL.md)
-- [ChromeLink MCP Server Architecture](./MCP_SERVER_ARCHITECTURE.md)
