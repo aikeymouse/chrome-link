@@ -219,10 +219,34 @@ function renderInspectedElement() {
     });
   });
   
-  console.log('Element rendered to DOM');
-}
+  // Add click handlers to copy buttons
+  const copyButtons = inspectedElementContent.querySelectorAll('.copy-btn');
+  copyButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const textToCopy = btn.dataset.copy;
+      
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        
+        // Visual feedback
+        btn.classList.add('copied');
+        const icon = btn.querySelector('.material-symbols-outlined');
+        const originalIcon = icon.textContent;
+        icon.textContent = 'check';
+        
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          icon.textContent = originalIcon;
+        }, 1500);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    });
+  });
 
-/**
+  console.log('Element rendered to DOM');
+}/**
  * Build element tree HTML
  */
 function buildElementTree() {
@@ -306,18 +330,33 @@ function buildElementDetails(element) {
       </div>
       <div class="element-row">
         <label>CSS Selector:</label>
-        <code class="element-selector">${escapeHtml(selector)}</code>
+        <div class="copyable-field">
+          <code class="element-selector">${escapeHtml(selector)}</code>
+          <button class="copy-btn" data-copy="${escapeHtml(selector)}" title="Copy CSS selector">
+            <span class="material-symbols-outlined">content_copy</span>
+          </button>
+        </div>
       </div>
       ${xpathSelector ? `
         <div class="element-row">
           <label>XPath:</label>
-          <code class="element-selector">${escapeHtml(xpathSelector)}</code>
+          <div class="copyable-field">
+            <code class="element-selector">${escapeHtml(xpathSelector)}</code>
+            <button class="copy-btn" data-copy="${escapeHtml(xpathSelector)}" title="Copy XPath">
+              <span class="material-symbols-outlined">content_copy</span>
+            </button>
+          </div>
         </div>
       ` : ''}
       ${textContent ? `
         <div class="element-row">
           <label>Text:</label>
-          <span class="element-text" title="${escapeHtml(textContent)}">${escapeHtml(textContent.substring(0, 100))}${textContent.length > 100 ? '...' : ''}</span>
+          <div class="copyable-field">
+            <code class="element-text" title="${escapeHtml(textContent)}">${escapeHtml(textContent)}</code>
+            <button class="copy-btn" data-copy="${escapeHtml(textContent)}" title="Copy text content">
+              <span class="material-symbols-outlined">content_copy</span>
+            </button>
+          </div>
         </div>
       ` : ''}
       ${attributes && Object.keys(attributes).length > 0 ? `
