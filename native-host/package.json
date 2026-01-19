@@ -1,6 +1,6 @@
 {
   "name": "chrome-link-native-host",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Native messaging host with WebSocket server for ChromeLink",
   "main": "server.js",
   "scripts": {
