@@ -7,6 +7,7 @@ let isInspectorMode = false;
 let inspectorTabId = null;
 let inspectedElement = null;
 let selectedTreeElement = null; // Currently selected element in tree
+let xrayMode = true; // X-ray mode active by default
 
 /**
  * Start inspector mode
@@ -63,8 +64,21 @@ async function startInspectorMode() {
 /**
  * Exit inspector mode
  */
-function exitInspectorMode() {
+async function exitInspectorMode() {
   if (!isInspectorMode) return;
+  
+  // Hide X-ray overlays
+  if (inspectorTabId) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: inspectorTabId },
+        func: () => window.__chromeLinkHelper._internal_hideXrayOverlays(),
+        world: 'MAIN'
+      });
+    } catch (error) {
+      console.warn('Failed to hide x-ray overlays:', error);
+    }
+  }
   
   // Send message to background to disable inspector
   if (inspectorTabId && typeof port !== 'undefined' && port) {
@@ -158,6 +172,13 @@ function renderInspectedElement() {
       </div>
       <div class="element-details-divider"></div>
       <div class="element-details-panel">
+        <div class="element-details-header">
+          <h3>Element Details</h3>
+          <label class="xray-toggle">
+            <input type="checkbox" id="xray-mode-toggle" ${xrayMode ? 'checked' : ''}>
+            <span class="xray-toggle-label">X-Ray</span>
+          </label>
+        </div>
         ${detailsHTML}
       </div>
     </div>
@@ -170,6 +191,18 @@ function renderInspectedElement() {
     newTreeContainer.scrollLeft = scrollLeft;
   }
   
+  // Add x-ray mode toggle handler
+  const xrayToggle = inspectedElementContent.querySelector('#xray-mode-toggle');
+  if (xrayToggle) {
+    xrayToggle.addEventListener('change', (e) => {
+      xrayMode = e.target.checked;
+      updateXrayOverlays();
+    });
+  }
+  
+  // Initialize x-ray overlays
+  updateXrayOverlays();
+
   // Add click and double-click handlers to tree badge items
   const treeBadges = inspectedElementContent.querySelectorAll('.tree-badge-item');
   treeBadges.forEach(badge => {
@@ -247,6 +280,34 @@ function renderInspectedElement() {
 
   console.log('Element rendered to DOM');
 }/**
+ * Update x-ray mode overlays on the page
+ */
+async function updateXrayOverlays() {
+  if (!inspectorTabId || !inspectedElement) return;
+  
+  try {
+    if (xrayMode) {
+      // Show overlays on page
+      await chrome.scripting.executeScript({
+        target: { tabId: inspectorTabId },
+        func: (elementData) => window.__chromeLinkHelper._internal_showXrayOverlays(elementData),
+        args: [inspectedElement],
+        world: 'MAIN'
+      });
+    } else {
+      // Hide overlays
+      await chrome.scripting.executeScript({
+        target: { tabId: inspectorTabId },
+        func: () => window.__chromeLinkHelper._internal_hideXrayOverlays(),
+        world: 'MAIN'
+      });
+    }
+  } catch (error) {
+    console.error('Failed to update x-ray overlays:', error);
+  }
+}
+
+/**
  * Build element tree HTML
  */
 function buildElementTree() {

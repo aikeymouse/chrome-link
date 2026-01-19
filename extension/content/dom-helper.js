@@ -1051,6 +1051,101 @@ window.__chromeLinkHelper = {
     }
     
     return { disabled: true };
+  },
+
+  /**
+   * Show X-ray overlays for element tree
+   */
+  _internal_showXrayOverlays(elementData) {
+    // Remove existing overlays
+    this._internal_hideXrayOverlays();
+    
+    const overlayContainer = document.createElement('div');
+    overlayContainer.id = '__chromelink-xray-overlays';
+    overlayContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2147483646;
+    `;
+    
+    // Create overlays for all elements in tree
+    const allElements = [
+      ...(elementData.parents || []),
+      elementData.clickedElement,
+      ...(elementData.children || [])
+    ].filter(Boolean);
+    
+    allElements.forEach(elemInfo => {
+      try {
+        const selector = elemInfo.selector || elemInfo.xpathSelector;
+        if (!selector) return;
+        
+        const el = selector.startsWith('/') 
+          ? document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+          : document.querySelector(selector);
+        
+        if (!el) return;
+        
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+          position: absolute;
+          left: ${rect.left}px;
+          top: ${rect.top}px;
+          width: ${rect.width}px;
+          height: ${rect.height}px;
+          border: 2px solid rgba(59, 130, 246, 0.7);
+          border-radius: 4px;
+        `;
+        
+        // Create label
+        const tag = elemInfo.tagName;
+        const className = elemInfo.attributes?.class ? elemInfo.attributes.class.split(' ')[0] : '';
+        const labelText = `<${tag}>${className ? ' .' + className : ''}`;
+        
+        const label = document.createElement('div');
+        label.style.cssText = `
+          position: absolute;
+          top: -1px;
+          right: -1px;
+          background: rgba(59, 130, 246, 0.7);
+          color: white;
+          font-size: 10px;
+          font-weight: 600;
+          padding: 2px 6px;
+          border-radius: 0 2px 0 4px;
+          white-space: nowrap;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        `;
+        label.textContent = labelText;
+        
+        overlay.appendChild(label);
+        overlayContainer.appendChild(overlay);
+      } catch (err) {
+        console.warn('Failed to create overlay for element:', err);
+      }
+    });
+    
+    document.body.appendChild(overlayContainer);
+    return { shown: true };
+  },
+
+  /**
+   * Hide X-ray overlays
+   */
+  _internal_hideXrayOverlays() {
+    const overlays = document.getElementById('__chromelink-xray-overlays');
+    if (overlays) {
+      overlays.remove();
+    }
+    return { hidden: true };
   }
 };
 
