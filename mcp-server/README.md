@@ -205,6 +205,86 @@ const allElements = await callHelper('extractPageElements', {
 
 ## Configuration for AI Agents
 
+### VS Code (GitHub Copilot)
+
+**Prerequisites:**
+- VS Code version 1.108 or later
+- GitHub Copilot extension installed
+- ChromeLink native host running (port 9000)
+
+**Setup:**
+
+1. **Create MCP configuration file** at:
+   - **macOS/Linux**: `~/Library/Application Support/Code/User/mcp.json`
+   - **Windows**: `%APPDATA%\Code\User\mcp.json`
+
+2. **Add ChromeLink server:**
+
+   **Option A: Global NPM installation (recommended)**
+   ```json
+   {
+     "servers": {
+       "chromelink": {
+         "type": "stdio",
+         "command": "chromelink-mcp"
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+   **Option B: Local installation**
+   ```json
+   {
+     "servers": {
+       "chromelink": {
+         "type": "stdio",
+         "command": "node",
+         "args": [
+           "/absolute/path/to/chrome-driver-extension/mcp-server/bin/chromelink-mcp"
+         ]
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+   **Option C: Using npx**
+   ```json
+   {
+     "servers": {
+       "chromelink": {
+         "type": "stdio",
+         "command": "npx",
+         "args": [
+           "chromelink-mcp"
+         ]
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+3. **Reload VS Code**: Press `Cmd+Shift+P` (or `Ctrl+Shift+P` on Windows) → "Developer: Reload Window"
+
+4. **Verify**: Open GitHub Copilot Chat and ask: "What MCP tools do you have?"
+
+**Quick Example:**
+
+```
+You: List all my Chrome tabs
+
+Copilot: [Uses chrome_list_tabs to show all open tabs]
+
+You: Open google.com in a new tab
+
+Copilot: [Uses chrome_open_tab to create new tab with URL]
+
+You: Take a screenshot of the active tab
+
+Copilot: [Uses chrome_capture_screenshot and shows the image]
+```
+
 ### Claude Desktop
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
