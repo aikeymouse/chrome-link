@@ -364,8 +364,15 @@ class MCPServer {
               },
               args: {
                 type: 'array',
-                description: 'Arguments to pass to the helper function',
-                items: {}
+                description: 'Arguments to pass to the helper function (as individual parameters, not objects)',
+                items: {
+                  oneOf: [
+                    { type: 'string' },
+                    { type: 'number' },
+                    { type: 'boolean' },
+                    { type: 'null' }
+                  ]
+                }
               },
               tabId: {
                 type: 'number',
@@ -521,6 +528,15 @@ class MCPServer {
           break;
 
         case 'chrome_call_helper':
+          // Validate that args array contains only primitives, not objects
+          if (args.args && Array.isArray(args.args)) {
+            for (let i = 0; i < args.args.length; i++) {
+              const arg = args.args[i];
+              if (arg !== null && typeof arg === 'object') {
+                throw new Error(`Invalid argument at index ${i}: expected primitive type (string, number, boolean, null), got object. Use individual parameters like ["form", false], not [{"containerSelector": "form"}]`);
+              }
+            }
+          }
           result = await this.client.callHelper(args.functionName, args.args, args.tabId);
           break;
 

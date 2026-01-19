@@ -125,9 +125,11 @@ The `extractPageElements` helper provides intelligent extraction of page element
 
 ```javascript
 // Extract all interactive elements from a form
-const result = await callHelper('extractPageElements', {
-  containerSelector: '#login-form'
-});
+// Note: args must be an array of individual parameters, not an object
+const result = await callHelper('extractPageElements', ['#login-form', false]);
+
+// Equivalent direct call:
+// window.__chromeLinkHelper.extractPageElements('#login-form', false)
 
 // Result structure:
 {
@@ -175,11 +177,8 @@ const result = await callHelper('extractPageElements', {
   timestamp: '2024-01-15T10:30:00.000Z'
 }
 
-// Include hidden elements
-const allElements = await callHelper('extractPageElements', {
-  containerSelector: 'body',
-  includeHidden: true
-});
+// Include hidden elements (second parameter = true)
+const allElements = await callHelper('extractPageElements', ['body', true]);
 ```
 
 **Key Features:**
