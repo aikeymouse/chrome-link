@@ -1072,20 +1072,25 @@ window.__chromeLinkHelper = {
       z-index: 2147483646;
     `;
     
-    // Create overlays only for parent of clicked element and children
-    const allElements = [];
+    // Create overlays only for parent of clicked element, clicked element, and children
+    const elementsToOverlay = [];
     
     // Add only the direct parent (last parent in the array)
     if (elementData.parents && elementData.parents.length > 0) {
-      allElements.push(elementData.parents[elementData.parents.length - 1]);
+      elementsToOverlay.push({ elem: elementData.parents[elementData.parents.length - 1], isClicked: false });
+    }
+    
+    // Add clicked element (with special styling)
+    if (elementData.clickedElement) {
+      elementsToOverlay.push({ elem: elementData.clickedElement, isClicked: true });
     }
     
     // Add children
     if (elementData.children) {
-      allElements.push(...elementData.children);
+      elementsToOverlay.push(...elementData.children.map(child => ({ elem: child, isClicked: false })));
     }
     
-    allElements.filter(Boolean).forEach(elemInfo => {
+    elementsToOverlay.filter(item => item.elem).forEach(({ elem: elemInfo, isClicked }) => {
       try {
         const selector = elemInfo.selector || elemInfo.xpathSelector;
         if (!selector) return;
@@ -1099,6 +1104,10 @@ window.__chromeLinkHelper = {
         const rect = el.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) return;
         
+        // Use orange for clicked element, blue for others
+        const borderColor = isClicked ? 'rgba(255, 152, 0, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+        const backgroundColor = isClicked ? 'rgba(255, 152, 0, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+        
         // Create overlay
         const overlay = document.createElement('div');
         overlay.style.cssText = `
@@ -1107,7 +1116,7 @@ window.__chromeLinkHelper = {
           top: ${rect.top}px;
           width: ${rect.width}px;
           height: ${rect.height}px;
-          border: 2px solid rgba(59, 130, 246, 0.7);
+          border: 2px solid ${borderColor};
           border-radius: 4px;
         `;
         
@@ -1121,7 +1130,7 @@ window.__chromeLinkHelper = {
           position: absolute;
           top: -1px;
           right: -1px;
-          background: rgba(59, 130, 246, 0.7);
+          background: ${backgroundColor};
           color: white;
           font-size: 10px;
           font-weight: 600;
