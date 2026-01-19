@@ -172,13 +172,6 @@ function renderInspectedElement() {
       </div>
       <div class="element-details-divider"></div>
       <div class="element-details-panel">
-        <div class="element-details-header">
-          <h3>Element Details</h3>
-          <label class="xray-toggle">
-            <input type="checkbox" id="xray-mode-toggle" ${xrayMode ? 'checked' : ''}>
-            <span class="xray-toggle-label">X-Ray</span>
-          </label>
-        </div>
         ${detailsHTML}
       </div>
     </div>
@@ -191,10 +184,15 @@ function renderInspectedElement() {
     newTreeContainer.scrollLeft = scrollLeft;
   }
   
-  // Add x-ray mode toggle handler
-  const xrayToggle = inspectedElementContent.querySelector('#xray-mode-toggle');
+  // Update x-ray toggle state
+  const xrayToggle = document.getElementById('xray-mode-toggle');
   if (xrayToggle) {
-    xrayToggle.addEventListener('change', (e) => {
+    xrayToggle.checked = xrayMode;
+    // Remove old listener to avoid duplicates
+    const newToggle = xrayToggle.cloneNode(true);
+    xrayToggle.parentNode.replaceChild(newToggle, xrayToggle);
+    
+    newToggle.addEventListener('change', (e) => {
       xrayMode = e.target.checked;
       updateXrayOverlays();
     });
