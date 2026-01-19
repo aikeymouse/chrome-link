@@ -78,9 +78,30 @@ class MCPServer {
       this.client = new ChromeLinkClient('ws://localhost:9000');
       await this.client.connect();
       this.log('Connected to browser-link-server');
+      
+      // Handle WebSocket disconnection - log but don't exit
+      // Server will attempt to reconnect on next tool call
+      this.client.ws.on('close', () => {
+        this.log('WebSocket connection closed (session may have expired)');
+        this.client = null;
+      });
+      
+      this.client.ws.on('error', (err) => {
+        this.log('WebSocket error:', err.message);
+      });
     } catch (error) {
       this.log('Failed to connect to browser-link-server:', error.message);
       throw error;
+    }
+  }
+  
+  /**
+   * Ensure connection is active, reconnect if needed
+   */
+  async ensureConnected() {
+    if (!this.client || !this.client.ws || this.client.ws.readyState !== 1) {
+      this.log('Reconnecting to browser-link-server...');
+      await this.initialize();
     }
   }
 
@@ -437,6 +458,9 @@ class MCPServer {
     this.log(`Tool call: ${name}`, args);
 
     try {
+      // Ensure connection is active before executing tool
+      await this.ensureConnected();
+      
       let result;
 
       switch (name) {
