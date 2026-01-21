@@ -564,6 +564,14 @@ window.__chromeLinkHelper = {
     }
     
     // Build nth-child path as last resort
+    // Special case: if element is body or html, just return the tag name
+    if (element.tagName.toLowerCase() === 'body') {
+      return 'body';
+    }
+    if (element.tagName.toLowerCase() === 'html') {
+      return 'html';
+    }
+    
     const path = [];
     let current = element;
     while (current && current !== document.body) {
