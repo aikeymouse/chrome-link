@@ -51,100 +51,85 @@ Client App (WebSocket) ←→ Node.js Native Host ←→ Chrome Extension (Servi
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md) for complete installation instructions.
+See [install-scripts/INSTALL.md](INSTALL.md) for complete installation instructions.
 
 ## Usage
 
-### Create a Session
-
-Connect via WebSocket to create a new session:
+### Quick Start with Node.js Client
 
 ```javascript
-const WebSocket = require('ws');
-const ws = new WebSocket('ws://localhost:9000/session?timeout=300000');
+const ChromeLinkClient = require('@aikeymouse/chromelink-client');
 
-ws.on('message', (data) => {
-  const msg = JSON.parse(data);
-  if (msg.type === 'sessionCreated') {
-    console.log('Session ID:', msg.sessionId);
-    // Now you can send commands
-  }
+async function example() {
+  // Create client
+  const client = new ChromeLinkClient();
+  
+  // Connect to ChromeLink server
+  await client.connect('ws://localhost:9000');
+  
+  // List all tabs
+  const { tabs } = await client.listTabs();
+  console.log(`Found ${tabs.length} tabs`);
+  
+  // Open a new tab
+  const { tab } = await client.openTab('https://example.com');
+  const tabId = tab.id;
+  
+  // Wait for page to load and get heading
+  await client.waitForElement('h1', 10000, tabId);
+  const heading = await client.getText('h1', tabId);
+  console.log('Page heading:', heading.value);
+  
+  // Execute JavaScript
+  const result = await client.executeJS('document.title', tabId);
+  console.log('Page title:', result.value);
+  
+  // Clean up
+  await client.closeTab(tabId);
+  client.close();
+}
+
+example().catch(console.error);
+```
+
+### Common Operations
+
+**Open tab and interact with form:**
+```javascript
+const { tab } = await client.openTab('https://example.com/login');
+await client.waitForElement('input[name="email"]', 5000, tab.id);
+await client.type('input[name="email"]', 'user@example.com', tab.id);
+await client.type('input[name="password"]', 'secret123', tab.id);
+await client.click('button[type="submit"]', tab.id);
+```
+
+**Capture screenshot:**
+```javascript
+const { screenshot } = await client.captureScreenshot({ 
+  format: 'png',
+  fullPage: true 
 });
+// screenshot is a base64 data URL
 ```
 
-Parameters:
-- `timeout`: Session timeout in milliseconds (default: 300000 = 5 minutes)
-- `sessionId`: (Optional) Resume existing session if not expired
+**Use helper functions (works on CSP-restricted pages):**
+```javascript
+// Extract page elements with CSS and XPath selectors
+const elements = await client.callHelper(
+  'extractPageElements', 
+  ['form', false], // containerSelector, includeHidden
+  tabId
+);
 
-See `examples/` for complete Node.js client examples.
-
-### WebSocket Commands
-
-Once connected via WebSocket, send JSON commands:
-
-#### List Tabs
-```json
-{
-  "action": "listTabs",
-  "requestId": "req-001"
-}
+// Highlight an element
+await client.callHelper('highlightElement', ['button.submit'], tabId);
 ```
 
-#### Open Tab
-```json
-{
-  "action": "openTab",
-  "params": {
-    "url": "https://example.com",
-    "focus": true
-  },
-  "requestId": "req-002"
-}
-```
+See [Node.js Client Documentation](clients/node/README.md) for complete API reference.
 
-#### Navigate Tab
-```json
-{
-  "action": "navigateTab",
-  "params": {
-    "tabId": 123,
-    "url": "https://google.com",
-    "focus": false
-  },
-  "requestId": "req-003"
-}
-```
+### Advanced: Direct WebSocket API
 
-#### Switch Tab
-```json
-{
-  "action": "switchTab",
-  "params": {
-    "tabId": 123
-  },
-  "requestId": "req-004"
-}
-```
-
-#### Execute JavaScript
-```json
-{
-  "action": "executeJS",
-  "params": {
-    "tabId": 123,
-    "code": "document.title",
-    "timeout": 30000,
-    "focus": false
-  },
-  "requestId": "req-005"
-}
-```
-
-Parameters:
-- `tabId`: (Optional) Tab ID, defaults to active tab
-- `code`: JavaScript code to execute
-- `timeout`: (Optional) Execution timeout in ms (default: 30000)
-- `focus`: (Optional) Focus Chrome window before execution
+For direct WebSocket control (without the Node.js client), see [PROTOCOL.md](docs/PROTOCOL.md) for the complete WebSocket message format.
 
 ### Response Format
 
