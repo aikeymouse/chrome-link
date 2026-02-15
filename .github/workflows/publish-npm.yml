@@ -159,7 +159,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event_name == 'push' || github.event.inputs.publish_placeholder != 'false' }}
+    if: ${{ always() && !cancelled() && needs.validate-version.result == 'success' && (github.event_name == 'push' || github.event.inputs.publish_placeholder != 'false') }}
     
     steps:
       - name: Checkout code
@@ -203,7 +203,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event_name == 'push' || github.event.inputs.publish_mcp != 'false' }}
+    if: ${{ always() && !cancelled() && needs.validate-version.result == 'success' && (github.event_name == 'push' || github.event.inputs.publish_mcp != 'false') }}
     
     steps:
       - name: Checkout code
