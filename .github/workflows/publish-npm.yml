@@ -112,6 +112,9 @@ jobs:
           node-version: '18'
           # Don't set registry-url when using OIDC - it creates .npmrc that forces token auth
       
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+      
       - name: Install dependencies
         working-directory: ./clients/node
         run: npm install
@@ -134,12 +137,15 @@ jobs:
         if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./clients/node
         run: |
+          echo "npm version: $(npm --version)"
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
+            echo "Checking OIDC environment..."
+            env | grep -E 'ACTIONS_ID_TOKEN|GITHUB_' || true
             # Don't create .npmrc - let npm use OIDC automatically
             # npm will detect GitHub Actions OIDC via ACTIONS_ID_TOKEN_REQUEST_URL env var
             npm publish --provenance --access public
@@ -174,6 +180,9 @@ jobs:
         with:
           node-version: '18'
           # Don't set registry-url when using OIDC
+      
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
       
       - name: Dry run (test package)
         if: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '') }}
@@ -227,6 +236,9 @@ jobs:
         with:
           node-version: '18'
           # Don't set registry-url when using OIDC
+      
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
       
       - name: Install dependencies
         working-directory: ./mcp-server
