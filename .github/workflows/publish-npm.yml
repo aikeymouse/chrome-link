@@ -136,13 +136,12 @@ jobs:
         run: |
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
-            # Create .npmrc for token auth
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            # Ensure no .npmrc exists - let npm use OIDC automatically
-            rm -f ~/.npmrc
+            # Configure registry without auth token - npm will use OIDC
+            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
             npm publish --provenance --access public
           fi
         env:
@@ -195,7 +194,7 @@ jobs:
             npm publish --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            rm -f ~/.npmrc
+            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
             npm publish --access public
           fi
         env:
@@ -252,7 +251,7 @@ jobs:
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            rm -f ~/.npmrc
+            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
             npm publish --provenance --access public
           fi
         env:
