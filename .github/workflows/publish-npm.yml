@@ -109,11 +109,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           # Don't set registry-url when using OIDC - it creates .npmrc that forces token auth
-      
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
       
       - name: Install dependencies
         working-directory: ./clients/node
@@ -178,11 +175,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           # Don't set registry-url when using OIDC
-      
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
       
       - name: Dry run (test package)
         if: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '') }}
@@ -234,11 +228,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           # Don't set registry-url when using OIDC
-      
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
       
       - name: Install dependencies
         working-directory: ./mcp-server
