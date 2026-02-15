@@ -23,6 +23,7 @@ See [Installation](#installation) for complete setup.
 ## Features
 
 - **WebSocket API**: Control Chrome tabs remotely via WebSocket connection
+- **Model Context Protocol (MCP)**: Official MCP server for AI agents (GitHub Copilot, Claude Desktop, etc.) with full browser automation capabilities
 - **Session Management**: Create sessions with configurable timeouts, resume existing sessions
 - **Tab Operations**: List, open, navigate, switch, close tabs in current active window
 - **JavaScript Execution**: Execute JavaScript in tabs with configurable timeout and result return
