@@ -140,8 +140,8 @@ jobs:
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            # Configure registry without auth token - npm will use OIDC
-            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+            # Don't create .npmrc - let npm use OIDC automatically
+            # npm will detect GitHub Actions OIDC via ACTIONS_ID_TOKEN_REQUEST_URL env var
             npm publish --provenance --access public
           fi
         env:
@@ -194,7 +194,7 @@ jobs:
             npm publish --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+            # Don't create .npmrc - let npm use OIDC automatically
             npm publish --access public
           fi
         env:
@@ -251,7 +251,7 @@ jobs:
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+            # Don't create .npmrc - let npm use OIDC automatically
             npm publish --provenance --access public
           fi
         env:
