@@ -59,8 +59,8 @@ function log(message, ...args) {
  */
 async function initializeClient() {
   try {
-    client = new ChromeLinkClient('ws://localhost:9000');
-    await client.connect();
+    client = new ChromeLinkClient({ verbose: false });
+    await client.connect('ws://localhost:9000');
     log('Connected to browser-link-server');
     
     // Handle WebSocket disconnection - log but don't exit
