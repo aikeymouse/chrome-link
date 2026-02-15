@@ -59,11 +59,23 @@ describe('MCP Server Integration Tests', function() {
 
   // Helper to parse tool result
   function parseToolResult(result) {
-    if (result && result.content && result.content[0] && result.content[0].text) {
-      try {
-        return JSON.parse(result.content[0].text);
-      } catch (e) {
-        return result.content[0].text;
+    if (result && result.content && result.content[0]) {
+      const content = result.content[0];
+      
+      // Handle image content (screenshots)
+      if (content.type === 'image') {
+        return {
+          dataUrl: `data:${content.mimeType};base64,${content.data}`
+        };
+      }
+      
+      // Handle text content
+      if (content.type === 'text' && content.text) {
+        try {
+          return JSON.parse(content.text);
+        } catch (e) {
+          return content.text;
+        }
       }
     }
     return result;
