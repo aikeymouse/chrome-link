@@ -8,4 +8,7 @@
  * Chrome automation capabilities via the Model Context Protocol.
  */
 
-require('../index.js');
+import('../index.js').catch(err => {
+  console.error('Failed to start MCP server:', err);
+  process.exit(1);
+});

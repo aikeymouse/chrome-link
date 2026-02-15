@@ -590,11 +590,31 @@ async function main() {
     try {
       const result = await handleToolCall(name, args || {});
       
+      // Special handling for screenshots - return as image content
+      if (name === 'chrome_capture_screenshot' && result.dataUrl) {
+        // Extract base64 data and mime type from data URL
+        // Format: data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...
+        const match = result.dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          const [, mimeType, base64Data] = match;
+          return {
+            content: [
+              {
+                type: 'image',
+                data: base64Data,
+                mimeType: mimeType
+              }
+            ]
+          };
+        }
+      }
+      
+      // For all other tools, return as text (without pretty-printing to reduce size)
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(result, null, 2)
+            text: JSON.stringify(result)
           }
         ]
       };
