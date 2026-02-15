@@ -130,12 +130,19 @@ jobs:
           echo "  2. Run 'Publish to npm' workflow"
           echo "  3. Uncheck 'Dry run' option"
       
-      - name: Publish to npm
+      - name: Publish to npm (OIDC or Token)
         if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./clients/node
-        run: npm publish --provenance --access public
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "✓ Using npm token authentication"
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          else
+            echo "✓ Using OIDC Trusted Publishing"
+          fi
+          npm publish --provenance --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Publish summary
         if: ${{ github.event.inputs.dry_run == 'false' }}
@@ -174,12 +181,19 @@ jobs:
           echo ""
           echo "✅ Placeholder package dry run successful!"
       
-      - name: Publish to npm
+      - name: Publish to npm (OIDC or Token)
         if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./clients/chromelink-client
-        run: npm publish --access public
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "✓ Using npm token authentication"
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          else
+            echo "✓ Using OIDC Trusted Publishing"
+          fi
+          npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Publish summary
         if: ${{ github.event.inputs.dry_run == 'false' }}
@@ -222,12 +236,19 @@ jobs:
           echo ""
           echo "✅ MCP server dry run successful!"
       
-      - name: Publish to npm
+      - name: Publish to npm (OIDC or Token)
         if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}
         working-directory: ./mcp-server
-        run: npm publish --provenance --access public
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "✓ Using npm token authentication"
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          else
+            echo "✓ Using OIDC Trusted Publishing"
+          fi
+          npm publish --provenance --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Publish summary
         if: ${{ github.event.inputs.dry_run == 'false' }}
