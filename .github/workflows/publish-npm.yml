@@ -110,7 +110,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          # Don't set registry-url when using OIDC - it creates .npmrc that forces token auth
       
       - name: Install dependencies
         working-directory: ./clients/node
@@ -136,16 +136,13 @@ jobs:
         run: |
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+            # Create .npmrc for token auth
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
             npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
-            # For OIDC: Remove token placeholder from .npmrc and let npm use OIDC automatically
-            if grep -q "authToken=" ~/.npmrc 2>/dev/null; then
-              sed -i.bak '/:_authToken=/d' ~/.npmrc
-              echo "Cleaned .npmrc for OIDC authentication"
-            fi
-            # npm 9+ will automatically use OIDC when running in GitHub Actions
+            # Ensure no .npmrc exists - let npm use OIDC automatically
+            rm -f ~/.npmrc
             npm publish --provenance --access public
           fi
         env:
@@ -177,7 +174,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          # Don't set registry-url when using OIDC
       
       - name: Dry run (test package)
         if: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.dry_run == 'true' || github.event.inputs.dry_run == '') }}
@@ -194,11 +191,13 @@ jobs:
         run: |
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+            npm publish --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
+            rm -f ~/.npmrc
+            npm publish --access public
           fi
-          npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
@@ -228,7 +227,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          # Don't set registry-url when using OIDC
       
       - name: Install dependencies
         working-directory: ./mcp-server
@@ -249,11 +248,13 @@ jobs:
         run: |
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+            npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
+            rm -f ~/.npmrc
+            npm publish --provenance --access public
           fi
-          npm publish --provenance --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
