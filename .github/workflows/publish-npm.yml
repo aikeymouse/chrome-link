@@ -143,9 +143,11 @@ jobs:
             echo "✓ Using OIDC Trusted Publishing"
             echo "Checking OIDC environment..."
             env | grep -E 'ACTIONS_ID_TOKEN|GITHUB_' || true
+            echo ""
+            echo "Publishing with --loglevel=verbose to see OIDC details..."
             # Don't create .npmrc - let npm use OIDC automatically
             # npm will detect GitHub Actions OIDC via ACTIONS_ID_TOKEN_REQUEST_URL env var
-            npm publish --provenance --access public
+            npm publish --provenance --access public --loglevel=verbose
           fi
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
