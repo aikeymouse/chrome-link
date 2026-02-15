@@ -76,7 +76,11 @@ describe('inspectElement helper', function() {
       // Validate parents array (outermost parent first)
       expect(result.parents.length).to.be.greaterThan(0);
       const firstParent = result.parents[0];
-      expect(firstParent.tagName).to.equal('main');
+      expect(firstParent.tagName).to.equal('body');
+      
+      // Should have main, label, and form as parents
+      const mainParent = result.parents.find(p => p.tagName === 'main');
+      expect(mainParent).to.exist;
       
       // Should have label as one of the parents (immediate parent)
       const labelParent = result.parents.find(p => p.tagName === 'label');
@@ -268,10 +272,12 @@ describe('inspectElement helper', function() {
       const response = await client.callHelper('inspectElement', ['#my-text-id'], testTabId);
       const result = response.value;
       
-      // Parents should be ordered from outermost inward
-      expect(result.parents[0].tagName).to.equal('main');
+      // Parents should be ordered from outermost inward (body is now included)
+      expect(result.parents[0].tagName).to.equal('body');
       
-      // Should have label and form as parents
+      // Should have main, label and form as parents
+      const mainParent = result.parents.find(p => p.tagName === 'main');
+      expect(mainParent).to.exist;
       const labelParent = result.parents.find(p => p.tagName === 'label');
       const formParent = result.parents.find(p => p.tagName === 'form');
       expect(labelParent).to.exist;
