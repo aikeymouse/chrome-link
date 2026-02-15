@@ -898,6 +898,25 @@ async function enableInspector(params) {
     tabId = tabs[0].id;
   }
   
+  // Validate tab exists and check URL
+  let tab;
+  try {
+    tab = await chrome.tabs.get(tabId);
+  } catch (err) {
+    throw { code: 'TAB_NOT_FOUND', message: `Tab with ID ${tabId} not found or was closed` };
+  }
+  
+  // Check if URL is accessible for content script injection
+  const url = tab.url || '';
+  if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || 
+      url.startsWith('edge://') || url.startsWith('about:') || 
+      url.startsWith('devtools://') || url === '') {
+    throw { 
+      code: 'RESTRICTED_URL', 
+      message: 'Inspector mode cannot be enabled on this page (restricted URL)' 
+    };
+  }
+  
   try {
     // Inject inspector bridge (ISOLATED world) to relay messages - in all frames
     await chrome.scripting.executeScript({
@@ -944,6 +963,27 @@ async function disableInspector(params) {
       throw { code: 'TAB_NOT_FOUND', message: 'No active tab found' };
     }
     tabId = tabs[0].id;
+  }
+  
+  // Check if URL is accessible before attempting to disable
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    const url = tab.url || '';
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || 
+        url.startsWith('edge://') || url.startsWith('about:') || 
+        url.startsWith('devtools://') || url === '') {
+      // Just clear inspector state without trying to inject scripts
+      if (inspectorTabId === tabId) {
+        inspectorTabId = null;
+      }
+      return { disabled: true, tabId };
+    }
+  } catch (error) {
+    // Tab might not exist anymore, just clear state
+    if (inspectorTabId === tabId) {
+      inspectorTabId = null;
+    }
+    return { disabled: true, tabId };
   }
   
   try {

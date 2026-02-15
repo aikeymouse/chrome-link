@@ -38,6 +38,32 @@ const clearLogsBtn = document.getElementById('clear-logs');
 const logsContainer = document.getElementById('logs-container');
 
 /**
+ * Check if URL is restricted for inspector mode
+ */
+function isRestrictedUrl(url) {
+  if (!url) return true;
+  return url.startsWith('chrome://') || 
+         url.startsWith('chrome-extension://') || 
+         url.startsWith('edge://') || 
+         url.startsWith('about:') || 
+         url.startsWith('devtools://');
+}
+
+/**
+ * Update inspect button state based on active tab
+ */
+function updateInspectButtonState() {
+  const activeTab = tabs.find(t => t.active);
+  if (!activeTab || isRestrictedUrl(activeTab.url)) {
+    inspectBtn.disabled = true;
+    inspectBtn.title = 'Inspector mode cannot be enabled on this page';
+  } else {
+    inspectBtn.disabled = false;
+    inspectBtn.title = 'Enable inspector mode';
+  }
+}
+
+/**
  * Initialize
  */
 function init() {
@@ -233,6 +259,7 @@ function handleTabUpdate(message) {
   }
   
   renderTabs();
+  updateInspectButtonState();
 }
 
 /**
@@ -574,6 +601,7 @@ function renderTabs() {
   
   if (displayTabs.length === 0) {
     tabsList.innerHTML = '<div class="empty-state">No tabs in current window</div>';
+    updateInspectButtonState();
     return;
   }
   
@@ -603,6 +631,9 @@ function renderTabs() {
       }
     });
   });
+  
+  // Update inspect button state based on active tab
+  updateInspectButtonState();
 }
 
 /**
