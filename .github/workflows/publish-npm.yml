@@ -137,10 +137,17 @@ jobs:
           if [ -n "$NPM_TOKEN" ]; then
             echo "✓ Using npm token authentication"
             export NODE_AUTH_TOKEN="$NPM_TOKEN"
+            npm publish --provenance --access public
           else
             echo "✓ Using OIDC Trusted Publishing"
+            # For OIDC: Remove token placeholder from .npmrc and let npm use OIDC automatically
+            if grep -q "authToken=" ~/.npmrc 2>/dev/null; then
+              sed -i.bak '/:_authToken=/d' ~/.npmrc
+              echo "Cleaned .npmrc for OIDC authentication"
+            fi
+            # npm 9+ will automatically use OIDC when running in GitHub Actions
+            npm publish --provenance --access public
           fi
-          npm publish --provenance --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       
