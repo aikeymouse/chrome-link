@@ -9,6 +9,11 @@ on:
         required: false
         type: boolean
         default: true
+      publish_scoped:
+        description: 'Publish @aikeymouse/chromelink-client'
+        required: false
+        type: boolean
+        default: true
       publish_placeholder:
         description: 'Also publish chromelink-client placeholder'
         required: false
@@ -101,6 +106,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    if: ${{ github.event_name == 'push' || github.event.inputs.publish_scoped != 'false' }}
     
     steps:
       - name: Checkout code
@@ -153,7 +159,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event.inputs.publish_placeholder == 'true' || github.event.inputs.publish_placeholder == '' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.publish_placeholder != 'false' }}
     
     steps:
       - name: Checkout code
@@ -197,7 +203,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event.inputs.publish_mcp == 'true' || github.event.inputs.publish_mcp == '' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.publish_mcp != 'false' }}
     
     steps:
       - name: Checkout code
